@@ -8,7 +8,7 @@
     "format": "prettier --write contracts/**/*.sol test/**/*.sol",
     "deploy": "hardhat run .\\scripts\\main.ts",
     "compile": "hardhat compile --force",
-    "test": "hardhat test --typecheck",
+    "test": "hardhat test",
     "node": "hardhat node"
   },
   "author": "",
@@ -18,6 +18,7 @@
     "@nomiclabs/hardhat-truffle5": "^2.0.7",
     "decimal.js": "^10.4.3",
     "dotenv-defaults": "^5.0.2",
+    "ethers": "^5.4.3",
     "prettier": "^3.2.2",
     "prettier-plugin-solidity": "^1.3.1",
     "solhint": "^4.1.1",
