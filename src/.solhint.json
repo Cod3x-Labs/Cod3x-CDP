@@ -1,0 +1,11 @@
+{
+  "extends": "solhint:recommended",
+  "plugins": ["prettier"],
+  "rules": {
+    "prettier/prettier": "error",
+    "compiler-version": ["error", "^0.8.23"],
+    "immutable-vars-naming": ["warn", { "immutablesAsConstants": false }],
+    "func-visibility": ["warn", { "ignoreConstructors": true }]
+  },
+  "excludedFiles": [""]
+}

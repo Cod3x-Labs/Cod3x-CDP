@@ -1,0 +1,12 @@
+name: "Workflow for Feature branches"
+
+on:
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+  solidity:
+    uses: Byte-Masons/workflows/.github/workflows/solidity.yml@main
+    with:
+      working-directory: ./src
