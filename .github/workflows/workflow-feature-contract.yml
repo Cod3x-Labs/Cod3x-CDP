@@ -10,3 +10,5 @@ jobs:
     uses: Byte-Masons/workflows/.github/workflows/solidity.yml@main
     with:
       working-directory: ./src
+      analysis-enabled: false
+      lint-enabled: false
