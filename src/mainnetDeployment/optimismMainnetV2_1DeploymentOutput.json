@@ -1,0 +1,92 @@
+{
+  "collateralConfig": {
+    "address": "0xA2f01800Bd6d878b82E6009a7022fa9B1cDC810c",
+    "txHash": "0xa09b161733e60c4aa2062c060986b1d7a6e6caa9a6eb411b49b78690c0a26e86",
+    "verification": "https://optimistic.etherscan.io/address/0xA2f01800Bd6d878b82E6009a7022fa9B1cDC810c#code"
+  },
+  "priceFeed": {
+    "address": "0xadd6F326a395629926D9a535d809B5e3d8c7FE8d",
+    "txHash": "0xf376f71316e71ccd7292ebe97394e34762c905d32ec0cdfd10bac2803bfc8d73",
+    "verification": "https://optimistic.etherscan.io/address/0xadd6F326a395629926D9a535d809B5e3d8c7FE8d#code"
+  },
+  "sortedTroves": {
+    "address": "0xe36e5aA08756074D7e12d6a753b5Ed2c54Aea573",
+    "txHash": "0x9eb4b20d4436623cebfcee0b10ee3270a3f10fa388a5743485b6db2a1d6e1330",
+    "verification": "https://optimistic.etherscan.io/address/0xe36e5aA08756074D7e12d6a753b5Ed2c54Aea573#code"
+  },
+  "troveManager": {
+    "address": "0x75C72F459f2054B46ceFD6D10eC99d0fbd777F05",
+    "txHash": "0x8285b3bece9646649b44eebf2ec3266b1f59c4b76b9156c0a0660a4c912a1a08",
+    "verification": "https://optimistic.etherscan.io/address/0x75C72F459f2054B46ceFD6D10eC99d0fbd777F05#code"
+  },
+  "activePool": {
+    "address": "0x95C4Bdc54501c1496B8213F81F30CA95760Be793",
+    "txHash": "0x2f999d6e6bd14d3c6d3edb110d6a4b727a50146420324b02bdba361a55eee303",
+    "verification": "https://optimistic.etherscan.io/address/0x95C4Bdc54501c1496B8213F81F30CA95760Be793#code"
+  },
+  "stabilityPool": {
+    "address": "0xD839A111598d5e27BD8f7A1A18ce9Bf079F0c0a2",
+    "txHash": "0x24626c2ded48d71945187988d12b39765385fcaccd3fbca4d77487df12d49202",
+    "verification": "https://optimistic.etherscan.io/address/0xD839A111598d5e27BD8f7A1A18ce9Bf079F0c0a2#code"
+  },
+  "gasPool": {
+    "address": "0x806498564B8d1F7679C24849E0e03e10a9B191f7",
+    "txHash": "0x16c04d5cc6ed9e31583db8a189e6b7b814adbbb4d7f47b47f221adefe9e6719e",
+    "verification": "https://optimistic.etherscan.io/address/0x806498564B8d1F7679C24849E0e03e10a9B191f7#code"
+  },
+  "defaultPool": {
+    "address": "0x19087D7aC5c0A28b775B9676b10325DD17A1CdC8",
+    "txHash": "0x8ad45c9c2a8e7afa465494b770fb81483189b452a44e0825adac2bbff6d5080a",
+    "verification": "https://optimistic.etherscan.io/address/0x19087D7aC5c0A28b775B9676b10325DD17A1CdC8#code"
+  },
+  "collSurplusPool": {
+    "address": "0xEe9C13e27D8A60671cB3E7EF351ffd8aDdb670FB",
+    "txHash": "0x63319cd0e9ef9ea607dd3b64f7b7d5bcc2bc2d61b1257c0761b7d009604ec29a",
+    "verification": "https://optimistic.etherscan.io/address/0xEe9C13e27D8A60671cB3E7EF351ffd8aDdb670FB#code"
+  },
+  "borrowerOperations": {
+    "address": "0xaA0B41B61f76587cf85155147d7F3B7725D14Eb3",
+    "txHash": "0x65c25ed31a7fb55a26bc4c96cf14cec52570417f2c0c5c7ee9d0a454703634df",
+    "verification": "https://optimistic.etherscan.io/address/0xaA0B41B61f76587cf85155147d7F3B7725D14Eb3#code"
+  },
+  "hintHelpers": {
+    "address": "0xA253C8b11FC03Ea74710CF668d86fd9FdBf8E550",
+    "txHash": "0x16aed261b0c998718c55b08b9da3711e29fe78deb807c23062fec9e0dc8603cf",
+    "verification": "https://optimistic.etherscan.io/address/0xA253C8b11FC03Ea74710CF668d86fd9FdBf8E550#code"
+  },
+  "tellorCaller": {
+    "address": "0xd0318fbd13A30f9AfEd11D6B794d669FCEa9F6A6",
+    "txHash": "0x20c146cef5f4acfc318bfa69f156c85dbf59260d127d082798f73d55ed48d948",
+    "verification": "https://optimistic.etherscan.io/address/0xd0318fbd13A30f9AfEd11D6B794d669FCEa9F6A6#code"
+  },
+  "redemptionHelper": {
+    "address": "0x5dc932A9A35026Bc715A1bE2669D92AC3e3867C3",
+    "txHash": "0xc018290e245be62d045e6efdf6b6d2fdbb11eb7fea7727e39f6435734fdb35a8",
+    "verification": "https://optimistic.etherscan.io/address/0x5dc932A9A35026Bc715A1bE2669D92AC3e3867C3#code"
+  },
+  "liquidationHelper": {
+    "address": "0xf3eAbd4cdbd09CbB00dbD727DfF6c94ab512F007",
+    "txHash": "0x5fa957f8c5428f3cd961bd487ee9b7e37ceeedacaadceb9e2ed2878d3cc0baf6",
+    "verification": "https://optimistic.etherscan.io/address/0xf3eAbd4cdbd09CbB00dbD727DfF6c94ab512F007#code"
+  },
+  "leverager": {
+    "address": "0xC047AD7Dc2b80811302C949658B228e4468fBF14",
+    "txHash": "0x898055ccaaf97debc6432684a1403b1f31ae7f463ce5ba2c09ad9f635a425a09",
+    "verification": "https://optimistic.etherscan.io/address/0xC047AD7Dc2b80811302C949658B228e4468fBF14#code"
+  },
+  "lqtyStaking": {
+    "address": "0x7D6a62d496D42d5E978C4eDa0d367Ac1Ba70A200",
+    "txHash": "0x74c11021d678d85cb7185fd75f3ca2b4fa42db3bd9e613455b11113f39876cf0",
+    "verification": "https://optimistic.etherscan.io/address/0x7D6a62d496D42d5E978C4eDa0d367Ac1Ba70A200#code"
+  },
+  "communityIssuance": {
+    "address": "0x323A9C4CB4Be7A3c9d31209B0a2bAd56276bbf89",
+    "txHash": "0xfc8b109a2609b9fd494e17b86d0f7fdad3a6ad2f43ff73c6d9e60c6e4ce35f97",
+    "verification": "https://optimistic.etherscan.io/address/0x323A9C4CB4Be7A3c9d31209B0a2bAd56276bbf89#code"
+  },
+  "multiTroveGetter": {
+    "address": "0x6aF72c0F9CFeC2567730C30bA60C3DD9080F8fBF",
+    "txHash": "0x21b59fb740b0483d41b7eed86c7347ee0cfa7e1a95805169a74e83bf2dc55d11",
+    "verification": "https://optimistic.etherscan.io/address/0x6aF72c0F9CFeC2567730C30bA60C3DD9080F8fBF#code"
+  }
+}
