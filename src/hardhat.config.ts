@@ -1,6 +1,9 @@
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
+import "@nomiclabs/hardhat-truffle5";
 import "dotenv-defaults/config";
+
+import { accountsList } from "./hardhatAccountsList2k.js";
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -8,11 +11,9 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {
-      forking: {
-        enabled: false,
-        url: ``
-      }
-    }
+      accounts: accountsList,
+      initialBaseFeePerGas: 0, //this setting is needed for some of tests to work
+    },
   }
 };
 
