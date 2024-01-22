@@ -7,13 +7,17 @@ import { accountsList } from "./hardhatAccountsList2k.js";
 
 const config: HardhatUserConfig = {
   solidity: {
-    compilers: [{ version: "0.8.23" }, { version: "0.6.11" }, { version: "0.4.23" }]
+    compilers: [
+      { version: "0.8.23", settings: { optimizer: { enabled: true }, viaIR: true } },
+      { version: "0.6.11", settings: { optimizer: { enabled: true } } },
+      { version: "0.4.23", settings: { optimizer: { enabled: true } } }
+    ]
   },
   networks: {
     hardhat: {
       accounts: accountsList,
-      initialBaseFeePerGas: 0, //this setting is needed for some of tests to work
-    },
+      initialBaseFeePerGas: 0 //this setting is needed for some of tests to work
+    }
   }
 };
 

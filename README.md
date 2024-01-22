@@ -24,3 +24,5 @@ Certainly, here's your README text with improved grammar and clarity:
 - The `/utils` directory currently contains a generic TypeScript script that can be used for deploying various Smart Contracts. An example of usage can be found in `main.ts` under the `/scripts` directory.
 
 - The `/.github` directory contains both workflow definitions for GitHub Actions and a `dependabot.yml` file with configuration for Dependabot, which automatically opens pull requests to keep your project's dependencies up to date.
+
+NOTE: It's a fork of [Ethos 2.1](https://github.com/Byte-Masons/liquity-dev/tree/v2.1)
