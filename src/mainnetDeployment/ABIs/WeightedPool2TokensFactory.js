@@ -1,131 +1,131 @@
 const WeightedPool2TokensFactory = {
-  "abi": [
+  abi: [
     {
-      "inputs": [
+      inputs: [
         {
-          "internalType": "contract IVault",
-          "name": "vault",
-          "type": "address"
-        }
+          internalType: "contract IVault",
+          name: "vault",
+          type: "address",
+        },
       ],
-      "stateMutability": "nonpayable",
-      "type": "constructor"
+      stateMutability: "nonpayable",
+      type: "constructor",
     },
     {
-      "anonymous": false,
-      "inputs": [
+      anonymous: false,
+      inputs: [
         {
-          "indexed": true,
-          "internalType": "address",
-          "name": "pool",
-          "type": "address"
-        }
+          indexed: true,
+          internalType: "address",
+          name: "pool",
+          type: "address",
+        },
       ],
-      "name": "PoolCreated",
-      "type": "event"
+      name: "PoolCreated",
+      type: "event",
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "internalType": "string",
-          "name": "name",
-          "type": "string"
+          internalType: "string",
+          name: "name",
+          type: "string",
         },
         {
-          "internalType": "string",
-          "name": "symbol",
-          "type": "string"
+          internalType: "string",
+          name: "symbol",
+          type: "string",
         },
         {
-          "internalType": "contract IERC20[]",
-          "name": "tokens",
-          "type": "address[]"
+          internalType: "contract IERC20[]",
+          name: "tokens",
+          type: "address[]",
         },
         {
-          "internalType": "uint256[]",
-          "name": "weights",
-          "type": "uint256[]"
+          internalType: "uint256[]",
+          name: "weights",
+          type: "uint256[]",
         },
         {
-          "internalType": "uint256",
-          "name": "swapFeePercentage",
-          "type": "uint256"
+          internalType: "uint256",
+          name: "swapFeePercentage",
+          type: "uint256",
         },
         {
-          "internalType": "bool",
-          "name": "oracleEnabled",
-          "type": "bool"
+          internalType: "bool",
+          name: "oracleEnabled",
+          type: "bool",
         },
         {
-          "internalType": "address",
-          "name": "owner",
-          "type": "address"
-        }
+          internalType: "address",
+          name: "owner",
+          type: "address",
+        },
       ],
-      "name": "create",
-      "outputs": [
+      name: "create",
+      outputs: [
         {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
+          internalType: "address",
+          name: "",
+          type: "address",
+        },
       ],
-      "stateMutability": "nonpayable",
-      "type": "function"
+      stateMutability: "nonpayable",
+      type: "function",
     },
     {
-      "inputs": [],
-      "name": "getPauseConfiguration",
-      "outputs": [
+      inputs: [],
+      name: "getPauseConfiguration",
+      outputs: [
         {
-          "internalType": "uint256",
-          "name": "pauseWindowDuration",
-          "type": "uint256"
+          internalType: "uint256",
+          name: "pauseWindowDuration",
+          type: "uint256",
         },
         {
-          "internalType": "uint256",
-          "name": "bufferPeriodDuration",
-          "type": "uint256"
-        }
+          internalType: "uint256",
+          name: "bufferPeriodDuration",
+          type: "uint256",
+        },
       ],
-      "stateMutability": "view",
-      "type": "function"
+      stateMutability: "view",
+      type: "function",
     },
     {
-      "inputs": [],
-      "name": "getVault",
-      "outputs": [
+      inputs: [],
+      name: "getVault",
+      outputs: [
         {
-          "internalType": "contract IVault",
-          "name": "",
-          "type": "address"
-        }
+          internalType: "contract IVault",
+          name: "",
+          type: "address",
+        },
       ],
-      "stateMutability": "view",
-      "type": "function"
+      stateMutability: "view",
+      type: "function",
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "internalType": "address",
-          "name": "pool",
-          "type": "address"
-        }
+          internalType: "address",
+          name: "pool",
+          type: "address",
+        },
       ],
-      "name": "isPoolFromFactory",
-      "outputs": [
+      name: "isPoolFromFactory",
+      outputs: [
         {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
+          internalType: "bool",
+          name: "",
+          type: "bool",
+        },
       ],
-      "stateMutability": "view",
-      "type": "function"
-    }
-  ]
-}
+      stateMutability: "view",
+      type: "function",
+    },
+  ],
+};
 
 module.exports = {
-  WeightedPool2TokensFactory: WeightedPool2TokensFactory
-}
+  WeightedPool2TokensFactory: WeightedPool2TokensFactory,
+};

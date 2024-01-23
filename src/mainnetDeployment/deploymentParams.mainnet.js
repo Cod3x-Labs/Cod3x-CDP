@@ -1,24 +1,24 @@
-const externalAddrs  = {
+const externalAddrs = {
   // https://data.chain.link/eth-usd
-  CHAINLINK_ETHUSD_PROXY: "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419", 
+  CHAINLINK_ETHUSD_PROXY: "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419",
   // https://docs.tellor.io/tellor/integration/reference-page
-  TELLOR_MASTER:"0x88dF592F8eb5D7Bd38bFeF7dEb0fBc02cf3778a0",
+  TELLOR_MASTER: "0x88dF592F8eb5D7Bd38bFeF7dEb0fBc02cf3778a0",
   // https://uniswap.org/docs/v2/smart-contracts/factory/
   UNISWAP_V2_FACTORY: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f",
   UNISWAP_V2_ROUTER02: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
   // https://etherscan.io/token/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2
   WETH_ERC20: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-}
+};
 
 const liquityAddrs = {
-  GENERAL_SAFE:"0xF06016D822943C42e3Cb7FC3a6A3B1889C1045f8", // to be passed to LQTYToken as the bounties/hackathons address
-  LQTY_SAFE:"0xb8a9faDA75c6d891fB77a7988Ff9BaD9e485Ca1C", // to be passed to LQTYToken as the LQTY multisig address
-  DEPLOYER: "0xa850535D3628CD4dFEB528dC85cfA93051Ff2984" // Mainnet REAL deployment address
-}
+  GENERAL_SAFE: "0xF06016D822943C42e3Cb7FC3a6A3B1889C1045f8", // to be passed to LQTYToken as the bounties/hackathons address
+  LQTY_SAFE: "0xb8a9faDA75c6d891fB77a7988Ff9BaD9e485Ca1C", // to be passed to LQTYToken as the LQTY multisig address
+  DEPLOYER: "0xa850535D3628CD4dFEB528dC85cfA93051Ff2984", // Mainnet REAL deployment address
+};
 
-// Beneficiaries for lockup contracts. 
+// Beneficiaries for lockup contracts.
 const beneficiaries = {
-  ACCOUNT_1: "0xBBdc88676759D09617C288E29f2Eb7Ce94592f25",  
+  ACCOUNT_1: "0xBBdc88676759D09617C288E29f2Eb7Ce94592f25",
   ACCOUNT_2: "0x77616b3a57C9ACf018E87c92ae187C8Cc0B112D6",
   ACCOUNT_3: "0x32c761138aD9Ff95D8595aa9A79208F19b01d8E7",
   ACCOUNT_4: "0x0eBBC1c8B634b775D14b24E6428C9386A1B6C74D",
@@ -51,20 +51,20 @@ const beneficiaries = {
   ACCOUNT_31: "0x994668f7B05B30996BB7F2B87140D0A761D9f292",
   ACCOUNT_32: "0xd89852fA2F66B54F485bCa0CcE3Af4e67015597E",
   ACCOUNT_33: "0xF6451cCdC8D47a26Ec6535cA8DEa90E6696A3aDC",
-  ACCOUNT_34: "0x895870D281E4761237f4465AFb51D16c3e124EFC"
-}
+  ACCOUNT_34: "0x895870D281E4761237f4465AFb51D16c3e124EFC",
+};
 
-const OUTPUT_FILE = './mainnetDeployment/mainnetDeploymentOutput.json'
+const OUTPUT_FILE = "./mainnetDeployment/mainnetDeploymentOutput.json";
 
-const delay = ms => new Promise(res => setTimeout(res, ms));
+const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 const waitFunction = async () => {
-  return delay(90000) // wait 90s
-}
+  return delay(90000); // wait 90s
+};
 
-const GAS_PRICE = 25000000000
-const TX_CONFIRMATIONS = 3 // for mainnet
+const GAS_PRICE = 25000000000;
+const TX_CONFIRMATIONS = 3; // for mainnet
 
-const ETHERSCAN_BASE_URL = 'https://etherscan.io/address'
+const ETHERSCAN_BASE_URL = "https://etherscan.io/address";
 
 module.exports = {
   externalAddrs,
