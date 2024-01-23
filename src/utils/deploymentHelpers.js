@@ -74,27 +74,11 @@ const maxBytes32 = "0x" + "f".repeat(64);
 
 class DeploymentHelper {
   static async deployLiquityCore() {
-    const cmdLineArgs = process.argv;
-    const frameworkPath = cmdLineArgs[1];
-    // console.log(`Framework used:  ${frameworkPath}`)
-
-    if (frameworkPath.includes("hardhat")) {
-      return this.deployLiquityCoreHardhat();
-    } else if (frameworkPath.includes("truffle")) {
-      return this.deployLiquityCoreTruffle();
-    }
+    return this.deployLiquityCoreHardhat();
   }
 
   static async deployLQTYContracts(multisigAddress) {
-    const cmdLineArgs = process.argv;
-    const frameworkPath = cmdLineArgs[1];
-    // console.log(`Framework used:  ${frameworkPath}`)
-
-    if (frameworkPath.includes("hardhat")) {
-      return this.deployLQTYContractsHardhat(multisigAddress);
-    } else if (frameworkPath.includes("truffle")) {
-      return this.deployLQTYContractsTruffle(multisigAddress);
-    }
+    return this.deployLQTYContractsHardhat(multisigAddress);
   }
 
   static async deployLiquityCoreHardhat() {
@@ -260,71 +244,6 @@ class DeploymentHelper {
       communityIssuance,
       stakingToken,
       oathToken,
-    };
-    return LQTYContracts;
-  }
-
-  static async deployLiquityCoreTruffle() {
-    const priceFeedTestnet = await PriceFeedTestnet.new();
-    const sortedTroves = await SortedTroves.new();
-    const troveManager = await TroveManager.new();
-    const activePool = await ActivePool.new();
-    const stabilityPool = await StabilityPool.new();
-    const gasPool = await GasPool.new();
-    const defaultPool = await DefaultPool.new();
-    const collSurplusPool = await CollSurplusPool.new();
-    const functionCaller = await FunctionCaller.new();
-    const borrowerOperations = await BorrowerOperations.new();
-    const hintHelpers = await HintHelpers.new();
-    const leverager = await Leverager.new();
-    const lusdToken = await LUSDToken.new(
-      troveManager.address,
-      stabilityPool.address,
-      borrowerOperations.address,
-    );
-    const coreContracts = {
-      priceFeedTestnet,
-      lusdToken,
-      sortedTroves,
-      troveManager,
-      activePool,
-      stabilityPool,
-      gasPool,
-      defaultPool,
-      collSurplusPool,
-      functionCaller,
-      borrowerOperations,
-      hintHelpers,
-      leverager,
-    };
-    return coreContracts;
-  }
-
-  static async deployLQTYContractsTruffle(
-    bountyAddress,
-    lpRewardsAddress,
-    multisigAddress,
-  ) {
-    const lqtyStaking = await lqtyStaking.new();
-    const lockupContractFactory = await LockupContractFactory.new();
-    const communityIssuance = await CommunityIssuance.new();
-
-    /* Deploy LQTY Token, passing Community Issuance,  LQTYStaking, and Factory addresses 
-    to the constructor  */
-    const lqtyToken = await LQTYToken.new(
-      communityIssuance.address,
-      lqtyStaking.address,
-      lockupContractFactory.address,
-      bountyAddress,
-      lpRewardsAddress,
-      multisigAddress,
-    );
-
-    const LQTYContracts = {
-      lqtyStaking,
-      lockupContractFactory,
-      communityIssuance,
-      lqtyToken,
     };
     return LQTYContracts;
   }
@@ -641,4 +560,5 @@ class DeploymentHelper {
     );
   }
 }
+
 module.exports = DeploymentHelper;
