@@ -25,4 +25,4 @@ Certainly, here's your README text with improved grammar and clarity:
 
 - The `/.github` directory contains both workflow definitions for GitHub Actions and a `dependabot.yml` file with configuration for Dependabot, which automatically opens pull requests to keep your project's dependencies up to date.
 
-NOTE: It's a fork of [Ethos 2.1](https://github.com/Byte-Masons/liquity-dev/tree/v2.1)
+NOTE: This is a fork of [Ethos 2.1](https://github.com/Byte-Masons/liquity-dev/tree/v2.1)
