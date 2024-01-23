@@ -112,25 +112,19 @@ contract("PriceFeed", async (accounts) => {
   });
 
   describe("Mainnet PriceFeed setup", async (accounts) => {
-    it("fetchPrice should fail on contract with no chainlink address set", async () => {
+    it("fetchPrice should fail on contract with no CollateralConfig address set", async () => {
+      let response;
       try {
-        const price = await zeroAddressPriceFeed.fetchPrice(
-          collateral1.address,
-        );
-        assert.isFalse(price.receipt.status);
+        response = await zeroAddressPriceFeed.fetchPrice(collateral1.address);
       } catch (err) {
-        assert.include(err.message, "function call to a non-contract account");
-      }
-    });
-
-    it("fetchPrice should fail on contract with no tellor address set", async () => {
-      try {
-        const price = await zeroAddressPriceFeed.fetchPrice(
-          collateral1.address,
+        assert.include(
+          err.message,
+          "Transaction reverted without a reason string",
         );
-        assert.isFalse(price.receipt.status);
-      } catch (err) {
-        assert.include(err.message, "function call to a non-contract account");
+        assert.isUndefined(
+          response,
+          "response should not be defined because tx is expected to be reverted",
+        );
       }
     });
 
