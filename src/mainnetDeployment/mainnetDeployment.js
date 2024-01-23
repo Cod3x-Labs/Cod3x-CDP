@@ -10,7 +10,6 @@ const {
 } = require("../utils/testHelpers.js");
 const { dec } = th;
 const MainnetDeploymentHelper = require("../utils/mainnetDeploymentHelpers.js");
-const toBigNum = ethers.BigNumber.from;
 
 async function mainnetDeploy(configParams) {
   const isTest = configParams.isTest;
