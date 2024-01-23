@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: BUSL-1.1
 
-pragma solidity 0.6.11;
+pragma solidity ^0.8.23;
 
 import "../LQTY/CommunityIssuance.sol";
 
 contract CommunityIssuanceTester is CommunityIssuance {
+    using SafeMath for uint;
+
     function unprotectedIssueLQTY() external returns (uint issuance) {
         if (lastIssuanceTimestamp < lastDistributionTime) {
             uint256 endTimestamp = block.timestamp > lastDistributionTime

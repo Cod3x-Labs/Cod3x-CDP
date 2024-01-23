@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 
-pragma solidity 0.6.11;
+pragma solidity ^0.8.23;
 
 import "./Interfaces/ICollateralConfig.sol";
 import "./Interfaces/IStabilityPool.sol";
@@ -12,6 +12,8 @@ import "./Dependencies/LiquityBase.sol";
 import "./Dependencies/Ownable.sol";
 
 contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
+    using SafeMath for uint256;
+
     ITroveManager public troveManager;
     ICollateralConfig public collateralConfig;
     IStabilityPool public stabilityPool;

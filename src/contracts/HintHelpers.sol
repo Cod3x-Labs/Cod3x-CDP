@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 
-pragma solidity 0.6.11;
+pragma solidity ^0.8.23;
 
 import "./Interfaces/ICollateralConfig.sol";
 import "./Interfaces/ITroveManager.sol";
@@ -10,6 +10,8 @@ import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
 
 contract HintHelpers is LiquityBase, Ownable, CheckContract {
+    using SafeMath for uint;
+    
     string public constant NAME = "HintHelpers";
 
     ICollateralConfig public collateralConfig;
@@ -119,14 +121,15 @@ contract HintHelpers is LiquityBase, Ownable, CheckContract {
         firstRedemptionHint = vars.currentTroveuser;
 
         if (_maxIterations == 0) {
-            _maxIterations = uint(-1);
+            _maxIterations = type(uint).max;
         }
-
+        
         while (
             vars.currentTroveuser != address(0) &&
             vars.remainingLUSD > 0 &&
-            _maxIterations-- > 0
+            _maxIterations > 0
         ) {
+            _maxIterations--;
             vars.netLUSDDebt = _getNetDebt(
                 troveManager.getTroveDebt(vars.currentTroveuser, _collateral)
             ).add(

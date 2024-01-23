@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 
-pragma solidity 0.6.11;
+pragma solidity ^0.8.23;
 
 import "../Dependencies/SafeERC20.sol";
 import "../Interfaces/ICommunityIssuance.sol";
@@ -40,7 +40,6 @@ contract CommunityIssuance is
 
     event OathTokenAddressSet(address _oathTokenAddress);
     event LogRewardPerSecond(uint256 _rewardPerSecond);
-    event StabilityPoolAddressSet(address _stabilityPoolAddress);
     event TotalOATHIssuedUpdated(
         IERC20 indexed _oathTokenAddress,
         uint256 _totalOATHIssued

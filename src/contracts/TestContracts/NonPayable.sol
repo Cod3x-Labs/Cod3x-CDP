@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 
-pragma solidity 0.6.11;
-
-//import "../Dependencies/console.sol";
+pragma solidity ^0.8.23;
 
 contract NonPayable {
     bool isPayable;
@@ -15,7 +13,6 @@ contract NonPayable {
         (bool success, bytes memory returnData) = _dest.call{value: msg.value}(
             _data
         );
-        //console.logBytes(returnData);
         require(success, string(returnData));
     }
 

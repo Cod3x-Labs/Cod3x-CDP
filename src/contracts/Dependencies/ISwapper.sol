@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL1.1
 
-pragma solidity 0.6.11;
+pragma solidity ^0.8.23;
 pragma experimental ABIEncoderV2;
 
 import "./IVeloRouter.sol";

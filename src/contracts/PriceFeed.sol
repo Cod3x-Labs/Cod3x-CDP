@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 
-pragma solidity 0.6.11;
+pragma solidity ^0.8.23;
 
 import "./Interfaces/ICollateralConfig.sol";
 import "./Interfaces/IPriceFeed.sol";
@@ -11,7 +11,6 @@ import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
 import "./Dependencies/BaseMath.sol";
 import "./Dependencies/LiquityMath.sol";
-import "./Dependencies/console.sol";
 
 /*
  * PriceFeed for mainnet deployment, to be connected to Chainlink's live ETH:USD aggregator reference
@@ -79,7 +78,6 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     mapping(address => Status) public status;
 
     event CollateralConfigAddressChanged(address _newCollateralConfigAddress);
-    event LastGoodPriceUpdated(address _collateral, uint _lastGoodPrice);
     event PriceFeedStatusChanged(address _collateral, Status newStatus);
 
     // --- Dependency setters ---
@@ -806,6 +804,10 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
          */
 
         // Try to get the price data from the previous round:
+        if(_currentRoundId == 0){
+            return prevChainlinkResponse;
+        }
+
         try
             priceAggregator[_collateral].getRoundData(_currentRoundId - 1)
         returns (

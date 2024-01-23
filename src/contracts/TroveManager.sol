@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-
-pragma solidity 0.6.11;
+pragma solidity ^0.8.23;
 
 import "./Interfaces/ICollateralConfig.sol";
 import "./Interfaces/ITroveManager.sol";
@@ -11,16 +10,11 @@ import "./Interfaces/ILQTYStaking.sol";
 import "./Interfaces/IRedemptionHelper.sol";
 import "./Interfaces/ILiquidationHelper.sol";
 import "./Dependencies/LiquityBase.sol";
-// import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
 import "./Dependencies/IERC20.sol";
 
-contract TroveManager is
-    LiquityBase /*Ownable,*/,
-    CheckContract,
-    ITroveManager
-{
-    // string constant public NAME = "TroveManager";
+contract TroveManager is LiquityBase, CheckContract, ITroveManager {
+    using SafeMath for uint256;
 
     address public owner;
 
@@ -184,29 +178,10 @@ contract TroveManager is
 
     // --- Events ---
 
-    event BorrowerOperationsAddressChanged(
-        address _newBorrowerOperationsAddress
-    );
     event CollateralConfigAddressChanged(address _newCollateralConfigAddress);
-    event PriceFeedAddressChanged(address _newPriceFeedAddress);
-    event LUSDTokenAddressChanged(address _newLUSDTokenAddress);
-    event ActivePoolAddressChanged(address _activePoolAddress);
-    event DefaultPoolAddressChanged(address _defaultPoolAddress);
-    event GasPoolAddressChanged(address _gasPoolAddress);
-    event CollSurplusPoolAddressChanged(address _collSurplusPoolAddress);
-    event SortedTrovesAddressChanged(address _sortedTrovesAddress);
-    event LQTYTokenAddressChanged(address _lqtyTokenAddress);
-    event LQTYStakingAddressChanged(address _lqtyStakingAddress);
     event RedemptionHelperAddressChanged(address _redemptionHelperAddress);
     event LiquidationHelperAddressChanged(address _liquidationHelperAddress);
 
-    event Liquidation(
-        address _collateral,
-        uint _liquidatedDebt,
-        uint _liquidatedColl,
-        uint _collGasCompensation,
-        uint _LUSDGasCompensation
-    );
     event TroveUpdated(
         address indexed _borrower,
         address _collateral,
@@ -221,36 +196,6 @@ contract TroveManager is
         uint _debt,
         uint _coll,
         TroveManagerOperation _operation
-    );
-    event BaseRateUpdated(uint _baseRate);
-    event LastFeeOpTimeUpdated(uint _lastFeeOpTime);
-    event TotalStakesUpdated(address _collateral, uint _newTotalStakes);
-    event SystemSnapshotsUpdated(
-        address _collateral,
-        uint _totalStakesSnapshot,
-        uint _totalCollateralSnapshot
-    );
-    event LTermsUpdated(
-        address _collateral,
-        uint _L_Collateral,
-        uint _L_LUSDDebt
-    );
-    event TroveSnapshotsUpdated(
-        address _collateral,
-        uint _L_Collateral,
-        uint _L_LUSDDebt
-    );
-    event TroveIndexUpdated(
-        address _borrower,
-        address _collateral,
-        uint _newIndex
-    );
-    event Redemption(
-        address _collateral,
-        uint _attemptedLUSDAmount,
-        uint _actualLUSDAmount,
-        uint _collSent,
-        uint _collFee
     );
 
     enum TroveManagerOperation {

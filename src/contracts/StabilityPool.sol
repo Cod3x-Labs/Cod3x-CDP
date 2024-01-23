@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-
-pragma solidity 0.6.11;
+pragma solidity ^0.8.23;
 
 import "./Interfaces/IBorrowerOperations.sol";
 import "./Interfaces/ICollateralConfig.sol";
@@ -16,7 +15,6 @@ import "./Dependencies/SafeMath.sol";
 import "./Dependencies/LiquitySafeMath128.sol";
 import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
-import "./Dependencies/console.sol";
 import "./Dependencies/SafeERC20.sol";
 
 /*
@@ -147,6 +145,7 @@ import "./Dependencies/SafeERC20.sol";
 contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
     using LiquitySafeMath128 for uint128;
     using SafeERC20 for IERC20;
+    using SafeMath for uint256;
 
     string public constant NAME = "StabilityPool";
 
@@ -234,52 +233,7 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
 
     // --- Events ---
 
-    event StabilityPoolCollateralBalanceUpdated(
-        address _collateral,
-        uint _newBalance
-    );
-    event StabilityPoolLUSDBalanceUpdated(uint _newBalance);
-
-    event BorrowerOperationsAddressChanged(
-        address _newBorrowerOperationsAddress
-    );
     event CollateralConfigAddressChanged(address _newCollateralConfigAddress);
-    event TroveManagerAddressChanged(address _newTroveManagerAddress);
-    event LiquidationHelperAddressChanged(address _liquidationHelperAddress);
-    event ActivePoolAddressChanged(address _newActivePoolAddress);
-    event DefaultPoolAddressChanged(address _newDefaultPoolAddress);
-    event LUSDTokenAddressChanged(address _newLUSDTokenAddress);
-    event SortedTrovesAddressChanged(address _newSortedTrovesAddress);
-    event PriceFeedAddressChanged(address _newPriceFeedAddress);
-    event CommunityIssuanceAddressChanged(address _newCommunityIssuanceAddress);
-
-    event P_Updated(uint _P);
-    event S_Updated(
-        address _collateral,
-        uint _S,
-        uint128 _epoch,
-        uint128 _scale
-    );
-    event G_Updated(uint _G, uint128 _epoch, uint128 _scale);
-    event EpochUpdated(uint128 _currentEpoch);
-    event ScaleUpdated(uint128 _currentScale);
-
-    event DepositSnapshotUpdated(
-        address indexed _depositor,
-        uint _P,
-        address[] _assets,
-        uint[] _amounts,
-        uint _G
-    );
-    event UserDepositChanged(address indexed _depositor, uint _newDeposit);
-
-    event CollateralGainWithdrawn(
-        address indexed _depositor,
-        address _collateral,
-        uint _collAmount
-    );
-    event LQTYPaidToDepositor(address indexed _depositor, uint _LQTY);
-    event CollateralSent(address _collateral, address _to, uint _amount);
 
     // --- Contract setters ---
 
@@ -781,7 +735,7 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
             return 0;
         }
 
-        Snapshots memory snapshots = depositSnapshots[_depositor];
+        Snapshots storage snapshots = depositSnapshots[_depositor];
         uint LQTYGain = _getLQTYGainFromSnapshots(initialDeposit, snapshots);
 
         return LQTYGain;
@@ -789,7 +743,7 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
 
     function _getLQTYGainFromSnapshots(
         uint initialDeposit,
-        Snapshots memory snapshots
+        Snapshots storage snapshots
     ) internal view returns (uint) {
         /*
          * Grab the sum 'G' from the epoch at which the stake was made. The LQTY gain may span up to one scale change.
@@ -830,7 +784,7 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
             return 0;
         }
 
-        Snapshots memory snapshots = depositSnapshots[_depositor];
+        Snapshots storage snapshots = depositSnapshots[_depositor];
 
         uint compoundedDeposit = _getCompoundedDepositFromSnapshots(
             initialDeposit,
@@ -842,7 +796,7 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
     // Internal function, used to calculcate compounded deposits.
     function _getCompoundedDepositFromSnapshots(
         uint initialDeposit,
-        Snapshots memory snapshots
+        Snapshots storage snapshots
     ) internal view returns (uint) {
         uint snapshot_P = snapshots.P;
         uint128 scaleSnapshot = snapshots.scale;

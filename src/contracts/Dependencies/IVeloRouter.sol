@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity 0.6.11;
+pragma solidity ^0.8.23;
 pragma experimental ABIEncoderV2;
 
 import {IERC20} from "../Dependencies/IERC20.sol";

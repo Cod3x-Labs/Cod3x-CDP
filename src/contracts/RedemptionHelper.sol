@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 
-pragma solidity 0.6.11;
+pragma solidity ^0.8.23;
 
 import "./Interfaces/ICollateralConfig.sol";
 import "./Interfaces/ILQTYStaking.sol";
@@ -14,6 +14,8 @@ import "./Dependencies/Ownable.sol";
 import "./Dependencies/IERC20.sol";
 
 contract RedemptionHelper is LiquityBase, Ownable, IRedemptionHelper {
+    using SafeMath for uint256;
+
     uint public constant BOOTSTRAP_PERIOD = 14 days;
 
     ITroveManager public troveManager;
@@ -166,7 +168,7 @@ contract RedemptionHelper is LiquityBase, Ownable, IRedemptionHelper {
 
         // Loop through the Troves starting from the one with lowest collateral ratio until _amount of LUSD is exchanged for collateral
         if (_maxIterations == 0) {
-            _maxIterations = uint(-1);
+            _maxIterations = type(uint).max;
         }
         while (
             totals.currentBorrower != address(0) &&

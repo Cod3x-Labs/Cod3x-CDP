@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: BUSL-1.1
 
-pragma solidity 0.6.11;
+pragma solidity ^0.8.23;
 
 import "./Interfaces/ILUSDToken.sol";
 import "./Interfaces/ITroveManager.sol";
 import "./Dependencies/SafeMath.sol";
 import "./Dependencies/CheckContract.sol";
-import "./Dependencies/console.sol";
+
 /*
  *
  * Based upon OpenZeppelin's ERC20 contract:
@@ -77,11 +77,6 @@ contract LUSDToken is CheckContract, ILUSDToken {
     uint internal immutable deploymentStartTime;
 
     // --- Events ---
-    event TroveManagerAddressChanged(address _troveManagerAddress);
-    event StabilityPoolAddressChanged(address _newStabilityPoolAddress);
-    event BorrowerOperationsAddressChanged(
-        address _newBorrowerOperationsAddress
-    );
     event GovernanceAddressChanged(address _governanceAddress);
     event GuardianAddressChanged(address _guardianAddress);
 
@@ -339,7 +334,7 @@ contract LUSDToken is CheckContract, ILUSDToken {
         ) {
             revert("LUSD: Invalid s value");
         }
-        require(deadline >= now, "LUSD: expired deadline");
+        require(deadline >= block.timestamp, "LUSD: expired deadline");
         bytes32 digest = keccak256(
             abi.encodePacked(
                 "\x19\x01",
@@ -368,7 +363,7 @@ contract LUSDToken is CheckContract, ILUSDToken {
 
     // --- Internal operations ---
 
-    function _chainID() private pure returns (uint256 chainID) {
+    function _chainID() private view returns (uint256 chainID) {
         assembly {
             chainID := chainid()
         }

@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: BUSL-1.1
 
-pragma solidity 0.6.11;
+pragma solidity ^0.8.23;
 
 import "../Dependencies/AggregatorV3Interface.sol";
-import "../Dependencies/console.sol";
 
 contract MockAggregator is AggregatorV3Interface {
     // storage variables to hold the mock data

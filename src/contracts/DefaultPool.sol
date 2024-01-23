@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 
-pragma solidity 0.6.11;
+pragma solidity ^0.8.23;
 
 import "./Interfaces/IActivePool.sol";
 import "./Interfaces/ICollateralConfig.sol";
@@ -8,7 +8,6 @@ import "./Interfaces/IDefaultPool.sol";
 import "./Dependencies/SafeMath.sol";
 import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
-import "./Dependencies/console.sol";
 import "./Dependencies/SafeERC20.sol";
 
 /*
@@ -31,12 +30,6 @@ contract DefaultPool is Ownable, CheckContract, IDefaultPool {
     mapping(address => uint256) internal LUSDDebt; // collateral => corresponding debt tracker
 
     event CollateralConfigAddressChanged(address _newCollateralConfigAddress);
-    event TroveManagerAddressChanged(address _newTroveManagerAddress);
-    event DefaultPoolLUSDDebtUpdated(address _collateral, uint _LUSDDebt);
-    event DefaultPoolCollateralBalanceUpdated(
-        address _collateral,
-        uint _amount
-    );
 
     // --- Dependency setters ---
 

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 
-pragma solidity 0.6.11;
+pragma solidity ^0.8.23;
 
 import "../Dependencies/SafeMath.sol";
 import "../Dependencies/LiquityMath.sol";
@@ -14,7 +14,6 @@ import "../Interfaces/ILQTYStaking.sol";
 import "./BorrowerOperationsScript.sol";
 import "./ERC20TransferScript.sol";
 import "./LQTYStakingScript.sol";
-import "../Dependencies/console.sol";
 import "../Dependencies/SafeERC20.sol";
 
 contract BorrowerWrappersScript is

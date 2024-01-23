@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-
-pragma solidity 0.6.11;
+pragma solidity ^0.8.23;
 
 import "./Interfaces/ISortedTroves.sol";
 import "./Interfaces/ITroveManager.sol";
@@ -8,7 +7,6 @@ import "./Interfaces/IBorrowerOperations.sol";
 import "./Dependencies/SafeMath.sol";
 import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
-import "./Dependencies/console.sol";
 
 /*
  * A sorted doubly linked list with nodes sorted in descending order.
@@ -49,9 +47,6 @@ contract SortedTroves is Ownable, CheckContract, ISortedTroves {
     string public constant NAME = "SortedTroves";
 
     event TroveManagerAddressChanged(address _troveManagerAddress);
-    event BorrowerOperationsAddressChanged(address _borrowerOperationsAddress);
-    event NodeAdded(address _collateral, address _id, uint _NICR);
-    event NodeRemoved(address _collateral, address _id);
 
     address public borrowerOperationsAddress;
 
@@ -251,7 +246,7 @@ contract SortedTroves is Ownable, CheckContract, ISortedTroves {
 
         delete data[_collateral].nodes[_id];
         data[_collateral].size = data[_collateral].size.sub(1);
-        NodeRemoved(_collateral, _id);
+        emit NodeRemoved(_collateral, _id);
     }
 
     /*

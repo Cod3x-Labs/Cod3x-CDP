@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: BUSL-1.1
 
-pragma solidity 0.6.11;
+pragma solidity ^0.8.23;
 
 import "./SafeMath.sol";
-import "./console.sol";
 
 library LiquityMath {
     using SafeMath for uint;

@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-
-pragma solidity 0.6.11;
+pragma solidity ^0.8.23;
 
 import "./Interfaces/IActivePool.sol";
 import "./Interfaces/ICollateralConfig.sol";
@@ -10,7 +9,6 @@ import "./Interfaces/ITroveManager.sol";
 import "./Dependencies/SafeMath.sol";
 import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
-import "./Dependencies/console.sol";
 import "./Dependencies/SafeERC20.sol";
 import "./Dependencies/IReaperVaultV2.sol";
 
@@ -50,16 +48,9 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
     // --- Events ---
 
     event CollateralConfigAddressChanged(address _newCollateralConfigAddress);
-    event BorrowerOperationsAddressChanged(
-        address _newBorrowerOperationsAddress
-    );
-    event TroveManagerAddressChanged(address _newTroveManagerAddress);
     event RedemptionHelperAddressChanged(address _redemptionHelperAddress);
     event LiquidationHelperAddressChanged(address _liquidationHelperAddress);
-    event CollSurplusPoolAddressChanged(address _collSurplusPoolAddress);
     event TreasuryAddressChanged(address _treasuryAddress);
-    event ActivePoolLUSDDebtUpdated(address _collateral, uint _LUSDDebt);
-    event ActivePoolCollateralBalanceUpdated(address _collateral, uint _amount);
     event YieldingPercentageUpdated(address _collateral, uint256 _bps);
     event YieldingPercentageDriftUpdated(uint256 _driftBps);
     event YieldClaimThresholdUpdated(address _collateral, uint256 _threshold);
@@ -244,7 +235,7 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
         _requireValidCollateralAddress(_collateral);
         _requireCallerIsBOorTroveM();
         LUSDDebt[_collateral] = LUSDDebt[_collateral].add(_amount);
-        ActivePoolLUSDDebtUpdated(_collateral, LUSDDebt[_collateral]);
+        emit ActivePoolLUSDDebtUpdated(_collateral, LUSDDebt[_collateral]);
     }
 
     function decreaseLUSDDebt(
@@ -254,7 +245,7 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
         _requireValidCollateralAddress(_collateral);
         _requireCallerIsBOorTroveMorSPorRH();
         LUSDDebt[_collateral] = LUSDDebt[_collateral].sub(_amount);
-        ActivePoolLUSDDebtUpdated(_collateral, LUSDDebt[_collateral]);
+        emit ActivePoolLUSDDebtUpdated(_collateral, LUSDDebt[_collateral]);
     }
 
     function pullCollateralFromBorrowerOperationsOrDefaultPool(
@@ -337,7 +328,7 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
         // what % of the final pool balance would the current allocation be?
         vars.finalBalance = collAmount[_collateral].sub(_amountLeavingPool);
         vars.percentOfFinalBal = vars.finalBalance == 0
-            ? uint256(-1)
+            ? type(uint256).max
             : vars.currentAllocated.mul(10_000).div(vars.finalBalance);
 
         // if abs(percentOfFinalBal - yieldingPercentage) > drift, we will need to deposit more or withdraw some

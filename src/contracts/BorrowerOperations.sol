@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-
-pragma solidity 0.6.11;
+pragma solidity ^0.8.23;
 pragma experimental ABIEncoderV2;
 
 import "./Interfaces/IBorrowerOperations.sol";
@@ -13,7 +12,6 @@ import "./Interfaces/ILQTYStaking.sol";
 import "./Dependencies/LiquityBase.sol";
 import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
-import "./Dependencies/console.sol";
 import "./Dependencies/SafeERC20.sol";
 
 contract BorrowerOperations is
@@ -22,6 +20,7 @@ contract BorrowerOperations is
     CheckContract,
     IBorrowerOperations
 {
+    using SafeMath for uint;
     using SafeERC20 for IERC20;
 
     string public constant NAME = "BorrowerOperations";
@@ -104,24 +103,10 @@ contract BorrowerOperations is
     }
 
     event CollateralConfigAddressChanged(address _newCollateralConfigAddress);
-    event TroveManagerAddressChanged(address _newTroveManagerAddress);
-    event ActivePoolAddressChanged(address _activePoolAddress);
-    event DefaultPoolAddressChanged(address _defaultPoolAddress);
-    event GasPoolAddressChanged(address _gasPoolAddress);
-    event CollSurplusPoolAddressChanged(address _collSurplusPoolAddress);
-    event PriceFeedAddressChanged(address _newPriceFeedAddress);
-    event SortedTrovesAddressChanged(address _sortedTrovesAddress);
-    event LUSDTokenAddressChanged(address _lusdTokenAddress);
-    event LQTYStakingAddressChanged(address _lqtyStakingAddress);
     event LeveragerAddressChanged(address _leverager);
 
     event SetFeeExemption(address _borrower, bool _isExempt);
 
-    event TroveCreated(
-        address indexed _borrower,
-        address _collateral,
-        uint arrayIndex
-    );
     event TroveUpdated(
         address indexed _borrower,
         address _collateral,
@@ -129,11 +114,6 @@ contract BorrowerOperations is
         uint _coll,
         uint stake,
         BorrowerOperation operation
-    );
-    event LUSDBorrowingFeePaid(
-        address indexed _borrower,
-        address _collateral,
-        uint _LUSDFee
     );
 
     // --- Dependency setters ---

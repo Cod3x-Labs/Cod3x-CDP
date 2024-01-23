@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 
-pragma solidity 0.6.11;
+pragma solidity ^0.8.23;
 
 import "./Interfaces/ICollateralConfig.sol";
 import "./Interfaces/ICollSurplusPool.sol";
@@ -8,7 +8,6 @@ import "./Dependencies/SafeMath.sol";
 import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
 import "./Dependencies/SafeERC20.sol";
-import "./Dependencies/console.sol";
 
 contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
     using SafeMath for uint256;
@@ -30,19 +29,7 @@ contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
     // --- Events ---
 
     event CollateralConfigAddressChanged(address _newCollateralConfigAddress);
-    event BorrowerOperationsAddressChanged(
-        address _newBorrowerOperationsAddress
-    );
-    event TroveManagerAddressChanged(address _newTroveManagerAddress);
     event LiquidationHelperAddressChanged(address _liquidationHelperAddress);
-    event ActivePoolAddressChanged(address _newActivePoolAddress);
-
-    event CollBalanceUpdated(
-        address indexed _account,
-        address _collateral,
-        uint _newBalance
-    );
-    event CollateralSent(address _collateral, address _to, uint _amount);
 
     // --- Contract setters ---
 
