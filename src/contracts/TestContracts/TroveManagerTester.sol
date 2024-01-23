@@ -8,8 +8,12 @@ import "../TroveManager.sol";
 for testing the parent's internal functions. */
 
 contract TroveManagerTester is TroveManager {
-
-    function computeICR(uint _coll, uint _debt, uint _price, uint _collDecimals) external pure returns (uint) {
+    function computeICR(
+        uint _coll,
+        uint _debt,
+        uint _price,
+        uint _collDecimals
+    ) external pure returns (uint) {
         return LiquityMath._computeCR(_coll, _debt, _price, _collDecimals);
     }
 
@@ -28,7 +32,7 @@ contract TroveManagerTester is TroveManager {
     function unprotectedDecayBaseRateFromBorrowing() external returns (uint) {
         baseRate = _calcDecayedBaseRate();
         assert(baseRate >= 0 && baseRate <= DECIMAL_PRECISION);
-        
+
         _updateLastFeeOpTime();
         return baseRate;
     }
@@ -47,13 +51,18 @@ contract TroveManagerTester is TroveManager {
 
     function callGetRedemptionFee(uint _ETHDrawn) external view returns (uint) {
         getRedemptionFee(_ETHDrawn);
-    }  
+    }
 
-    function getActualDebtFromComposite(uint _debtVal) external pure returns (uint) {
+    function getActualDebtFromComposite(
+        uint _debtVal
+    ) external pure returns (uint) {
         return _getNetDebt(_debtVal);
     }
 
-    function callInternalRemoveTroveOwner(address _troveOwner, address _collateral) external {
+    function callInternalRemoveTroveOwner(
+        address _troveOwner,
+        address _collateral
+    ) external {
         uint troveOwnersArrayLength = TroveOwners[_collateral].length;
         _removeTroveOwner(_troveOwner, _collateral, troveOwnersArrayLength);
     }

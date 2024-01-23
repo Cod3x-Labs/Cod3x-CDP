@@ -2,7 +2,6 @@
 
 pragma solidity 0.6.11;
 
-
 /**
  * The purpose of this contract is to hold LUSD tokens for gas compensation:
  * https://github.com/liquity/dev#gas-compensation

@@ -33,11 +33,10 @@ contract UsingTellor is IERC2362 {
      * @return _value the value retrieved
      * @return _timestampRetrieved the value's timestamp
      */
-    function getDataAfter(bytes32 _queryId, uint256 _timestamp)
-        public
-        view
-        returns (bytes memory _value, uint256 _timestampRetrieved)
-    {
+    function getDataAfter(
+        bytes32 _queryId,
+        uint256 _timestamp
+    ) public view returns (bytes memory _value, uint256 _timestampRetrieved) {
         (bool _found, uint256 _index) = getIndexForDataAfter(
             _queryId,
             _timestamp
@@ -57,11 +56,10 @@ contract UsingTellor is IERC2362 {
      * @return _value the value retrieved
      * @return _timestampRetrieved the value's timestamp
      */
-    function getDataBefore(bytes32 _queryId, uint256 _timestamp)
-        public
-        view
-        returns (bytes memory _value, uint256 _timestampRetrieved)
-    {
+    function getDataBefore(
+        bytes32 _queryId,
+        uint256 _timestamp
+    ) public view returns (bytes memory _value, uint256 _timestampRetrieved) {
         (, _value, _timestampRetrieved) = tellor.getDataBefore(
             _queryId,
             _timestamp
@@ -76,11 +74,10 @@ contract UsingTellor is IERC2362 {
      * @return _index the latest index found before the specified timestamp
      */
     // slither-disable-next-line calls-loop
-    function getIndexForDataAfter(bytes32 _queryId, uint256 _timestamp)
-        public
-        view
-        returns (bool _found, uint256 _index)
-    {
+    function getIndexForDataAfter(
+        bytes32 _queryId,
+        uint256 _timestamp
+    ) public view returns (bool _found, uint256 _index) {
         uint256 _count = getNewValueCountbyQueryId(_queryId);
         if (_count == 0) return (false, 0);
         _count--;
@@ -167,11 +164,10 @@ contract UsingTellor is IERC2362 {
      * @return _index the latest index found before the specified timestamp
      */
     // slither-disable-next-line calls-loop
-    function getIndexForDataBefore(bytes32 _queryId, uint256 _timestamp)
-        public
-        view
-        returns (bool _found, uint256 _index)
-    {
+    function getIndexForDataBefore(
+        bytes32 _queryId,
+        uint256 _timestamp
+    ) public view returns (bool _found, uint256 _index) {
         return tellor.getIndexForDataBefore(_queryId, _timestamp);
     }
 
@@ -241,11 +237,9 @@ contract UsingTellor is IERC2362 {
      * @param _queryId the id to look up
      * @return uint256 count of the number of values received for the queryId
      */
-    function getNewValueCountbyQueryId(bytes32 _queryId)
-        public
-        view
-        returns (uint256)
-    {
+    function getNewValueCountbyQueryId(
+        bytes32 _queryId
+    ) public view returns (uint256) {
         return tellor.getNewValueCountbyQueryId(_queryId);
     }
 
@@ -255,11 +249,10 @@ contract UsingTellor is IERC2362 {
      * @param _timestamp is the timestamp to find a corresponding reporter for
      * @return address of the reporter who reported the value for the data ID at the given timestamp
      */
-    function getReporterByTimestamp(bytes32 _queryId, uint256 _timestamp)
-        public
-        view
-        returns (address)
-    {
+    function getReporterByTimestamp(
+        bytes32 _queryId,
+        uint256 _timestamp
+    ) public view returns (address) {
         return tellor.getReporterByTimestamp(_queryId, _timestamp);
     }
 
@@ -269,11 +262,10 @@ contract UsingTellor is IERC2362 {
      * @param _index is the value index to look up
      * @return uint256 timestamp
      */
-    function getTimestampbyQueryIdandIndex(bytes32 _queryId, uint256 _index)
-        public
-        view
-        returns (uint256)
-    {
+    function getTimestampbyQueryIdandIndex(
+        bytes32 _queryId,
+        uint256 _index
+    ) public view returns (uint256) {
         return tellor.getTimestampbyQueryIdandIndex(_queryId, _index);
     }
 
@@ -283,11 +275,10 @@ contract UsingTellor is IERC2362 {
      * @param _timestamp is the timestamp of the value to look up
      * @return bool true if queryId/timestamp is under dispute
      */
-    function isInDispute(bytes32 _queryId, uint256 _timestamp)
-        public
-        view
-        returns (bool)
-    {
+    function isInDispute(
+        bytes32 _queryId,
+        uint256 _timestamp
+    ) public view returns (bool) {
         return tellor.isInDispute(_queryId, _timestamp);
     }
 
@@ -297,11 +288,10 @@ contract UsingTellor is IERC2362 {
      * @param _timestamp to retrieve data/value from
      * @return bytes value for query/timestamp submitted
      */
-    function retrieveData(bytes32 _queryId, uint256 _timestamp)
-        public
-        view
-        returns (bytes memory)
-    {
+    function retrieveData(
+        bytes32 _queryId,
+        uint256 _timestamp
+    ) public view returns (bytes memory) {
         return tellor.retrieveData(_queryId, _timestamp);
     }
 
@@ -321,15 +311,13 @@ contract UsingTellor is IERC2362 {
      * @return _timestamp timestamp of most recent value
      * @return _statusCode 200 if value found, 404 if not found
      */
-    function valueFor(bytes32 _id)
+    function valueFor(
+        bytes32 _id
+    )
         external
         view
         override
-        returns (
-            int256 _value,
-            uint256 _timestamp,
-            uint256 _statusCode
-        )
+        returns (int256 _value, uint256 _timestamp, uint256 _statusCode)
     {
         bytes32 _queryId = idMappingContract.getTellorID(_id);
         bytes memory _valueBytes;
@@ -351,11 +339,9 @@ contract UsingTellor is IERC2362 {
      * @param _b bytes value to convert to uint256
      * @return _number uint256 converted from bytes
      */
-    function _sliceUint(bytes memory _b)
-        internal
-        pure
-        returns (uint256 _number)
-    {
+    function _sliceUint(
+        bytes memory _b
+    ) internal pure returns (uint256 _number) {
         for (uint256 _i = 0; _i < _b.length; _i++) {
             _number = _number * 256 + uint8(_b[_i]);
         }

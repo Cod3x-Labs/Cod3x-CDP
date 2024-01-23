@@ -11,11 +11,9 @@ import "./SortedTroves.sol";
 contract MultiTroveGetter {
     struct CombinedTroveData {
         address owner;
-
         uint debt;
         uint coll;
         uint stake;
-
         uint snapshotCollAmount;
         uint snapshotLUSDDebt;
     }
@@ -24,16 +22,25 @@ contract MultiTroveGetter {
     TroveManager public troveManager; // XXX Troves missing from ITroveManager?
     ISortedTroves public sortedTroves;
 
-    constructor(ICollateralConfig _collateralConfig, TroveManager _troveManager, ISortedTroves _sortedTroves) public {
+    constructor(
+        ICollateralConfig _collateralConfig,
+        TroveManager _troveManager,
+        ISortedTroves _sortedTroves
+    ) public {
         collateralConfig = _collateralConfig;
         troveManager = _troveManager;
         sortedTroves = _sortedTroves;
     }
 
-    function getMultipleSortedTroves(address _collateral, int _startIdx, uint _count)
-        external view returns (CombinedTroveData[] memory _troves)
-    {
-        require(collateralConfig.isCollateralAllowed(_collateral),"Invalid collateral address");
+    function getMultipleSortedTroves(
+        address _collateral,
+        int _startIdx,
+        uint _count
+    ) external view returns (CombinedTroveData[] memory _troves) {
+        require(
+            collateralConfig.isCollateralAllowed(_collateral),
+            "Invalid collateral address"
+        );
         uint startIdx;
         bool descend;
 
@@ -57,20 +64,33 @@ contract MultiTroveGetter {
             }
 
             if (descend) {
-                _troves = _getMultipleSortedTrovesFromHead(_collateral, startIdx, _count);
+                _troves = _getMultipleSortedTrovesFromHead(
+                    _collateral,
+                    startIdx,
+                    _count
+                );
             } else {
-                _troves = _getMultipleSortedTrovesFromTail(_collateral, startIdx, _count);
+                _troves = _getMultipleSortedTrovesFromTail(
+                    _collateral,
+                    startIdx,
+                    _count
+                );
             }
         }
     }
 
-    function _getMultipleSortedTrovesFromHead(address _collateral, uint _startIdx, uint _count)
-        internal view returns (CombinedTroveData[] memory _troves)
-    {
+    function _getMultipleSortedTrovesFromHead(
+        address _collateral,
+        uint _startIdx,
+        uint _count
+    ) internal view returns (CombinedTroveData[] memory _troves) {
         address currentTroveowner = sortedTroves.getFirst(_collateral);
 
         for (uint idx = 0; idx < _startIdx; ++idx) {
-            currentTroveowner = sortedTroves.getNext(_collateral, currentTroveowner);
+            currentTroveowner = sortedTroves.getNext(
+                _collateral,
+                currentTroveowner
+            );
         }
 
         _troves = new CombinedTroveData[](_count);
@@ -81,25 +101,35 @@ contract MultiTroveGetter {
                 _troves[idx].debt,
                 _troves[idx].coll,
                 _troves[idx].stake,
-                /* status */,
+                /* status */
                 /* arrayIndex */
+                ,
+
             ) = troveManager.Troves(currentTroveowner, _collateral);
             (
                 _troves[idx].snapshotCollAmount,
                 _troves[idx].snapshotLUSDDebt
             ) = troveManager.rewardSnapshots(currentTroveowner, _collateral);
 
-            currentTroveowner = sortedTroves.getNext(_collateral, currentTroveowner);
+            currentTroveowner = sortedTroves.getNext(
+                _collateral,
+                currentTroveowner
+            );
         }
     }
 
-    function _getMultipleSortedTrovesFromTail(address _collateral, uint _startIdx, uint _count)
-        internal view returns (CombinedTroveData[] memory _troves)
-    {
+    function _getMultipleSortedTrovesFromTail(
+        address _collateral,
+        uint _startIdx,
+        uint _count
+    ) internal view returns (CombinedTroveData[] memory _troves) {
         address currentTroveowner = sortedTroves.getLast(_collateral);
 
         for (uint idx = 0; idx < _startIdx; ++idx) {
-            currentTroveowner = sortedTroves.getPrev(_collateral, currentTroveowner);
+            currentTroveowner = sortedTroves.getPrev(
+                _collateral,
+                currentTroveowner
+            );
         }
 
         _troves = new CombinedTroveData[](_count);
@@ -110,15 +140,20 @@ contract MultiTroveGetter {
                 _troves[idx].debt,
                 _troves[idx].coll,
                 _troves[idx].stake,
-                /* status */,
+                /* status */
                 /* arrayIndex */
+                ,
+
             ) = troveManager.Troves(currentTroveowner, _collateral);
             (
                 _troves[idx].snapshotCollAmount,
                 _troves[idx].snapshotLUSDDebt
             ) = troveManager.rewardSnapshots(currentTroveowner, _collateral);
 
-            currentTroveowner = sortedTroves.getPrev(_collateral, currentTroveowner);
+            currentTroveowner = sortedTroves.getPrev(
+                _collateral,
+                currentTroveowner
+            );
         }
     }
 }

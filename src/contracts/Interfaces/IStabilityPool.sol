@@ -3,13 +3,17 @@
 pragma solidity 0.6.11;
 
 interface IStabilityPool {
-
     // --- Events ---
-    
-    event StabilityPoolCollateralBalanceUpdated(address _collateral, uint _newBalance);
+
+    event StabilityPoolCollateralBalanceUpdated(
+        address _collateral,
+        uint _newBalance
+    );
     event StabilityPoolLUSDBalanceUpdated(uint _newBalance);
 
-    event BorrowerOperationsAddressChanged(address _newBorrowerOperationsAddress);
+    event BorrowerOperationsAddressChanged(
+        address _newBorrowerOperationsAddress
+    );
     event TroveManagerAddressChanged(address _newTroveManagerAddress);
     event LiquidationHelperAddressChanged(address _liquidationHelperAddress);
     event ActivePoolAddressChanged(address _newActivePoolAddress);
@@ -20,15 +24,30 @@ interface IStabilityPool {
     event CommunityIssuanceAddressChanged(address _newCommunityIssuanceAddress);
 
     event P_Updated(uint _P);
-    event S_Updated(address _collateral, uint _S, uint128 _epoch, uint128 _scale);
+    event S_Updated(
+        address _collateral,
+        uint _S,
+        uint128 _epoch,
+        uint128 _scale
+    );
     event G_Updated(uint _G, uint128 _epoch, uint128 _scale);
     event EpochUpdated(uint128 _currentEpoch);
     event ScaleUpdated(uint128 _currentScale);
 
-    event DepositSnapshotUpdated(address indexed _depositor, uint _P, address[] _assets, uint[] _amounts, uint _G);
+    event DepositSnapshotUpdated(
+        address indexed _depositor,
+        uint _P,
+        address[] _assets,
+        uint[] _amounts,
+        uint _G
+    );
     event UserDepositChanged(address indexed _depositor, uint _newDeposit);
 
-    event CollateralGainWithdrawn(address indexed _depositor, address _collateral, uint _collAmount);
+    event CollateralGainWithdrawn(
+        address indexed _depositor,
+        address _collateral,
+        uint _collAmount
+    );
     event LQTYPaidToDepositor(address indexed _depositor, uint _LQTY);
     event CollateralSent(address _collateral, address _to, uint _amount);
 
@@ -96,7 +115,9 @@ interface IStabilityPool {
     /*
      * Calculates the collateral gain earned by the deposit since its last snapshots were taken.
      */
-    function getDepositorCollateralGain(address _depositor) external view returns (address[] memory assets, uint[] memory amounts);
+    function getDepositorCollateralGain(
+        address _depositor
+    ) external view returns (address[] memory assets, uint[] memory amounts);
 
     /*
      * Calculate the LQTY gain earned by a deposit since its last snapshots were taken.
@@ -104,19 +125,26 @@ interface IStabilityPool {
      * Otherwise, their cut of the deposit's earnings is equal to the kickbackRate, set by the front end through
      * which they made their deposit.
      */
-    function getDepositorLQTYGain(address _depositor) external view returns (uint);
+    function getDepositorLQTYGain(
+        address _depositor
+    ) external view returns (uint);
 
     /*
      * Return the user's compounded deposit.
      */
-    function getCompoundedLUSDDeposit(address _depositor) external view returns (uint);
+    function getCompoundedLUSDDeposit(
+        address _depositor
+    ) external view returns (uint);
 
     /*
      * A depositor's snapshot struct now contains a mapping for the running sum (S) for each collateral.
      * Mappings within a struct are not accessible via the auto-generated getters in the ABI, so we provide
      * this separate function that will return the specified depositor's "S" snapshot for the given collateral.
      */
-    function depositSnapshots_S(address _depositor, address _collateral) external view returns (uint);
+    function depositSnapshots_S(
+        address _depositor,
+        address _collateral
+    ) external view returns (uint);
 
     /*
      * Fallback function

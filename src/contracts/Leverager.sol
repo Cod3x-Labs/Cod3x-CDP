@@ -59,12 +59,24 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
     event SwapperAddressChanged(address _swapper);
 
     event MaxLeverageIterationsChanged(uint _iterations);
-    event ExchangeForPairChanged(address indexed _tokenIn, address indexed _tokenOut, ExchangeType _exchange);
+    event ExchangeForPairChanged(
+        address indexed _tokenIn,
+        address indexed _tokenOut,
+        ExchangeType _exchange
+    );
     event ExchangeSettingsChanged(ExchangeSettings _settings);
-    event SlippageSettingsChanged(uint _minERNPrice, uint _maxERNPrice, uint _minSwapPercentOut);
+    event SlippageSettingsChanged(
+        uint _minERNPrice,
+        uint _maxERNPrice,
+        uint _minSwapPercentOut
+    );
 
     event LeveredTroveOpened(
-        address indexed _borrower, address indexed _collateral, uint _totalDebt, uint _totalColl, uint _startingColl
+        address indexed _borrower,
+        address indexed _collateral,
+        uint _totalDebt,
+        uint _totalColl,
+        uint _startingColl
     );
 
     function setAddresses(
@@ -110,17 +122,26 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
     }
 
     function setMaxLeverageIterations(uint _iterations) external onlyOwner {
-        require(_iterations > 1 && _iterations <= 30, "Iterations outside allowable range");
+        require(
+            _iterations > 1 && _iterations <= 30,
+            "Iterations outside allowable range"
+        );
         maxLeverageIterations = _iterations;
         emit MaxLeverageIterationsChanged(_iterations);
     }
 
-    function setExchange(address _tokenIn, address _tokenOut, ExchangeType _exchange) external onlyOwner {
+    function setExchange(
+        address _tokenIn,
+        address _tokenOut,
+        ExchangeType _exchange
+    ) external onlyOwner {
         exchangeForPair[_tokenIn][_tokenOut] = _exchange;
         emit ExchangeForPairChanged(_tokenIn, _tokenOut, _exchange);
     }
 
-    function setExchangeSettings(ExchangeSettings memory _settings) external onlyOwner {
+    function setExchangeSettings(
+        ExchangeSettings memory _settings
+    ) external onlyOwner {
         checkContract(_settings.veloRouter);
         checkContract(_settings.balVault);
         checkContract(_settings.uniV3Router);
@@ -128,17 +149,28 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
         emit ExchangeSettingsChanged(_settings);
     }
 
-    function setSlippageSettings(uint _minERNPrice, uint _maxERNPrice, uint _minSwapPercentOut) external onlyOwner {
+    function setSlippageSettings(
+        uint _minERNPrice,
+        uint _maxERNPrice,
+        uint _minSwapPercentOut
+    ) external onlyOwner {
         require(
-            _minERNPrice >= LiquityMath._getScaledCollAmount(98, 2)
-                && _maxERNPrice <= LiquityMath._getScaledCollAmount(110, 2),
+            _minERNPrice >= LiquityMath._getScaledCollAmount(98, 2) &&
+                _maxERNPrice <= LiquityMath._getScaledCollAmount(110, 2),
             "ERN price out of range 0.98-1.10"
         );
-        require(_minSwapPercentOut >= LiquityMath._getScaledCollAmount(98, 2), "More than 2% slippage + fees");
+        require(
+            _minSwapPercentOut >= LiquityMath._getScaledCollAmount(98, 2),
+            "More than 2% slippage + fees"
+        );
         minERNPrice = _minERNPrice;
         maxERNPrice = _maxERNPrice;
         minSwapPercentOut = _minSwapPercentOut;
-        emit SlippageSettingsChanged(_minERNPrice, _maxERNPrice, _minSwapPercentOut);
+        emit SlippageSettingsChanged(
+            _minERNPrice,
+            _maxERNPrice,
+            _minSwapPercentOut
+        );
     }
 
     struct LocalVariables_leverToTargetCRWithNIterations {
@@ -178,7 +210,8 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
         require(_n <= maxLeverageIterations, "Leverager: Too many iterations");
         _requireERNPriceAndSwapPercentInRange(_ernPrice, _swapPercentOut);
         require(
-            troveManager.getTroveStatus(msg.sender, _collateral) != uint(TroveStatus.active),
+            troveManager.getTroveStatus(msg.sender, _collateral) !=
+                uint(TroveStatus.active),
             "Leverager: Cannot lever up active trove"
         );
 
@@ -187,14 +220,21 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
         vars.collDecimals = collateralConfig.getCollateralDecimals(_collateral);
         require(
             !_checkRecoveryMode(
-                _collateral, vars.collPrice, collateralConfig.getCollateralCCR(_collateral), vars.collDecimals
+                _collateral,
+                vars.collPrice,
+                collateralConfig.getCollateralCCR(_collateral),
+                vars.collDecimals
             ),
             "Leverager: Cannot lever up during recovery mode"
         );
 
         vars.startingColl = _collAmount;
         vars.totalColl = _collAmount;
-        IERC20(_collateral).safeTransferFrom(msg.sender, address(this), _collAmount);
+        IERC20(_collateral).safeTransferFrom(
+            msg.sender,
+            address(this),
+            _collAmount
+        );
 
         vars.shouldOpenTrove = true;
         for (uint i; i < _n; ++i) {
@@ -218,11 +258,21 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
                 MinAmountOutData memory minAmountOut = MinAmountOutData(
                     MinAmountOutKind.Absolute,
                     _getUnscaledCollAmount(
-                        _findMinAmountOut(vars.collPrice, _ernPrice, vars.lusdAmount, _swapPercentOut),
+                        _findMinAmountOut(
+                            vars.collPrice,
+                            _ernPrice,
+                            vars.lusdAmount,
+                            _swapPercentOut
+                        ),
                         vars.collDecimals
                     )
                 );
-                _collAmount = _swap(address(lusdToken), address(_collateral), vars.lusdAmount, minAmountOut);
+                _collAmount = _swap(
+                    address(lusdToken),
+                    address(_collateral),
+                    vars.lusdAmount,
+                    minAmountOut
+                );
                 vars.totalColl = vars.totalColl.add(_collAmount);
             }
         }
@@ -271,7 +321,11 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
         LocalVariables_deleverAndCloseTrove memory vars;
         vars.collPrice = priceFeed.fetchPrice(_collateral);
         vars.collDecimals = collateralConfig.getCollateralDecimals(_collateral);
-        vars.currentICR = troveManager.getCurrentICR(msg.sender, _collateral, vars.collPrice);
+        vars.currentICR = troveManager.getCurrentICR(
+            msg.sender,
+            _collateral,
+            vars.collPrice
+        );
 
         lusdToken.safeTransferFrom(msg.sender, address(this), _lusdAmount);
 
@@ -282,23 +336,45 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
                     _findMinAmountOut(
                         _ernPrice,
                         vars.collPrice,
-                        LiquityMath._getScaledCollAmount(vars.collAmount, vars.collDecimals),
+                        LiquityMath._getScaledCollAmount(
+                            vars.collAmount,
+                            vars.collDecimals
+                        ),
                         _swapPercentOut
                     )
                 );
-                _swap(address(_collateral), address(lusdToken), vars.collAmount, minAmountOut);
+                _swap(
+                    address(_collateral),
+                    address(lusdToken),
+                    vars.collAmount,
+                    minAmountOut
+                );
                 _lusdAmount = lusdToken.balanceOf(address(this));
             }
 
-            (vars.collAmount, vars.closedTrove, _upperHint, _lowerHint) = _delever(
+            (
+                vars.collAmount,
+                vars.closedTrove,
+                _upperHint,
+                _lowerHint
+            ) = _delever(
                 Params__delever(
-                    _lusdAmount, _collateral, vars.collDecimals, vars.collPrice, vars.currentICR, _upperHint, _lowerHint
+                    _lusdAmount,
+                    _collateral,
+                    vars.collDecimals,
+                    vars.collPrice,
+                    vars.currentICR,
+                    _upperHint,
+                    _lowerHint
                 )
             );
 
             if (vars.closedTrove) {
                 IERC20(_collateral).safeTransfer(msg.sender, vars.collAmount);
-                lusdToken.safeTransfer(msg.sender, lusdToken.balanceOf(address(this)));
+                lusdToken.safeTransfer(
+                    msg.sender,
+                    lusdToken.balanceOf(address(this))
+                );
                 return;
             }
         }
@@ -318,11 +394,13 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
         bool shouldOpenTrove;
     }
 
-    function _borrowLUSDWithCollAmount(Params__borrowLUSDWithCollAmount memory params)
-        internal
-        returns (address newUpperHint, address newLowerHint)
-    {
-        uint scaledCollAmount = LiquityMath._getScaledCollAmount(params.collAmount, params.collDecimals);
+    function _borrowLUSDWithCollAmount(
+        Params__borrowLUSDWithCollAmount memory params
+    ) internal returns (address newUpperHint, address newLowerHint) {
+        uint scaledCollAmount = LiquityMath._getScaledCollAmount(
+            params.collAmount,
+            params.collDecimals
+        );
         // CR = dollar value of coll / debt
         // CR * debt = dollar value of coll
         // CR * debt = coll amount * coll price
@@ -331,9 +409,14 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
         if (params.shouldOpenTrove) {
             newDebt = newDebt.sub(LUSD_GAS_COMPENSATION);
         }
-        uint newDebtMinusFee = newDebt.sub(troveManager.getBorrowingFeeWithDecay(newDebt));
+        uint newDebtMinusFee = newDebt.sub(
+            troveManager.getBorrowingFeeWithDecay(newDebt)
+        );
 
-        IERC20(params.collateral).safeIncreaseAllowance(address(borrowerOperations), params.collAmount);
+        IERC20(params.collateral).safeIncreaseAllowance(
+            address(borrowerOperations),
+            params.collAmount
+        );
         if (params.shouldOpenTrove) {
             (newUpperHint, newLowerHint) = borrowerOperations.openTroveFor(
                 msg.sender,
@@ -371,14 +454,25 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
         address startingLowerHint;
     }
 
-    function _delever(Params__delever memory params)
+    function _delever(
+        Params__delever memory params
+    )
         internal
-        returns (uint collAmountWithdrawn, bool closedTrove, address newUpperHint, address newLowerHint)
+        returns (
+            uint collAmountWithdrawn,
+            bool closedTrove,
+            address newUpperHint,
+            address newLowerHint
+        )
     {
-        uint debt = _getNetDebt(troveManager.getTroveDebt(msg.sender, params.collateral));
+        uint debt = _getNetDebt(
+            troveManager.getTroveDebt(msg.sender, params.collateral)
+        );
         if (debt < params.lusdAmount) {
             borrowerOperations.closeTroveFor(msg.sender, params.collateral);
-            collAmountWithdrawn = IERC20(params.collateral).balanceOf(address(this));
+            collAmountWithdrawn = IERC20(params.collateral).balanceOf(
+                address(this)
+            );
             return (collAmountWithdrawn, true, address(0), address(0));
         }
 
@@ -388,15 +482,28 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
             debtAfterRepayment = MIN_NET_DEBT;
         }
 
-        uint troveCollValue = troveManager.getTroveColl(msg.sender, params.collateral);
-        troveCollValue = LiquityMath._getScaledCollAmount(troveCollValue, params.collDecimals).mul(params.price);
+        uint troveCollValue = troveManager.getTroveColl(
+            msg.sender,
+            params.collateral
+        );
+        troveCollValue = LiquityMath
+            ._getScaledCollAmount(troveCollValue, params.collDecimals)
+            .mul(params.price);
         // To find x (dollar value of collAmountWithdrawn)
         // (collAmountInTrove * collPrice / 1 ether) - x = debtAfterRepayment * targetCR
         // x = (collAmountInTrove * collPrice / 1 ether) - (debtAfterRepayment * targetCR)
         // We then divide by price to get actual collAmountWithdrawn (not denominated in dollars)
-        collAmountWithdrawn =
-            troveCollValue.sub(debtAfterRepayment.add(LUSD_GAS_COMPENSATION).mul(params.targetCR)).div(params.price);
-        collAmountWithdrawn = _getUnscaledCollAmount(collAmountWithdrawn, params.collDecimals);
+        collAmountWithdrawn = troveCollValue
+            .sub(
+                debtAfterRepayment.add(LUSD_GAS_COMPENSATION).mul(
+                    params.targetCR
+                )
+            )
+            .div(params.price);
+        collAmountWithdrawn = _getUnscaledCollAmount(
+            collAmountWithdrawn,
+            params.collDecimals
+        );
 
         (newUpperHint, newLowerHint) = borrowerOperations.adjustTroveFor(
             IBorrowerOperations.Params_adjustTroveFor(
@@ -413,49 +520,95 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
         );
     }
 
-    function _swap(address _tokenIn, address _tokenOut, uint _amountIn, MinAmountOutData memory _data)
-        internal
-        returns (uint amountOut)
-    {
+    function _swap(
+        address _tokenIn,
+        address _tokenOut,
+        uint _amountIn,
+        MinAmountOutData memory _data
+    ) internal returns (uint amountOut) {
         IERC20(_tokenIn).safeIncreaseAllowance(address(swapper), _amountIn);
         ExchangeType exchange = exchangeForPair[_tokenIn][_tokenOut];
         if (exchange == ExchangeType.Bal) {
-            amountOut = swapper.swapBal(_tokenIn, _tokenOut, _amountIn, _data, exchangeSettings.balVault);
+            amountOut = swapper.swapBal(
+                _tokenIn,
+                _tokenOut,
+                _amountIn,
+                _data,
+                exchangeSettings.balVault
+            );
         } else if (exchange == ExchangeType.VeloSolid) {
-            amountOut = swapper.swapVelo(_tokenIn, _tokenOut, _amountIn, _data, exchangeSettings.veloRouter);
+            amountOut = swapper.swapVelo(
+                _tokenIn,
+                _tokenOut,
+                _amountIn,
+                _data,
+                exchangeSettings.veloRouter
+            );
         } else if (exchange == ExchangeType.UniV3) {
-            amountOut = swapper.swapUniV3(_tokenIn, _tokenOut, _amountIn, _data, exchangeSettings.uniV3Router);
+            amountOut = swapper.swapUniV3(
+                _tokenIn,
+                _tokenOut,
+                _amountIn,
+                _data,
+                exchangeSettings.uniV3Router
+            );
         } else {
             revert("Leverager: Invalid ExchangeType");
         }
 
-        require(amountOut >= _data.absoluteOrBPSValue, "Leverager: Swap failed");
+        require(
+            amountOut >= _data.absoluteOrBPSValue,
+            "Leverager: Swap failed"
+        );
     }
 
-    function _findMinAmountOut(uint _priceOut, uint _priceIn, uint _amountIn, uint _minPercentOut)
-        internal
-        pure
-        returns (uint)
-    {
+    function _findMinAmountOut(
+        uint _priceOut,
+        uint _priceIn,
+        uint _amountIn,
+        uint _minPercentOut
+    ) internal pure returns (uint) {
         // _amountIn * _priceIn * (_minPercentOut / DECIMAL_PRECISISION) = _amountOut * _priceOut
         // ^ (dollar value in)    ^ (account for slippage and fees)        ^ (dollar value out)
         // solving for _amountOut
         // _amountOut = _amountIn * _priceIn * (_minPercentOut / DECIMAL_PRECISION) / _priceOut
-        return _amountIn.mul(_priceIn).mul(_minPercentOut).div(_priceOut).div(LiquityMath.DECIMAL_PRECISION);
+        return
+            _amountIn.mul(_priceIn).mul(_minPercentOut).div(_priceOut).div(
+                LiquityMath.DECIMAL_PRECISION
+            );
     }
 
-    function _requireERNPriceAndSwapPercentInRange(uint _ernPrice, uint _swapPercentOut) internal view {
-        require(_ernPrice >= minERNPrice && _ernPrice <= maxERNPrice, "Leverager: ERN price out of range");
-        require(_swapPercentOut >= minSwapPercentOut, "Leverager: Too much slippage");
-        require(_swapPercentOut <= LiquityMath.DECIMAL_PRECISION, "Leverager: Negative slippage");
+    function _requireERNPriceAndSwapPercentInRange(
+        uint _ernPrice,
+        uint _swapPercentOut
+    ) internal view {
+        require(
+            _ernPrice >= minERNPrice && _ernPrice <= maxERNPrice,
+            "Leverager: ERN price out of range"
+        );
+        require(
+            _swapPercentOut >= minSwapPercentOut,
+            "Leverager: Too much slippage"
+        );
+        require(
+            _swapPercentOut <= LiquityMath.DECIMAL_PRECISION,
+            "Leverager: Negative slippage"
+        );
     }
 
-    function _getUnscaledCollAmount(uint _collAmount, uint _collDecimals) internal pure returns (uint unscaledColl) {
+    function _getUnscaledCollAmount(
+        uint _collAmount,
+        uint _collDecimals
+    ) internal pure returns (uint unscaledColl) {
         unscaledColl = _collAmount;
         if (_collDecimals > LiquityMath.CR_CALCULATION_DECIMALS) {
-            unscaledColl = unscaledColl.mul(10 ** (_collDecimals - LiquityMath.CR_CALCULATION_DECIMALS));
+            unscaledColl = unscaledColl.mul(
+                10 ** (_collDecimals - LiquityMath.CR_CALCULATION_DECIMALS)
+            );
         } else if (_collDecimals < LiquityMath.CR_CALCULATION_DECIMALS) {
-            unscaledColl = unscaledColl.div(10 ** (LiquityMath.CR_CALCULATION_DECIMALS - _collDecimals));
+            unscaledColl = unscaledColl.div(
+                10 ** (LiquityMath.CR_CALCULATION_DECIMALS - _collDecimals)
+            );
         }
     }
 }

@@ -2,15 +2,14 @@
 
 pragma solidity 0.6.11;
 
-import '../Interfaces/ITroveManager.sol';
-import '../Interfaces/ISortedTroves.sol';
-import '../Interfaces/IPriceFeed.sol';
-import '../Dependencies/LiquityMath.sol';
+import "../Interfaces/ITroveManager.sol";
+import "../Interfaces/ISortedTroves.sol";
+import "../Interfaces/IPriceFeed.sol";
+import "../Dependencies/LiquityMath.sol";
 
 /* Wrapper contract - used for calculating gas of read-only and internal functions. 
 Not part of the Liquity application. */
 contract FunctionCaller {
-
     ITroveManager troveManager;
     address public troveManagerAddress;
 
@@ -26,19 +25,19 @@ contract FunctionCaller {
         troveManagerAddress = _troveManagerAddress;
         troveManager = ITroveManager(_troveManagerAddress);
     }
-    
+
     function setSortedTrovesAddress(address _sortedTrovesAddress) external {
         troveManagerAddress = _sortedTrovesAddress;
         sortedTroves = ISortedTroves(_sortedTrovesAddress);
     }
 
-     function setPriceFeedAddress(address _priceFeedAddress) external {
+    function setPriceFeedAddress(address _priceFeedAddress) external {
         priceFeedAddress = _priceFeedAddress;
         priceFeed = IPriceFeed(_priceFeedAddress);
     }
 
     // --- Non-view wrapper functions used for calculating gas ---
-    
+
     function troveManager_getCurrentICR(
         address _address,
         address _collateral,
@@ -47,7 +46,18 @@ contract FunctionCaller {
         return troveManager.getCurrentICR(_address, _collateral, _price);
     }
 
-    function sortedTroves_findInsertPosition(address _collateral, uint _NICR, address _prevId, address _nextId) external view returns (address, address) {
-        return sortedTroves.findInsertPosition(_collateral, _NICR, _prevId, _nextId);
+    function sortedTroves_findInsertPosition(
+        address _collateral,
+        uint _NICR,
+        address _prevId,
+        address _nextId
+    ) external view returns (address, address) {
+        return
+            sortedTroves.findInsertPosition(
+                _collateral,
+                _NICR,
+                _prevId,
+                _nextId
+            );
     }
 }

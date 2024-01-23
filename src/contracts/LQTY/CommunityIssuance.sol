@@ -10,14 +10,18 @@ import "../Dependencies/Ownable.sol";
 import "../Dependencies/CheckContract.sol";
 import "../Dependencies/SafeMath.sol";
 
-
-contract CommunityIssuance is ICommunityIssuance, Ownable, CheckContract, BaseMath {
+contract CommunityIssuance is
+    ICommunityIssuance,
+    Ownable,
+    CheckContract,
+    BaseMath
+{
     using SafeERC20 for IERC20;
     using SafeMath for uint;
 
     // --- Data ---
 
-    string constant public NAME = "CommunityIssuance";
+    string public constant NAME = "CommunityIssuance";
 
     bool public initialized = false;
 
@@ -37,7 +41,10 @@ contract CommunityIssuance is ICommunityIssuance, Ownable, CheckContract, BaseMa
     event OathTokenAddressSet(address _oathTokenAddress);
     event LogRewardPerSecond(uint256 _rewardPerSecond);
     event StabilityPoolAddressSet(address _stabilityPoolAddress);
-    event TotalOATHIssuedUpdated(IERC20 indexed _oathTokenAddress, uint256 _totalOATHIssued);
+    event TotalOATHIssuedUpdated(
+        IERC20 indexed _oathTokenAddress,
+        uint256 _totalOATHIssued
+    );
 
     // --- Functions ---
 
@@ -45,15 +52,10 @@ contract CommunityIssuance is ICommunityIssuance, Ownable, CheckContract, BaseMa
         distributionPeriod = 14 days;
     }
 
-    function setAddresses
-    (
-        address _oathTokenAddress, 
+    function setAddresses(
+        address _oathTokenAddress,
         address _stabilityPoolAddress
-    ) 
-        external 
-        onlyOwner 
-        override 
-    {
+    ) external override onlyOwner {
         require(!initialized, "issuance has been initialized");
         checkContract(_oathTokenAddress);
         checkContract(_stabilityPoolAddress);
@@ -68,7 +70,10 @@ contract CommunityIssuance is ICommunityIssuance, Ownable, CheckContract, BaseMa
     }
 
     function setOathToken(address _oathTokenAddress) external onlyOwner {
-        require(lastIssuanceTimestamp >= lastDistributionTime, "last distribution has not been fully issued");
+        require(
+            lastIssuanceTimestamp >= lastDistributionTime,
+            "last distribution has not been fully issued"
+        );
         checkContract(_oathTokenAddress);
         oathToken = IERC20(_oathTokenAddress);
         emit OathTokenAddressSet(_oathTokenAddress);
@@ -83,7 +88,9 @@ contract CommunityIssuance is ICommunityIssuance, Ownable, CheckContract, BaseMa
         IERC20 _oathToken = oathToken;
         uint256 _totalOATHIssued = totalOATHIssued[_oathToken];
         if (_lastIssuanceTimestamp < _lastDistributionTime) {
-            uint256 endTimestamp = block.timestamp > _lastDistributionTime ? _lastDistributionTime : block.timestamp;
+            uint256 endTimestamp = block.timestamp > _lastDistributionTime
+                ? _lastDistributionTime
+                : block.timestamp;
             uint256 timePassed = endTimestamp.sub(_lastIssuanceTimestamp);
             issuance = getRewardAmount(timePassed);
 
@@ -107,13 +114,17 @@ contract CommunityIssuance is ICommunityIssuance, Ownable, CheckContract, BaseMa
         uint256 _lastDistributionTime = lastDistributionTime;
         uint256 _amount = amount;
         if (_lastIssuanceTimestamp < _lastDistributionTime) {
-            uint256 timeLeft = _lastDistributionTime.sub(_lastIssuanceTimestamp);
+            uint256 timeLeft = _lastDistributionTime.sub(
+                _lastIssuanceTimestamp
+            );
             uint256 notIssued = getRewardAmount(timeLeft);
             amount = amount.add(notIssued);
         }
 
         uint256 _distributionPeriod = distributionPeriod;
-        _rewardPerSecond = amount.mul(DECIMAL_PRECISION).div(_distributionPeriod);
+        _rewardPerSecond = amount.mul(DECIMAL_PRECISION).div(
+            _distributionPeriod
+        );
         lastDistributionTime = block.timestamp.add(_distributionPeriod);
         lastIssuanceTimestamp = block.timestamp;
 
@@ -122,7 +133,9 @@ contract CommunityIssuance is ICommunityIssuance, Ownable, CheckContract, BaseMa
     }
 
     // Owner-only function to update the distribution period
-    function updateDistributionPeriod(uint256 _newDistributionPeriod) external onlyOwner {
+    function updateDistributionPeriod(
+        uint256 _newDistributionPeriod
+    ) external onlyOwner {
         distributionPeriod = _newDistributionPeriod;
     }
 
@@ -143,6 +156,9 @@ contract CommunityIssuance is ICommunityIssuance, Ownable, CheckContract, BaseMa
     // --- 'require' functions ---
 
     function _requireCallerIsStabilityPool() internal view {
-        require(msg.sender == stabilityPoolAddress, "CommunityIssuance: caller is not SP");
+        require(
+            msg.sender == stabilityPoolAddress,
+            "CommunityIssuance: caller is not SP"
+        );
     }
 }

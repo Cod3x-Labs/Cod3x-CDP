@@ -2,9 +2,7 @@
 
 pragma solidity 0.6.11;
 
-
 contract MockTellor {
-
     // --- Mock price data ---
 
     bool didRetrieve = true; // default to a positive retrieval
@@ -19,7 +17,7 @@ contract MockTellor {
         price = _price;
     }
 
-      function setDidRetrieve(bool _didRetrieve) external {
+    function setDidRetrieve(bool _didRetrieve) external {
         didRetrieve = _didRetrieve;
     }
 
@@ -27,13 +25,16 @@ contract MockTellor {
         updateTime = _updateTime;
     }
 
-      function setRevertRequest() external {
+    function setRevertRequest() external {
         revertRequest = !revertRequest;
     }
 
-    // --- Mock data reporting functions --- 
+    // --- Mock data reporting functions ---
 
-    function getDataBefore(bytes32 _queryId, uint256 _timestamp)
+    function getDataBefore(
+        bytes32 _queryId,
+        uint256 _timestamp
+    )
         external
         view
         returns (
@@ -47,19 +48,24 @@ contract MockTellor {
         return (true, abi.encode(price), updateTime);
     }
 
-    function getTimestampbyQueryIdandIndex(bytes32, uint) external view returns (uint) {
+    function getTimestampbyQueryIdandIndex(
+        bytes32,
+        uint
+    ) external view returns (uint) {
         return updateTime;
     }
 
     function getNewValueCountbyQueryId(bytes32) external view returns (uint) {
-        if (revertRequest) {require (1 == 0, "Tellor request reverted");}
+        if (revertRequest) {
+            require(1 == 0, "Tellor request reverted");
+        }
         return 1;
     }
 
-    function retrieveData(bytes32, uint256) external view returns (bytes memory) {
+    function retrieveData(
+        bytes32,
+        uint256
+    ) external view returns (bytes memory) {
         return abi.encode(price);
     }
-
-
-
 }

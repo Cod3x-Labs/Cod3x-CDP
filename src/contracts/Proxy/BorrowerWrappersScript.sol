@@ -17,12 +17,15 @@ import "./LQTYStakingScript.sol";
 import "../Dependencies/console.sol";
 import "../Dependencies/SafeERC20.sol";
 
-
-contract BorrowerWrappersScript is BorrowerOperationsScript, ERC20TransferScript, LQTYStakingScript {
+contract BorrowerWrappersScript is
+    BorrowerOperationsScript,
+    ERC20TransferScript,
+    LQTYStakingScript
+{
     using SafeMath for uint;
     using SafeERC20 for IERC20;
 
-    string constant public NAME = "BorrowerWrappersScript";
+    string public constant NAME = "BorrowerWrappersScript";
 
     ICollateralConfig immutable collateralConfig;
     ITroveManager immutable troveManager;
@@ -39,12 +42,16 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ERC20TransferScript
         address _stabilityPoolAddress,
         address _lqtyStakingAddress
     )
-        BorrowerOperationsScript(IBorrowerOperations(_borrowerOperationsAddress))
-        LQTYStakingScript(_lqtyStakingAddress)
         public
+        BorrowerOperationsScript(
+            IBorrowerOperations(_borrowerOperationsAddress)
+        )
+        LQTYStakingScript(_lqtyStakingAddress)
     {
         checkContract(_collateralConfigAddress);
-        ICollateralConfig collateralConfigCached = ICollateralConfig(_collateralConfigAddress);
+        ICollateralConfig collateralConfigCached = ICollateralConfig(
+            _collateralConfigAddress
+        );
         collateralConfig = collateralConfigCached;
 
         checkContract(_troveManagerAddress);
@@ -67,11 +74,21 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ERC20TransferScript
         lqtyToken = IERC20(lqtyTokenCached);
 
         ILQTYStaking lqtyStakingCached = troveManagerCached.lqtyStaking();
-        require(_lqtyStakingAddress == address(lqtyStakingCached), "BorrowerWrappersScript: Wrong LQTYStaking address");
+        require(
+            _lqtyStakingAddress == address(lqtyStakingCached),
+            "BorrowerWrappersScript: Wrong LQTYStaking address"
+        );
         lqtyStaking = lqtyStakingCached;
     }
 
-    function claimCollateralAndOpenTrove(address _collateral, uint _collAmount, uint _maxFee, uint _LUSDAmount, address _upperHint, address _lowerHint) external {
+    function claimCollateralAndOpenTrove(
+        address _collateral,
+        uint _collAmount,
+        uint _maxFee,
+        uint _LUSDAmount,
+        address _upperHint,
+        address _lowerHint
+    ) external {
         uint balanceBefore = IERC20(_collateral).balanceOf(address(this));
 
         // Claim collateral
@@ -85,12 +102,31 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ERC20TransferScript
         uint totalCollateral = balanceAfter.sub(balanceBefore).add(_collAmount);
 
         // Open trove with obtained collateral, plus collateral sent by user
-        IERC20(_collateral).safeTransferFrom(msg.sender, address(this), _collAmount);
-        IERC20(_collateral).safeIncreaseAllowance(address(borrowerOperations), totalCollateral);
-        borrowerOperations.openTrove(_collateral, totalCollateral, _maxFee, _LUSDAmount, _upperHint, _lowerHint);
+        IERC20(_collateral).safeTransferFrom(
+            msg.sender,
+            address(this),
+            _collAmount
+        );
+        IERC20(_collateral).safeIncreaseAllowance(
+            address(borrowerOperations),
+            totalCollateral
+        );
+        borrowerOperations.openTrove(
+            _collateral,
+            totalCollateral,
+            _maxFee,
+            _LUSDAmount,
+            _upperHint,
+            _lowerHint
+        );
     }
 
-    function claimSPRewardsAndRecycle(address _collateral, uint _maxFee, address _upperHint, address _lowerHint) external {
+    function claimSPRewardsAndRecycle(
+        address _collateral,
+        uint _maxFee,
+        address _upperHint,
+        address _lowerHint
+    ) external {
         uint collBalanceBefore = IERC20(_collateral).balanceOf(address(this));
         uint lqtyBalanceBefore = lqtyToken.balanceOf(address(this));
 
@@ -105,8 +141,20 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ERC20TransferScript
         if (claimedCollateral > 0) {
             _requireUserHasTrove(address(this), _collateral);
             uint LUSDAmount = _getNetLUSDAmount(_collateral, claimedCollateral);
-            IERC20(_collateral).safeIncreaseAllowance(address(borrowerOperations), claimedCollateral);
-            borrowerOperations.adjustTrove(_collateral, _maxFee, claimedCollateral, 0, LUSDAmount, true, _upperHint, _lowerHint);
+            IERC20(_collateral).safeIncreaseAllowance(
+                address(borrowerOperations),
+                claimedCollateral
+            );
+            borrowerOperations.adjustTrove(
+                _collateral,
+                _maxFee,
+                claimedCollateral,
+                0,
+                LUSDAmount,
+                true,
+                _upperHint,
+                _lowerHint
+            );
             // Provide withdrawn LUSD to Stability Pool
             if (LUSDAmount > 0) {
                 stabilityPool.provideToSP(LUSDAmount);
@@ -121,7 +169,12 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ERC20TransferScript
         }
     }
 
-    function claimStakingGainsAndRecycle(address _collateral, uint _maxFee, address _upperHint, address _lowerHint) external {
+    function claimStakingGainsAndRecycle(
+        address _collateral,
+        uint _maxFee,
+        address _upperHint,
+        address _lowerHint
+    ) external {
         uint collBalanceBefore = IERC20(_collateral).balanceOf(address(this));
         uint lusdBalanceBefore = lusdToken.balanceOf(address(this));
         uint lqtyBalanceBefore = lqtyToken.balanceOf(address(this));
@@ -129,16 +182,32 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ERC20TransferScript
         // Claim gains
         lqtyStaking.unstake(0);
 
-        uint gainedCollateral = IERC20(_collateral).balanceOf(address(this)).sub(collBalanceBefore); // stack too deep issues :'(
-        uint gainedLUSD = lusdToken.balanceOf(address(this)).sub(lusdBalanceBefore);
+        uint gainedCollateral = IERC20(_collateral)
+            .balanceOf(address(this))
+            .sub(collBalanceBefore); // stack too deep issues :'(
+        uint gainedLUSD = lusdToken.balanceOf(address(this)).sub(
+            lusdBalanceBefore
+        );
 
         uint netLUSDAmount;
         // Top up trove and get more LUSD, keeping ICR constant
         if (gainedCollateral > 0) {
             _requireUserHasTrove(address(this), _collateral);
             netLUSDAmount = _getNetLUSDAmount(_collateral, gainedCollateral);
-            IERC20(_collateral).safeIncreaseAllowance(address(borrowerOperations), gainedCollateral);
-            borrowerOperations.adjustTrove(_collateral, _maxFee, gainedCollateral, 0, netLUSDAmount, true, _upperHint, _lowerHint);
+            IERC20(_collateral).safeIncreaseAllowance(
+                address(borrowerOperations),
+                gainedCollateral
+            );
+            borrowerOperations.adjustTrove(
+                _collateral,
+                _maxFee,
+                gainedCollateral,
+                0,
+                netLUSDAmount,
+                true,
+                _upperHint,
+                _lowerHint
+            );
         }
 
         uint totalLUSD = gainedLUSD.add(netLUSDAmount);
@@ -153,31 +222,54 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ERC20TransferScript
                 lqtyStaking.stake(claimedLQTY);
             }
         }
-
     }
 
-    function _getNetLUSDAmount(address _collateral, uint _collAmount) internal returns (uint) {
+    function _getNetLUSDAmount(
+        address _collateral,
+        uint _collAmount
+    ) internal returns (uint) {
         uint price = priceFeed.fetchPrice(_collateral);
-        uint ICR = troveManager.getCurrentICR(address(this), _collateral, price);
+        uint ICR = troveManager.getCurrentICR(
+            address(this),
+            _collateral,
+            price
+        );
 
         uint collDecimals = collateralConfig.getCollateralDecimals(_collateral);
-        uint LUSDAmount = _getScaledCollAmount(_collAmount, collDecimals).mul(price).div(ICR);
+        uint LUSDAmount = _getScaledCollAmount(_collAmount, collDecimals)
+            .mul(price)
+            .div(ICR);
         uint borrowingRate = troveManager.getBorrowingRateWithDecay();
-        uint netDebt = LUSDAmount.mul(LiquityMath.DECIMAL_PRECISION).div(LiquityMath.DECIMAL_PRECISION.add(borrowingRate));
+        uint netDebt = LUSDAmount.mul(LiquityMath.DECIMAL_PRECISION).div(
+            LiquityMath.DECIMAL_PRECISION.add(borrowingRate)
+        );
 
         return netDebt;
     }
 
-    function _requireUserHasTrove(address _depositor, address _collateral) internal view {
-        require(troveManager.getTroveStatus(_depositor, _collateral) == 1, "BorrowerWrappersScript: caller must have an active trove");
+    function _requireUserHasTrove(
+        address _depositor,
+        address _collateral
+    ) internal view {
+        require(
+            troveManager.getTroveStatus(_depositor, _collateral) == 1,
+            "BorrowerWrappersScript: caller must have an active trove"
+        );
     }
 
-    function _getScaledCollAmount(uint256 _collAmount, uint256 _collDecimals) internal pure returns (uint256 scaledColl) {
+    function _getScaledCollAmount(
+        uint256 _collAmount,
+        uint256 _collDecimals
+    ) internal pure returns (uint256 scaledColl) {
         scaledColl = _collAmount;
         if (_collDecimals > LiquityMath.CR_CALCULATION_DECIMALS) {
-            scaledColl = scaledColl.div(10 ** (_collDecimals - LiquityMath.CR_CALCULATION_DECIMALS));
+            scaledColl = scaledColl.div(
+                10 ** (_collDecimals - LiquityMath.CR_CALCULATION_DECIMALS)
+            );
         } else if (_collDecimals < LiquityMath.CR_CALCULATION_DECIMALS) {
-            scaledColl = scaledColl.mul(10 ** (LiquityMath.CR_CALCULATION_DECIMALS - _collDecimals));
+            scaledColl = scaledColl.mul(
+                10 ** (LiquityMath.CR_CALCULATION_DECIMALS - _collDecimals)
+            );
         }
     }
 }

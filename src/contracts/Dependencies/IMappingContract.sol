@@ -2,6 +2,6 @@
 
 pragma solidity 0.6.11;
 
-interface IMappingContract{
-    function getTellorID(bytes32 _id) external view returns(bytes32);
+interface IMappingContract {
+    function getTellorID(bytes32 _id) external view returns (bytes32);
 }

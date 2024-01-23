@@ -38,7 +38,10 @@ contract EchidnaProxy {
         troveManager.liquidateTroves(_collateral, _n);
     }
 
-    function batchLiquidateTrovesPrx(address _collateral, address[] calldata _troveArray) external {
+    function batchLiquidateTrovesPrx(
+        address _collateral,
+        address[] calldata _troveArray
+    ) external {
         troveManager.batchLiquidateTroves(_collateral, _troveArray);
     }
 
@@ -52,42 +55,146 @@ contract EchidnaProxy {
         uint _maxIterations,
         uint _maxFee
     ) external {
-        troveManager.redeemCollateral(_collateral, _LUSDAmount, _firstRedemptionHint, _upperPartialRedemptionHint, _lowerPartialRedemptionHint, _partialRedemptionHintNICR, _maxIterations, _maxFee);
+        troveManager.redeemCollateral(
+            _collateral,
+            _LUSDAmount,
+            _firstRedemptionHint,
+            _upperPartialRedemptionHint,
+            _lowerPartialRedemptionHint,
+            _partialRedemptionHintNICR,
+            _maxIterations,
+            _maxFee
+        );
     }
 
     // Borrower Operations
-    function openTrovePrx(address _collateral, uint _collAmount, uint _LUSDAmount, address _upperHint, address _lowerHint, uint _maxFee) external {
-        IERC20(_collateral).safeTransferFrom(msg.sender, address(this), _collAmount);
-        IERC20(_collateral).safeIncreaseAllowance(address(borrowerOperations), _collAmount);
-        borrowerOperations.openTrove(_collateral, _collAmount, _maxFee, _LUSDAmount, _upperHint, _lowerHint);
+    function openTrovePrx(
+        address _collateral,
+        uint _collAmount,
+        uint _LUSDAmount,
+        address _upperHint,
+        address _lowerHint,
+        uint _maxFee
+    ) external {
+        IERC20(_collateral).safeTransferFrom(
+            msg.sender,
+            address(this),
+            _collAmount
+        );
+        IERC20(_collateral).safeIncreaseAllowance(
+            address(borrowerOperations),
+            _collAmount
+        );
+        borrowerOperations.openTrove(
+            _collateral,
+            _collAmount,
+            _maxFee,
+            _LUSDAmount,
+            _upperHint,
+            _lowerHint
+        );
     }
 
-    function addCollPrx(address _collateral, uint _collAmount, address _upperHint, address _lowerHint) external {
-        IERC20(_collateral).safeTransferFrom(msg.sender, address(this), _collAmount);
-        IERC20(_collateral).safeIncreaseAllowance(address(borrowerOperations), _collAmount);
-        borrowerOperations.addColl(_collateral, _collAmount, _upperHint, _lowerHint);
+    function addCollPrx(
+        address _collateral,
+        uint _collAmount,
+        address _upperHint,
+        address _lowerHint
+    ) external {
+        IERC20(_collateral).safeTransferFrom(
+            msg.sender,
+            address(this),
+            _collAmount
+        );
+        IERC20(_collateral).safeIncreaseAllowance(
+            address(borrowerOperations),
+            _collAmount
+        );
+        borrowerOperations.addColl(
+            _collateral,
+            _collAmount,
+            _upperHint,
+            _lowerHint
+        );
     }
 
-    function withdrawCollPrx(address _collateral, uint _amount, address _upperHint, address _lowerHint) external {
-        borrowerOperations.withdrawColl(_collateral, _amount, _upperHint, _lowerHint);
+    function withdrawCollPrx(
+        address _collateral,
+        uint _amount,
+        address _upperHint,
+        address _lowerHint
+    ) external {
+        borrowerOperations.withdrawColl(
+            _collateral,
+            _amount,
+            _upperHint,
+            _lowerHint
+        );
     }
 
-    function withdrawLUSDPrx(address _collateral, uint _amount, address _upperHint, address _lowerHint, uint _maxFee) external {
-        borrowerOperations.withdrawLUSD(_collateral, _maxFee, _amount, _upperHint, _lowerHint);
+    function withdrawLUSDPrx(
+        address _collateral,
+        uint _amount,
+        address _upperHint,
+        address _lowerHint,
+        uint _maxFee
+    ) external {
+        borrowerOperations.withdrawLUSD(
+            _collateral,
+            _maxFee,
+            _amount,
+            _upperHint,
+            _lowerHint
+        );
     }
 
-    function repayLUSDPrx(address _collateral, uint _amount, address _upperHint, address _lowerHint) external {
-        borrowerOperations.repayLUSD(_collateral, _amount, _upperHint, _lowerHint);
+    function repayLUSDPrx(
+        address _collateral,
+        uint _amount,
+        address _upperHint,
+        address _lowerHint
+    ) external {
+        borrowerOperations.repayLUSD(
+            _collateral,
+            _amount,
+            _upperHint,
+            _lowerHint
+        );
     }
 
     function closeTrovePrx(address _collateral) external {
         borrowerOperations.closeTrove(_collateral);
     }
 
-    function adjustTrovePrx(address _collateral, uint _collTopUp, uint _collWithdrawal, uint _debtChange, bool _isDebtIncrease, address _upperHint, address _lowerHint, uint _maxFee) external {
-        IERC20(_collateral).safeTransferFrom(msg.sender, address(this), _collTopUp);
-        IERC20(_collateral).safeIncreaseAllowance(address(borrowerOperations), _collTopUp);
-        borrowerOperations.adjustTrove(_collateral, _maxFee, _collTopUp, _collWithdrawal, _debtChange, _isDebtIncrease, _upperHint, _lowerHint);
+    function adjustTrovePrx(
+        address _collateral,
+        uint _collTopUp,
+        uint _collWithdrawal,
+        uint _debtChange,
+        bool _isDebtIncrease,
+        address _upperHint,
+        address _lowerHint,
+        uint _maxFee
+    ) external {
+        IERC20(_collateral).safeTransferFrom(
+            msg.sender,
+            address(this),
+            _collTopUp
+        );
+        IERC20(_collateral).safeIncreaseAllowance(
+            address(borrowerOperations),
+            _collTopUp
+        );
+        borrowerOperations.adjustTrove(
+            _collateral,
+            _maxFee,
+            _collTopUp,
+            _collWithdrawal,
+            _debtChange,
+            _isDebtIncrease,
+            _upperHint,
+            _lowerHint
+        );
     }
 
     // Pool Manager
@@ -101,23 +208,39 @@ contract EchidnaProxy {
 
     // LUSD Token
 
-    function transferPrx(address recipient, uint256 amount) external returns (bool) {
+    function transferPrx(
+        address recipient,
+        uint256 amount
+    ) external returns (bool) {
         return lusdToken.transfer(recipient, amount);
     }
 
-    function approvePrx(address spender, uint256 amount) external returns (bool) {
+    function approvePrx(
+        address spender,
+        uint256 amount
+    ) external returns (bool) {
         return lusdToken.approve(spender, amount);
     }
 
-    function transferFromPrx(address sender, address recipient, uint256 amount) external returns (bool) {
+    function transferFromPrx(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) external returns (bool) {
         return lusdToken.transferFrom(sender, recipient, amount);
     }
 
-    function increaseAllowancePrx(address spender, uint256 addedValue) external returns (bool) {
+    function increaseAllowancePrx(
+        address spender,
+        uint256 addedValue
+    ) external returns (bool) {
         return lusdToken.increaseAllowance(spender, addedValue);
     }
 
-    function decreaseAllowancePrx(address spender, uint256 subtractedValue) external returns (bool) {
+    function decreaseAllowancePrx(
+        address spender,
+        uint256 subtractedValue
+    ) external returns (bool) {
         return lusdToken.decreaseAllowance(spender, subtractedValue);
     }
 }

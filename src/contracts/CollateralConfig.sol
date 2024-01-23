@@ -20,11 +20,11 @@ contract CollateralConfig is ICollateralConfig, CheckContract, Ownable {
     bool public initialized = false;
 
     // Smallest allowed value for the minimum collateral ratio for individual troves in each market (collateral)
-    uint256 constant public MIN_ALLOWED_MCR = 1.005 ether; // 100.5%
+    uint256 public constant MIN_ALLOWED_MCR = 1.005 ether; // 100.5%
 
     // Smallest allowed value for Critical system collateral ratio.
     // If a market's (collateral's) total collateral ratio (TCR) falls below the CCR, Recovery Mode is triggered.
-    uint256 constant public MIN_ALLOWED_CCR = 1.01 ether; // 101%
+    uint256 public constant MIN_ALLOWED_CCR = 1.01 ether; // 101%
 
     struct Config {
         bool allowed;
@@ -37,7 +37,7 @@ contract CollateralConfig is ICollateralConfig, CheckContract, Ownable {
     }
 
     address[] public collaterals; // for returning entire list of allowed collaterals
-    mapping (address => Config) public collateralConfig; // for O(1) checking of collateral's validity and properties
+    mapping(address => Config) public collateralConfig; // for O(1) checking of collateral's validity and properties
 
     IActivePool public activePool;
     IPriceFeed public priceFeed;
@@ -51,9 +51,17 @@ contract CollateralConfig is ICollateralConfig, CheckContract, Ownable {
         uint256 _chainlinkTimeout,
         uint256 _tellorTimeout
     );
-    event CollateralRatiosUpdated(address _collateral, uint256 _MCR, uint256 _CCR);
+    event CollateralRatiosUpdated(
+        address _collateral,
+        uint256 _MCR,
+        uint256 _CCR
+    );
     event CollateralDebtLimitUpdated(address _collateral, uint256 _debtLimit);
-    event CollateralOracleTimeoutsUpdated(address _collateral, uint256 _chainlinkTimeout, uint256 _tellorTimeout);
+    event CollateralOracleTimeoutsUpdated(
+        address _collateral,
+        uint256 _chainlinkTimeout,
+        uint256 _tellorTimeout
+    );
 
     /**
      * @notice One-time owner-only initializer.
@@ -76,14 +84,36 @@ contract CollateralConfig is ICollateralConfig, CheckContract, Ownable {
     ) external onlyOwner {
         require(!initialized, "Can only initialize once");
         require(_collaterals.length != 0, "At least one collateral required");
-        require(_MCRs.length == _collaterals.length, "Array lengths must match");
-        require(_CCRs.length == _collaterals.length, "Array lenghts must match");
-        require(_debtLimits.length == _collaterals.length, "Array lengths must match");
-        require(_chainlinkTimeouts.length == _collaterals.length, "Array lengths must match");
-        require(_tellorTimeouts.length == _collaterals.length, "Array lengths must match");
+        require(
+            _MCRs.length == _collaterals.length,
+            "Array lengths must match"
+        );
+        require(
+            _CCRs.length == _collaterals.length,
+            "Array lenghts must match"
+        );
+        require(
+            _debtLimits.length == _collaterals.length,
+            "Array lengths must match"
+        );
+        require(
+            _chainlinkTimeouts.length == _collaterals.length,
+            "Array lengths must match"
+        );
+        require(
+            _tellorTimeouts.length == _collaterals.length,
+            "Array lengths must match"
+        );
 
-        for(uint256 i = 0; i < _collaterals.length; i++) {
-            _addNewCollateral(_collaterals[i], _MCRs[i], _CCRs[i], _debtLimits[i], _chainlinkTimeouts[i], _tellorTimeouts[i]);
+        for (uint256 i = 0; i < _collaterals.length; i++) {
+            _addNewCollateral(
+                _collaterals[i],
+                _MCRs[i],
+                _CCRs[i],
+                _debtLimits[i],
+                _chainlinkTimeouts[i],
+                _tellorTimeouts[i]
+            );
         }
 
         checkContract(_activePool);
@@ -105,7 +135,14 @@ contract CollateralConfig is ICollateralConfig, CheckContract, Ownable {
         address _chainlinkAggregator,
         bytes32 _tellorQueryId
     ) external onlyOwner {
-        _addNewCollateral(_collateral, _MCR, _CCR, _debtLimit, _chainlinkTimeout, _tellorTimeout);
+        _addNewCollateral(
+            _collateral,
+            _MCR,
+            _CCR,
+            _debtLimit,
+            _chainlinkTimeout,
+            _tellorTimeout
+        );
         activePool.setYieldGenerator(_collateral, _vault);
         priceFeed.updateChainlinkAggregator(_collateral, _chainlinkAggregator);
         priceFeed.updateTellorQueryID(_collateral, _tellorQueryId);
@@ -139,7 +176,15 @@ contract CollateralConfig is ICollateralConfig, CheckContract, Ownable {
         config.chainlinkTimeout = _chainlinkTimeout;
         config.tellorTimeout = _tellorTimeout;
 
-        emit CollateralWhitelisted(_collateral, decimals, _MCR, _CCR, _debtLimit, _chainlinkTimeout, _tellorTimeout);
+        emit CollateralWhitelisted(
+            _collateral,
+            decimals,
+            _MCR,
+            _CCR,
+            _debtLimit,
+            _chainlinkTimeout,
+            _tellorTimeout
+        );
     }
 
     function updateCollateralDebtLimit(
@@ -186,55 +231,69 @@ contract CollateralConfig is ICollateralConfig, CheckContract, Ownable {
         Config storage config = collateralConfig[_collateral];
         config.chainlinkTimeout = _chainlinkTimeout;
         config.tellorTimeout = _tellorTimeout;
-        emit CollateralOracleTimeoutsUpdated(_collateral, _chainlinkTimeout, _tellorTimeout);
+        emit CollateralOracleTimeoutsUpdated(
+            _collateral,
+            _chainlinkTimeout,
+            _tellorTimeout
+        );
     }
 
-    function getAllowedCollaterals() external override view returns (address[] memory) {
+    function getAllowedCollaterals()
+        external
+        view
+        override
+        returns (address[] memory)
+    {
         return collaterals;
     }
 
-    function isCollateralAllowed(address _collateral) external override view returns (bool) {
+    function isCollateralAllowed(
+        address _collateral
+    ) external view override returns (bool) {
         return collateralConfig[_collateral].allowed;
     }
 
     function getCollateralDecimals(
         address _collateral
-    ) external override view checkCollateral(_collateral) returns (uint256) {
+    ) external view override checkCollateral(_collateral) returns (uint256) {
         return collateralConfig[_collateral].decimals;
     }
 
     function getCollateralMCR(
         address _collateral
-    ) external override view checkCollateral(_collateral) returns (uint256) {
+    ) external view override checkCollateral(_collateral) returns (uint256) {
         return collateralConfig[_collateral].MCR;
     }
 
     function getCollateralCCR(
         address _collateral
-    ) external override view checkCollateral(_collateral) returns (uint256) {
+    ) external view override checkCollateral(_collateral) returns (uint256) {
         return collateralConfig[_collateral].CCR;
     }
 
     function getCollateralDebtLimit(
         address _collateral
-    ) external override view checkCollateral(_collateral) returns (uint256) {
+    ) external view override checkCollateral(_collateral) returns (uint256) {
         return collateralConfig[_collateral].debtLimit;
     }
 
     function getCollateralChainlinkTimeout(
         address _collateral
-    ) external override view checkCollateral(_collateral) returns (uint256) {
+    ) external view override checkCollateral(_collateral) returns (uint256) {
         return collateralConfig[_collateral].chainlinkTimeout;
     }
 
     function getCollateralTellorTimeout(
         address _collateral
-    ) external override view checkCollateral(_collateral) returns (uint256) {
+    ) external view override checkCollateral(_collateral) returns (uint256) {
         return collateralConfig[_collateral].tellorTimeout;
     }
 
     modifier checkCollateral(address _collateral) {
-        require(collateralConfig[_collateral].allowed, "Invalid collateral address");
+        require(
+            collateralConfig[_collateral].allowed,
+            "Invalid collateral address"
+        );
         _;
     }
 }

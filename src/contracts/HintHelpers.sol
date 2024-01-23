@@ -10,7 +10,7 @@ import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
 
 contract HintHelpers is LiquityBase, Ownable, CheckContract {
-    string constant public NAME = "HintHelpers";
+    string public constant NAME = "HintHelpers";
 
     ICollateralConfig public collateralConfig;
     ISortedTroves public sortedTroves;
@@ -28,10 +28,7 @@ contract HintHelpers is LiquityBase, Ownable, CheckContract {
         address _collateralConfigAddress,
         address _sortedTrovesAddress,
         address _troveManagerAddress
-    )
-        external
-        onlyOwner
-    {
+    ) external onlyOwner {
         checkContract(_collateralConfigAddress);
         checkContract(_sortedTrovesAddress);
         checkContract(_troveManagerAddress);
@@ -83,7 +80,7 @@ contract HintHelpers is LiquityBase, Ownable, CheckContract {
 
     function getRedemptionHints(
         address _collateral,
-        uint _LUSDamount, 
+        uint _LUSDamount,
         uint _price,
         uint _maxIterations
     )
@@ -106,9 +103,17 @@ contract HintHelpers is LiquityBase, Ownable, CheckContract {
 
         while (
             vars.currentTroveuser != address(0) &&
-            troveManager.getCurrentICR(vars.currentTroveuser, _collateral, _price) < vars.collMCR
+            troveManager.getCurrentICR(
+                vars.currentTroveuser,
+                _collateral,
+                _price
+            ) <
+            vars.collMCR
         ) {
-            vars.currentTroveuser = vars.sortedTroves.getPrev(_collateral, vars.currentTroveuser);
+            vars.currentTroveuser = vars.sortedTroves.getPrev(
+                _collateral,
+                vars.currentTroveuser
+            );
         }
 
         firstRedemptionHint = vars.currentTroveuser;
@@ -117,31 +122,63 @@ contract HintHelpers is LiquityBase, Ownable, CheckContract {
             _maxIterations = uint(-1);
         }
 
-        while (vars.currentTroveuser != address(0) && vars.remainingLUSD > 0 && _maxIterations-- > 0) {
-            vars.netLUSDDebt = _getNetDebt(troveManager.getTroveDebt(vars.currentTroveuser, _collateral))
-                .add(troveManager.getPendingLUSDDebtReward(vars.currentTroveuser, _collateral));
+        while (
+            vars.currentTroveuser != address(0) &&
+            vars.remainingLUSD > 0 &&
+            _maxIterations-- > 0
+        ) {
+            vars.netLUSDDebt = _getNetDebt(
+                troveManager.getTroveDebt(vars.currentTroveuser, _collateral)
+            ).add(
+                    troveManager.getPendingLUSDDebtReward(
+                        vars.currentTroveuser,
+                        _collateral
+                    )
+                );
 
             if (vars.netLUSDDebt > vars.remainingLUSD) {
                 if (vars.netLUSDDebt > MIN_NET_DEBT) {
-                    vars.maxRedeemableLUSD = LiquityMath._min(vars.remainingLUSD, vars.netLUSDDebt.sub(MIN_NET_DEBT));
+                    vars.maxRedeemableLUSD = LiquityMath._min(
+                        vars.remainingLUSD,
+                        vars.netLUSDDebt.sub(MIN_NET_DEBT)
+                    );
 
-                    vars.collAmount = troveManager.getTroveColl(vars.currentTroveuser, _collateral)
-                        .add(troveManager.getPendingCollateralReward(vars.currentTroveuser, _collateral));
+                    vars.collAmount = troveManager
+                        .getTroveColl(vars.currentTroveuser, _collateral)
+                        .add(
+                            troveManager.getPendingCollateralReward(
+                                vars.currentTroveuser,
+                                _collateral
+                            )
+                        );
 
-                    vars.newColl = vars.collAmount.sub(vars.maxRedeemableLUSD.mul(10**vars.collDecimals).div(_price));
+                    vars.newColl = vars.collAmount.sub(
+                        vars.maxRedeemableLUSD.mul(10 ** vars.collDecimals).div(
+                            _price
+                        )
+                    );
                     vars.newDebt = vars.netLUSDDebt.sub(vars.maxRedeemableLUSD);
 
                     vars.compositeDebt = _getCompositeDebt(vars.newDebt);
-                    partialRedemptionHintNICR = LiquityMath._computeNominalCR(vars.newColl, vars.compositeDebt, vars.collDecimals);
+                    partialRedemptionHintNICR = LiquityMath._computeNominalCR(
+                        vars.newColl,
+                        vars.compositeDebt,
+                        vars.collDecimals
+                    );
 
-                    vars.remainingLUSD = vars.remainingLUSD.sub(vars.maxRedeemableLUSD);
+                    vars.remainingLUSD = vars.remainingLUSD.sub(
+                        vars.maxRedeemableLUSD
+                    );
                 }
                 break;
             } else {
                 vars.remainingLUSD = vars.remainingLUSD.sub(vars.netLUSDDebt);
             }
 
-            vars.currentTroveuser = vars.sortedTroves.getPrev(_collateral, vars.currentTroveuser);
+            vars.currentTroveuser = vars.sortedTroves.getPrev(
+                _collateral,
+                vars.currentTroveuser
+            );
         }
 
         truncatedLUSDamount = _LUSDamount.sub(vars.remainingLUSD);
@@ -156,7 +193,12 @@ contract HintHelpers is LiquityBase, Ownable, CheckContract {
     Submitting numTrials = k * sqrt(length), with k = 15 makes it very, very likely that the ouput address will 
     be <= sqrt(length) positions away from the correct insert position.
     */
-    function getApproxHint(address _collateral, uint _CR, uint _numTrials, uint _inputRandomSeed)
+    function getApproxHint(
+        address _collateral,
+        uint _CR,
+        uint _numTrials,
+        uint _inputRandomSeed
+    )
         external
         view
         returns (address hintAddress, uint diff, uint latestRandomSeed)
@@ -169,20 +211,34 @@ contract HintHelpers is LiquityBase, Ownable, CheckContract {
         }
 
         hintAddress = sortedTroves.getLast(_collateral);
-        diff = LiquityMath._getAbsoluteDifference(_CR, troveManager.getNominalICR(hintAddress, _collateral));
+        diff = LiquityMath._getAbsoluteDifference(
+            _CR,
+            troveManager.getNominalICR(hintAddress, _collateral)
+        );
         latestRandomSeed = _inputRandomSeed;
 
         uint i = 1;
 
         while (i < _numTrials) {
-            latestRandomSeed = uint(keccak256(abi.encodePacked(latestRandomSeed)));
+            latestRandomSeed = uint(
+                keccak256(abi.encodePacked(latestRandomSeed))
+            );
 
             uint arrayIndex = latestRandomSeed % arrayLength;
-            address currentAddress = troveManager.getTroveFromTroveOwnersArray(_collateral, arrayIndex);
-            uint currentNICR = troveManager.getNominalICR(currentAddress, _collateral);
+            address currentAddress = troveManager.getTroveFromTroveOwnersArray(
+                _collateral,
+                arrayIndex
+            );
+            uint currentNICR = troveManager.getNominalICR(
+                currentAddress,
+                _collateral
+            );
 
             // check if abs(current - CR) > abs(closest - CR), and update closest if current is closer
-            uint currentDiff = LiquityMath._getAbsoluteDifference(currentNICR, _CR);
+            uint currentDiff = LiquityMath._getAbsoluteDifference(
+                currentNICR,
+                _CR
+            );
 
             if (currentDiff < diff) {
                 diff = currentDiff;
@@ -192,17 +248,29 @@ contract HintHelpers is LiquityBase, Ownable, CheckContract {
         }
     }
 
-    function computeNominalCR(uint _coll, uint _debt, uint8 _collDecimals) external pure returns (uint) {
+    function computeNominalCR(
+        uint _coll,
+        uint _debt,
+        uint8 _collDecimals
+    ) external pure returns (uint) {
         return LiquityMath._computeNominalCR(_coll, _debt, _collDecimals);
     }
 
-    function computeCR(uint _coll, uint _debt, uint _price, uint8 _collDecimals) external pure returns (uint) {
+    function computeCR(
+        uint _coll,
+        uint _debt,
+        uint _price,
+        uint8 _collDecimals
+    ) external pure returns (uint) {
         return LiquityMath._computeCR(_coll, _debt, _price, _collDecimals);
     }
 
     // --- 'require' functions ---
 
     function _requireValidCollateralAddress(address _collateral) internal view {
-        require(collateralConfig.isCollateralAllowed(_collateral),"Invalid collateral address");
+        require(
+            collateralConfig.isCollateralAllowed(_collateral),
+            "Invalid collateral address"
+        );
     }
 }
