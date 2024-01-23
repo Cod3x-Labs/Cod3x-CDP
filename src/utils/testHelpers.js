@@ -1750,12 +1750,15 @@ class TestHelper {
     }
   }
 
-  static async assertAssert(txPromise) {
+  static async assertAssert(
+    txPromise,
+    assertErrMessage = "reverted with panic code 0x1 (Assertion error)",
+  ) {
     try {
       const tx = await txPromise;
       assert.isFalse(tx.receipt.status); // when this assert fails, the expected revert didn't occur, i.e. the tx succeeded
     } catch (err) {
-      assert.include(err.message, "invalid opcode");
+      assert.include(err.message, assertErrMessage);
     }
   }
 
