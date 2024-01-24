@@ -804,7 +804,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
          */
 
         // Try to get the price data from the previous round:
-        if(_currentRoundId == 0){
+        if (_currentRoundId == 0) {
             return prevChainlinkResponse;
         }
 

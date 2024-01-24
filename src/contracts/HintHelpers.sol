@@ -11,7 +11,7 @@ import "./Dependencies/CheckContract.sol";
 
 contract HintHelpers is LiquityBase, Ownable, CheckContract {
     using SafeMath for uint;
-    
+
     string public constant NAME = "HintHelpers";
 
     ICollateralConfig public collateralConfig;
@@ -123,7 +123,7 @@ contract HintHelpers is LiquityBase, Ownable, CheckContract {
         if (_maxIterations == 0) {
             _maxIterations = type(uint).max;
         }
-        
+
         while (
             vars.currentTroveuser != address(0) &&
             vars.remainingLUSD > 0 &&

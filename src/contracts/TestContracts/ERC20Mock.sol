@@ -4,13 +4,12 @@ pragma solidity ^0.8.23;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-
 // https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.3.0/contracts/mocks/ERC20Mock.sol
 // mock class using ERC20
 contract ERC20Mock is ERC20 {
     uint8 private _decimals;
 
-    constructor (
+    constructor(
         string memory name,
         string memory symbol,
         uint8 decimals_,
@@ -33,7 +32,11 @@ contract ERC20Mock is ERC20 {
         _transfer(from, to, value);
     }
 
-    function approveInternal(address owner, address spender, uint256 value) public {
+    function approveInternal(
+        address owner,
+        address spender,
+        uint256 value
+    ) public {
         _approve(owner, spender, value);
     }
 
