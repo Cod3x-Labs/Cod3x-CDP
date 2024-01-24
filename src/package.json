@@ -8,7 +8,7 @@
     "format": "prettier --write contracts/**/*.sol test/**/*.js utils/**/*.js scripts/**/*.js mainnetDeployment/**/*.js",
     "deploy": "hardhat run .\\scripts\\main.ts",
     "compile": "hardhat compile --force",
-    "test": "hardhat test --parallel",
+    "test": "hardhat test --parallel --bail",
     "node": "hardhat node"
   },
   "author": "",
