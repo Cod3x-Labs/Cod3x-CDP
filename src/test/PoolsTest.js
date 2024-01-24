@@ -103,7 +103,7 @@ contract("ActivePool", async (accounts) => {
       [collateral1.address, collateral2.address],
       [toBN(dec(12, 17)), toBN(dec(13, 17))], // MCR for WETH at 120%, and for WBTC at 130%
       [toBN(dec(165, 16)), toBN(dec(18, 17))], // CCR for WETH at 165%, and for WBTC at 180%
-      [ethers.constants.MaxUint256, ethers.constants.MaxUint256],
+      [ethers.MaxUint256, ethers.MaxUint256],
       [14400, 14400], // 4 hour Chainlink timeouts
       [14400, 14400], // 4 hour Tellor timeouts
       activePool.address,
@@ -1526,7 +1526,7 @@ contract("DefaultPool", async (accounts) => {
       collaterals.map((c) => c.address),
       [toBN(dec(12, 17)), toBN(dec(13, 17))], // MCR for WETH at 120%, and for WBTC at 130%
       [toBN(dec(165, 16)), toBN(dec(18, 17))], // CCR for WETH at 165%, and for WBTC at 180%
-      [ethers.constants.MaxUint256, ethers.constants.MaxUint256],
+      [ethers.MaxUint256, ethers.MaxUint256],
       [14400, 14400], // 4 hour Chainlink timeouts
       [14400, 14400], // 4 hour Tellor timeouts
       mockActivePool.address,

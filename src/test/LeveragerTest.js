@@ -54,11 +54,11 @@ contractIfForking("Leverager", async (accounts) => {
 
     await collateral.approve(
       contracts.leverager.address,
-      ethers.constants.MaxUint256,
+      ethers.MaxUint256,
     );
     await contracts.lusdToken.approve(
       contracts.leverager.address,
-      ethers.constants.MaxUint256,
+      ethers.MaxUint256,
     );
 
     whaleWallet = (await ethers.getSigners())[1];
@@ -66,7 +66,7 @@ contractIfForking("Leverager", async (accounts) => {
       .connect(whaleWallet)
       .approve(
         contracts.borrowerOperations.address,
-        ethers.constants.MaxUint256,
+        ethers.MaxUint256,
       );
   });
 

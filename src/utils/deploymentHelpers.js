@@ -389,7 +389,7 @@ class DeploymentHelper {
       [contracts.collaterals[0].address],
       [toBN(dec(12, 17))], // MCR for WETH at 120%
       [toBN(dec(165, 16))], // CCR for WETH at 165%
-      [ethers.constants.MaxUint256], // No debt limit
+      [ethers.MaxUint256], // No debt limit
       [14400], // 4 hour Chainlink timeout
       [14400], // 4 hour Tellor timeout
       contracts.activePool.address,
@@ -517,7 +517,7 @@ class DeploymentHelper {
       contracts.collaterals[1].address,
       toBN(dec(13, 17)), // MCR for WBTC at 130%
       toBN(dec(18, 17)), // CCR for WBTC at 180%
-      ethers.constants.MaxUint256, // No debt limit
+      ethers.MaxUint256, // No debt limit
       14400, // 4 hour Chainlink timeout
       14400, // 4 hour Tellor timeout
       contracts.reapervaults[1].address,

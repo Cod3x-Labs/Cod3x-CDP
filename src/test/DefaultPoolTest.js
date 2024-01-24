@@ -56,7 +56,7 @@ contract("DefaultPool", async (accounts) => {
       [collateral.address],
       [toBN(dec(12, 17))], // MCR for WETH at 120%
       [toBN(dec(165, 16))], // CCR for WETH at 165%
-      [ethers.constants.MaxUint256],
+      [ethers.MaxUint256],
       [14400], // 4 hour Chainlink timeout
       [14400], // 4 hour Tellor timeouts
       activePool.address,
