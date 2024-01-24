@@ -34,6 +34,10 @@ contract("TroveManager", async (accounts) => {
   let borrowerOperations;
   let hintHelpers;
   let collaterals;
+  let lqtyStaking;
+  let lqtyToken;
+  let communityIssuance;
+  let lockupContractFactory;
 
   let contracts;
 
@@ -168,7 +172,7 @@ contract("TroveManager", async (accounts) => {
 
     // Make 10 tiny troves at relatively negligible collateral (~1e-9 of total)
     const tinyTroves = accounts.slice(10, 20);
-    for (account of tinyTroves) {
+    for (const account of tinyTroves) {
       await mintCollateralAndApproveBorrowerOps(
         collaterals[0],
         account,

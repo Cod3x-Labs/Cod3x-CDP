@@ -50,6 +50,7 @@ contract("StabilityPool", async (accounts) => {
   let oathToken;
   let communityIssuance;
   let collaterals;
+  let hintHelpers;
 
   let collDecimals;
 
@@ -1666,10 +1667,10 @@ contract("StabilityPool", async (accounts) => {
       await lusdToken.transfer(C, dec(100, 18), { from: whale });
       await lusdToken.transfer(D, dec(100, 18), { from: whale });
 
-      txPromise_A = stabilityPool.provideToSP(0, { from: A });
-      txPromise_B = stabilityPool.provideToSP(0, { from: B });
-      txPromise_C = stabilityPool.provideToSP(0, { from: C });
-      txPromise_D = stabilityPool.provideToSP(0, { from: D });
+      const txPromise_A = stabilityPool.provideToSP(0, { from: A });
+      const txPromise_B = stabilityPool.provideToSP(0, { from: B });
+      const txPromise_C = stabilityPool.provideToSP(0, { from: C });
+      const txPromise_D = stabilityPool.provideToSP(0, { from: D });
 
       await th.assertRevert(
         txPromise_A,
@@ -2513,7 +2514,7 @@ contract("StabilityPool", async (accounts) => {
 
       // 6 Accounts open troves and provide to SP
       const depositors = [alice, bob, carol, dennis, erin, flyn];
-      for (account of depositors) {
+      for (const account of depositors) {
         await openTrove({
           collateral: collaterals[0],
           extraLUSDAmount: toBN(dec(10000, 18)),
@@ -2584,7 +2585,7 @@ contract("StabilityPool", async (accounts) => {
 
       // 6 Accounts open troves and provide to SP
       const depositors = [alice, bob, carol, dennis, erin, flyn];
-      for (account of depositors) {
+      for (const account of depositors) {
         await openTrove({
           collateral: collaterals[0],
           extraLUSDAmount: toBN(dec(10000, 18)),
@@ -3976,7 +3977,7 @@ contract("StabilityPool", async (accounts) => {
 
       // Check deposits snapshots are non-zero
 
-      for (depositor of [A, B, C, D]) {
+      for (const depositor of [A, B, C, D]) {
         const snapshot = await stabilityPool.depositSnapshots(depositor);
         const snapshot_S = await stabilityPool.depositSnapshots_S(
           depositor,
@@ -3999,7 +4000,7 @@ contract("StabilityPool", async (accounts) => {
       await stabilityPool.withdrawFromSP(dec(40000, 18), { from: D });
 
       // Check all depositors' snapshots have been zero'd
-      for (depositor of [A, B, C, D]) {
+      for (const depositor of [A, B, C, D]) {
         const snapshot = await stabilityPool.depositSnapshots(depositor);
         const snapshot_S = await stabilityPool.depositSnapshots_S(
           depositor,

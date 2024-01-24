@@ -155,7 +155,7 @@ contract("Fee arithmetic tests", async (accounts) => {
     [549137589365708000, 2, 301552092054380000],
     [14163921244333700, 3, 2841518643583],
     [173482812472018000, 2, 30096286223201300],
-    [089043101634399300, 2, 7928673948673970],
+    [89043101634399300, 2, 7928673948673970],
     [228676956496486000, 2, 52293150432495800],
     [690422882634616000, 8, 51632293155573900],
     [88730376626724100, 11, 2684081],
@@ -189,7 +189,7 @@ contract("Fee arithmetic tests", async (accounts) => {
     [968639062260900000, 37, 307604877091227000],
     [784478611520428000, 140, 1743],
     [61314555619941600, 13, 173],
-    [562295998606858000, 71, 000000000000000002],
+    [562295998606858000, 71, 2],
     [896709855620154000, 20, 112989701464696000],
     [8484527608110470, 111, 0],
     [33987471529490900, 190, 0],
@@ -236,7 +236,7 @@ contract("Fee arithmetic tests", async (accounts) => {
   });
 
   it("minutesPassedSinceLastFeeOp(): returns minutes passed between time of last fee operation and current block.timestamp, rounded down to nearest minutes", async () => {
-    for (testPair of secondsToMinutesRoundedDown) {
+    for (const testPair of secondsToMinutesRoundedDown) {
       await troveManagerTester.setLastFeeOpTimeToNow();
 
       const seconds = testPair[0];
@@ -317,7 +317,7 @@ contract("Fee arithmetic tests", async (accounts) => {
 
   it("decayBaseRateFromBorrowing(): returns correctly decayed base rate, for various durations. Initial baseRate = 0.01", async () => {
     // baseRate = 0.01
-    for (i = 0; i < decayBaseRateResults.seconds.length; i++) {
+    for (let i = 0; i < decayBaseRateResults.seconds.length; i++) {
       // Set base rate to 0.01 in TroveManager
       await troveManagerTester.setBaseRate(dec(1, 16));
       const contractBaseRate = await troveManagerTester.baseRate();
@@ -357,7 +357,7 @@ contract("Fee arithmetic tests", async (accounts) => {
 
   it("decayBaseRateFromBorrowing(): returns correctly decayed base rate, for various durations. Initial baseRate = 0.1", async () => {
     // baseRate = 0.1
-    for (i = 0; i < decayBaseRateResults.seconds.length; i++) {
+    for (let i = 0; i < decayBaseRateResults.seconds.length; i++) {
       // Set base rate to 0.1 in TroveManager
       await troveManagerTester.setBaseRate(dec(1, 17));
       const contractBaseRate = await troveManagerTester.baseRate();
@@ -397,7 +397,7 @@ contract("Fee arithmetic tests", async (accounts) => {
 
   it("decayBaseRateFromBorrowing(): returns correctly decayed base rate, for various durations. Initial baseRate = 0.34539284", async () => {
     // baseRate = 0.34539284
-    for (i = 0; i < decayBaseRateResults.seconds.length; i++) {
+    for (let i = 0; i < decayBaseRateResults.seconds.length; i++) {
       // Set base rate to 0.1 in TroveManager
       await troveManagerTester.setBaseRate("345392840000000000");
       const contractBaseRate = await troveManagerTester.baseRate();
@@ -438,7 +438,7 @@ contract("Fee arithmetic tests", async (accounts) => {
 
   it("decayBaseRateFromBorrowing(): returns correctly decayed base rate, for various durations. Initial baseRate = 0.9976", async () => {
     // baseRate = 0.9976
-    for (i = 0; i < decayBaseRateResults.seconds.length; i++) {
+    for (let i = 0; i < decayBaseRateResults.seconds.length; i++) {
       // Set base rate to 0.9976 in TroveManager
       await troveManagerTester.setBaseRate("997600000000000000");
       await troveManagerTester.setBaseRate("997600000000000000");
@@ -633,7 +633,7 @@ contract("Fee arithmetic tests", async (accounts) => {
     });
 
     it("decPow(): correct output for various bases and exponents", async () => {
-      for (list of exponentiationResults) {
+      for (const list of exponentiationResults) {
         const base = list[0].toString();
         const exponent = list[1].toString();
         const expectedResult = list[2].toString();

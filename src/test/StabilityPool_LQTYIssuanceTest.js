@@ -960,13 +960,13 @@ contract("StabilityPool - OATH Rewards", async (accounts) => {
       await priceFeed.setPrice(collaterals[0].address, dec(100, 18));
 
       // Check all would-be depositors have 0 OATH balance
-      for (depositor of allDepositors) {
+      for (const depositor of allDepositors) {
         assert.equal(await oathToken.balanceOf(depositor), "0");
       }
 
       // A, B each deposit 10k LUSD
       const depositors_1 = [A, B];
-      for (account of depositors_1) {
+      for (const account of depositors_1) {
         await mintCollateralAndApproveBorrowerOps(
           collaterals[0],
           account,
@@ -997,7 +997,7 @@ contract("StabilityPool - OATH Rewards", async (accounts) => {
 
       // C, D each deposit 10k LUSD
       const depositors_2 = [C, D];
-      for (account of depositors_2) {
+      for (const account of depositors_2) {
         await mintCollateralAndApproveBorrowerOps(
           collaterals[0],
           account,
@@ -1028,7 +1028,7 @@ contract("StabilityPool - OATH Rewards", async (accounts) => {
 
       // Erin, Flyn each deposit 100 LUSD
       const depositors_3 = [E, F];
-      for (account of depositors_3) {
+      for (const account of depositors_3) {
         await mintCollateralAndApproveBorrowerOps(
           collaterals[0],
           account,
@@ -1059,7 +1059,7 @@ contract("StabilityPool - OATH Rewards", async (accounts) => {
 
       // Graham, Harriet each deposit 10k LUSD
       const depositors_4 = [G, H];
-      for (account of depositors_4) {
+      for (const account of depositors_4) {
         await mintCollateralAndApproveBorrowerOps(
           collaterals[0],
           account,
@@ -1089,7 +1089,7 @@ contract("StabilityPool - OATH Rewards", async (accounts) => {
       });
 
       // All depositors withdraw from SP
-      for (depositor of allDepositors) {
+      for (const depositor of allDepositors) {
         await stabilityPool.withdrawFromSP(dec(10000, 18), { from: depositor });
       }
 
@@ -1101,25 +1101,25 @@ contract("StabilityPool - OATH Rewards", async (accounts) => {
       const expectedOATHGain_D4 = toBN(dec(1000, 18)).div(th.toBN("2"));
 
       // Check A, B only earn issuance from day 1. Error tolerance = 1e-3 tokens
-      for (depositor of [A, B]) {
+      for (const depositor of [A, B]) {
         const OATHBalance = await oathToken.balanceOf(depositor);
         assert.isAtMost(getDifference(OATHBalance, expectedOATHGain_D1), 3e17);
       }
 
       // Check C, D only earn issuance from day 2.  Error tolerance = 1e-3 tokens
-      for (depositor of [C, D]) {
+      for (const depositor of [C, D]) {
         const OATHBalance = await oathToken.balanceOf(depositor);
         assert.isAtMost(getDifference(OATHBalance, expectedOATHGain_D2), 3e17);
       }
 
       // Check E, F only earn issuance from day 3.  Error tolerance = 1e-3 tokens
-      for (depositor of [E, F]) {
+      for (const depositor of [E, F]) {
         const OATHBalance = await oathToken.balanceOf(depositor);
         assert.isAtMost(getDifference(OATHBalance, expectedOATHGain_D3), 3e17);
       }
 
       // Check G, H only earn issuance from day 4.  Error tolerance = 1e-3 tokens
-      for (depositor of [G, H]) {
+      for (const depositor of [G, H]) {
         const OATHBalance = await oathToken.balanceOf(depositor);
         assert.isAtMost(getDifference(OATHBalance, expectedOATHGain_D4), 3e17);
       }
@@ -1621,7 +1621,7 @@ contract("StabilityPool - OATH Rewards", async (accounts) => {
 
       /* All depositors withdraw fully from SP.  Withdraw in reverse order, so that the largest remaining
       deposit (F) withdraws first, and does not get extra OATH gains from the periods between withdrawals */
-      for (depositor of [F, E, D, C, B, A]) {
+      for (const depositor of [F, E, D, C, B, A]) {
         await stabilityPool.withdrawFromSP(dec(10000, 18), { from: depositor });
       }
 

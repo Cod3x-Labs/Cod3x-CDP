@@ -2117,7 +2117,7 @@ contract("Gas compensation tests", async (accounts) => {
         await troveManagerTester.getCollGasCompensation(coll_firstTrove)
       ).toString();
 
-      for (account of _10_accounts) {
+      for (const account of _10_accounts) {
         // Check gas compensation is the same for all troves
         const coll = (
           await troveManager.Troves(account, collaterals[0].address)
@@ -2179,7 +2179,7 @@ contract("Gas compensation tests", async (accounts) => {
 
       const ICRList = [];
 
-      for (account of _20_accounts) {
+      for (const account of _20_accounts) {
         const ICR = await troveManager.getCurrentICR(
           account,
           collaterals[0].address,
@@ -2237,7 +2237,7 @@ contract("Gas compensation tests", async (accounts) => {
 
       const ICRList = [];
 
-      for (account of accountsList) {
+      for (const account of accountsList) {
         const ICR = await troveManager.getCurrentICR(
           account,
           collaterals[0].address,

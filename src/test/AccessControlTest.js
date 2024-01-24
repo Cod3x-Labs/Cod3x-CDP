@@ -80,7 +80,7 @@ contract(
         coreContracts,
       );
 
-      for (account of accounts.slice(0, 10)) {
+      for (const account of accounts.slice(0, 10)) {
         await th.openTrove(coreContracts, {
           collateral: collaterals[0],
           extraLUSDAmount: toBN(dec(20000, 18)),

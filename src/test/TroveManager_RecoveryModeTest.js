@@ -3471,32 +3471,32 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     Elisa       102%
     Freddy      102%
     */
-    alice_ICR = await troveManager.getCurrentICR(
+    const alice_ICR = await troveManager.getCurrentICR(
       alice,
       collaterals[0].address,
       price,
     );
-    bob_ICR = await troveManager.getCurrentICR(
+    const bob_ICR = await troveManager.getCurrentICR(
       bob,
       collaterals[0].address,
       price,
     );
-    carol_ICR = await troveManager.getCurrentICR(
+    const carol_ICR = await troveManager.getCurrentICR(
       carol,
       collaterals[0].address,
       price,
     );
-    dennis_ICR = await troveManager.getCurrentICR(
+    const dennis_ICR = await troveManager.getCurrentICR(
       dennis,
       collaterals[0].address,
       price,
     );
-    erin_ICR = await troveManager.getCurrentICR(
+    const erin_ICR = await troveManager.getCurrentICR(
       erin,
       collaterals[0].address,
       price,
     );
-    freddy_ICR = await troveManager.getCurrentICR(
+    const freddy_ICR = await troveManager.getCurrentICR(
       freddy,
       collaterals[0].address,
       price,
@@ -5990,32 +5990,32 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     Elisa       102%
     Freddy      102%
     */
-    alice_ICR = await troveManager.getCurrentICR(
+    const alice_ICR = await troveManager.getCurrentICR(
       alice,
       collaterals[0].address,
       price,
     );
-    bob_ICR = await troveManager.getCurrentICR(
+    const bob_ICR = await troveManager.getCurrentICR(
       bob,
       collaterals[0].address,
       price,
     );
-    carol_ICR = await troveManager.getCurrentICR(
+    const carol_ICR = await troveManager.getCurrentICR(
       carol,
       collaterals[0].address,
       price,
     );
-    dennis_ICR = await troveManager.getCurrentICR(
+    const dennis_ICR = await troveManager.getCurrentICR(
       dennis,
       collaterals[0].address,
       price,
     );
-    erin_ICR = await troveManager.getCurrentICR(
+    const erin_ICR = await troveManager.getCurrentICR(
       erin,
       collaterals[0].address,
       price,
     );
-    freddy_ICR = await troveManager.getCurrentICR(
+    const freddy_ICR = await troveManager.getCurrentICR(
       freddy,
       collaterals[0].address,
       price,
@@ -6372,32 +6372,32 @@ contract("TroveManager - in Recovery Mode", async (accounts) => {
     Elisa       102%
     Freddy      102%
     */
-    alice_ICR = await troveManager.getCurrentICR(
+    const alice_ICR = await troveManager.getCurrentICR(
       alice,
       collaterals[0].address,
       price,
     );
-    bob_ICR = await troveManager.getCurrentICR(
+    const bob_ICR = await troveManager.getCurrentICR(
       bob,
       collaterals[0].address,
       price,
     );
-    carol_ICR = await troveManager.getCurrentICR(
+    const carol_ICR = await troveManager.getCurrentICR(
       carol,
       collaterals[0].address,
       price,
     );
-    dennis_ICR = await troveManager.getCurrentICR(
+    const dennis_ICR = await troveManager.getCurrentICR(
       dennis,
       collaterals[0].address,
       price,
     );
-    erin_ICR = await troveManager.getCurrentICR(
+    const erin_ICR = await troveManager.getCurrentICR(
       erin,
       collaterals[0].address,
       price,
     );
-    freddy_ICR = await troveManager.getCurrentICR(
+    const freddy_ICR = await troveManager.getCurrentICR(
       freddy,
       collaterals[0].address,
       price,

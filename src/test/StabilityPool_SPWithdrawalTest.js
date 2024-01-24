@@ -136,7 +136,7 @@ contract(
 
         // Whale transfers 10k LUSD to A, B and C who then deposit it to the SP
         const depositors = [alice, bob, carol];
-        for (account of depositors) {
+        for (const account of depositors) {
           await lusdToken.transfer(account, dec(10000, 18), { from: whale });
           await stabilityPool.provideToSP(dec(10000, 18), { from: account });
         }
@@ -242,7 +242,7 @@ contract(
 
         // Whale transfers 10k LUSD to A, B and C who then deposit it to the SP
         const depositors = [alice, bob, carol];
-        for (account of depositors) {
+        for (const account of depositors) {
           await lusdToken.transfer(account, dec(10000, 18), { from: whale });
           await stabilityPool.provideToSP(dec(10000, 18), { from: account });
         }
@@ -364,7 +364,7 @@ contract(
 
         // Whale transfers 10k LUSD to A, B and C who then deposit it to the SP
         const depositors = [alice, bob, carol];
-        for (account of depositors) {
+        for (const account of depositors) {
           await lusdToken.transfer(account, dec(10000, 18), { from: whale });
           await stabilityPool.provideToSP(dec(10000, 18), { from: account });
         }
@@ -496,7 +496,7 @@ contract(
 
         // Whale transfers 10k LUSD to A, B and C who then deposit it to the SP
         const depositors = [alice, bob, carol];
-        for (account of depositors) {
+        for (const account of depositors) {
           await lusdToken.transfer(account, dec(10000, 18), { from: whale });
           await stabilityPool.provideToSP(dec(10000, 18), { from: account });
         }
@@ -620,7 +620,7 @@ contract(
 
         // Whale transfers 10k LUSD to A, B and C who then deposit it to the SP
         const depositors = [alice, bob, carol];
-        for (account of depositors) {
+        for (const account of depositors) {
           await lusdToken.transfer(account, dec(10000, 18), { from: whale });
           await stabilityPool.provideToSP(dec(10000, 18), { from: account });
         }
@@ -1182,7 +1182,7 @@ contract(
 
         // Whale transfers 10k LUSD to A, B and C who then deposit it to the SP
         const depositors = [alice, bob, carol];
-        for (account of depositors) {
+        for (const account of depositors) {
           await lusdToken.transfer(account, dec(10000, 18), { from: whale });
           await stabilityPool.provideToSP(dec(10000, 18), { from: account });
         }
@@ -1347,7 +1347,7 @@ contract(
 
         // Whale transfers 10k LUSD to A, B and C who then deposit it to the SP
         const depositors = [alice, bob, carol];
-        for (account of depositors) {
+        for (const account of depositors) {
           await lusdToken.transfer(account, dec(10000, 18), { from: whale });
           await stabilityPool.provideToSP(dec(10000, 18), { from: account });
         }
@@ -1708,7 +1708,7 @@ contract(
 
         // Whale transfers 10k LUSD to A, B and C who then deposit it to the SP
         const depositors = [alice, bob, carol, dennis];
-        for (account of depositors) {
+        for (const account of depositors) {
           await lusdToken.transfer(account, dec(10000, 18), { from: whale });
           await stabilityPool.provideToSP(dec(10000, 18), { from: account });
         }
@@ -2078,7 +2078,7 @@ contract(
 
         // Whale transfers 10k LUSD to A, B and D who then deposit it to the SP
         const depositors = [alice, bob, dennis];
-        for (account of depositors) {
+        for (const account of depositors) {
           await lusdToken.transfer(account, dec(10000, 18), { from: whale });
           await stabilityPool.provideToSP(dec(10000, 18), { from: account });
         }
@@ -2272,7 +2272,7 @@ contract(
 
         // Whale transfers 10k LUSD to A, B who then deposit it to the SP
         const depositors = [alice, bob];
-        for (account of depositors) {
+        for (const account of depositors) {
           await lusdToken.transfer(account, dec(10000, 18), { from: whale });
           await stabilityPool.provideToSP(dec(10000, 18), { from: account });
         }
@@ -2317,7 +2317,7 @@ contract(
 
         // Carol, Dennis each deposit 10000 LUSD
         const depositors_2 = [carol, dennis];
-        for (account of depositors_2) {
+        for (const account of depositors_2) {
           await lusdToken.transfer(account, dec(10000, 18), { from: whale });
           await stabilityPool.provideToSP(dec(10000, 18), { from: account });
         }
@@ -2428,7 +2428,7 @@ contract(
 
         // Whale transfers 10k LUSD to A, B who then deposit it to the SP
         const depositors = [alice, bob];
-        for (account of depositors) {
+        for (const account of depositors) {
           await lusdToken.transfer(account, dec(10000, 18), { from: whale });
           await stabilityPool.provideToSP(dec(10000, 18), { from: account });
         }
@@ -2532,7 +2532,7 @@ contract(
 
         // Carol, Dennis each deposit 10000 LUSD
         const depositors_2 = [carol, dennis];
-        for (account of depositors) {
+        for (const account of depositors) {
           await lusdToken.transfer(account, dec(10000, 18), { from: whale });
           await stabilityPool.provideToSP(dec(10000, 18), { from: account });
         }
@@ -2592,7 +2592,7 @@ contract(
 
         // Whale transfers 10k LUSD to A, B who then deposit it to the SP
         const depositors = [alice, bob];
-        for (account of depositors) {
+        for (const account of depositors) {
           await lusdToken.transfer(account, dec(10000, 18), { from: whale });
           await stabilityPool.provideToSP(dec(10000, 18), { from: account });
         }
@@ -2932,7 +2932,7 @@ contract(
 
         // Alice, Bob each deposit 10k LUSD
         const depositors_1 = [alice, bob];
-        for (account of depositors_1) {
+        for (const account of depositors_1) {
           await lusdToken.transfer(account, dec(10000, 18), { from: whale });
           await stabilityPool.provideToSP(dec(10000, 18), { from: account });
         }
@@ -2944,7 +2944,7 @@ contract(
 
         // Carol, Dennis each deposit 10000 LUSD
         const depositors_2 = [carol, dennis];
-        for (account of depositors_2) {
+        for (const account of depositors_2) {
           await lusdToken.transfer(account, dec(10000, 18), { from: whale });
           await stabilityPool.provideToSP(dec(10000, 18), { from: account });
         }
@@ -2956,7 +2956,7 @@ contract(
 
         // Erin, Flyn each deposit 10000 LUSD
         const depositors_3 = [erin, flyn];
-        for (account of depositors_3) {
+        for (const account of depositors_3) {
           await lusdToken.transfer(account, dec(10000, 18), { from: whale });
           await stabilityPool.provideToSP(dec(10000, 18), { from: account });
         }
@@ -2968,7 +2968,7 @@ contract(
 
         // Graham, Harriet each deposit 10000 LUSD
         const depositors_4 = [graham, harriet];
-        for (account of depositors_4) {
+        for (const account of depositors_4) {
           await lusdToken.transfer(account, dec(10000, 18), { from: whale });
           await stabilityPool.provideToSP(dec(10000, 18), { from: account });
         }
@@ -4335,7 +4335,7 @@ contract(
         await priceFeed.setPrice(collaterals[0].address, dec(2, 27));
 
         const depositors = [alice, bob];
-        for (account of depositors) {
+        for (const account of depositors) {
           await mintCollateralAndApproveBorrowerOps(
             collaterals[0],
             account,
@@ -4446,7 +4446,7 @@ contract(
         const price = await priceFeed.getPrice(collaterals[0].address);
 
         const depositors = [alice, bob];
-        for (account of depositors) {
+        for (const account of depositors) {
           await mintCollateralAndApproveBorrowerOps(
             collaterals[0],
             account,

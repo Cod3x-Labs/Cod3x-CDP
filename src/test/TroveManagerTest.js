@@ -59,6 +59,10 @@ contract("TroveManager", async (accounts) => {
   let borrowerOperations;
   let hintHelpers;
   let collaterals;
+  let lqtyStaking;
+  let oathToken;
+  let communityIssuance;
+  let stakingToken;
 
   let contracts;
   let liquidationReserve;
@@ -3705,7 +3709,7 @@ contract("TroveManager", async (accounts) => {
       ).gte(collMCR),
     );
 
-    liquidationArray = [alice, bob, carol, dennis, erin];
+    const liquidationArray = [alice, bob, carol, dennis, erin];
     await troveManager.batchLiquidateTroves(
       collaterals[0].address,
       liquidationArray,
@@ -3823,7 +3827,7 @@ contract("TroveManager", async (accounts) => {
       ).lt(collMCR),
     );
 
-    liquidationArray = [alice, bob]; // C-E not included
+    const liquidationArray = [alice, bob]; // C-E not included
     await troveManager.batchLiquidateTroves(
       collaterals[0].address,
       liquidationArray,
@@ -3962,7 +3966,7 @@ contract("TroveManager", async (accounts) => {
       ).gte(collMCR),
     );
 
-    liquidationArray = [alice, bob, carol, dennis, erin];
+    const liquidationArray = [alice, bob, carol, dennis, erin];
     await troveManager.batchLiquidateTroves(
       collaterals[0].address,
       liquidationArray,
@@ -4045,7 +4049,7 @@ contract("TroveManager", async (accounts) => {
       await th.checkRecoveryMode(contracts, collaterals[0].address),
     );
 
-    liquidationArray = [];
+    const liquidationArray = [];
     try {
       const tx = await troveManager.batchLiquidateTroves(
         collaterals[0].address,

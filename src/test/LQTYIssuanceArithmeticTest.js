@@ -10,6 +10,7 @@ contract("Oath community issuance tests", async (accounts) => {
   let communityIssuanceTester;
   let oathToken;
   let stabilityPool;
+  let borrowerOperations;
 
   const thousand = th.toBN(dec(1000, 18));
   const million = th.toBN(dec(1000000, 18));

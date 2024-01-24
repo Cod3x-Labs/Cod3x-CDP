@@ -24,6 +24,7 @@ contract("PriceFeed", async (accounts) => {
   let collateral1;
   let collateral2;
   let collateralConfig;
+  let mockTellor;
 
   const setAddresses = async () => {
     await priceFeed.setAddresses(

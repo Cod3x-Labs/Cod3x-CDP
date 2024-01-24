@@ -42,6 +42,7 @@ contract("LQTYStaking revenue share tests", async (accounts) => {
   let lqtyStaking;
   let stakingToken;
   let collaterals;
+  let hintHelpers;
 
   let contracts;
 
@@ -60,7 +61,7 @@ contract("LQTYStaking revenue share tests", async (accounts) => {
     await deploymentHelper.connectCoreContracts(contracts, LQTYContracts);
     await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, contracts);
 
-    nonPayable = await NonPayable.new();
+    const nonPayable = await NonPayable.new();
     priceFeed = contracts.priceFeedTestnet;
     lusdToken = contracts.lusdToken;
     sortedTroves = contracts.sortedTroves;
@@ -300,7 +301,7 @@ contract("LQTYStaking revenue share tests", async (accounts) => {
       collaterals[0].address,
       contracts,
       dec(100, 18),
-      (gasPrice = GAS_PRICE),
+      GAS_PRICE,
     );
 
     const B_BalAfterRedemption = await lusdToken.balanceOf(B);
@@ -385,7 +386,7 @@ contract("LQTYStaking revenue share tests", async (accounts) => {
       collaterals[0].address,
       contracts,
       dec(100, 18),
-      (gasPrice = GAS_PRICE),
+      GAS_PRICE,
     );
 
     const B_BalAfterRedemption = await lusdToken.balanceOf(B);
@@ -466,7 +467,7 @@ contract("LQTYStaking revenue share tests", async (accounts) => {
       collaterals[1].address,
       contracts,
       dec(100, 18),
-      (gasPrice = GAS_PRICE),
+      GAS_PRICE,
     );
 
     const B_BalAfterRedemption = await lusdToken.balanceOf(B);
@@ -485,7 +486,7 @@ contract("LQTYStaking revenue share tests", async (accounts) => {
       collaterals[1].address,
       contracts,
       dec(100, 18),
-      (gasPrice = GAS_PRICE),
+      GAS_PRICE,
     );
 
     const C_BalAfterRedemption = await lusdToken.balanceOf(C);
@@ -602,7 +603,7 @@ contract("LQTYStaking revenue share tests", async (accounts) => {
       collaterals[0].address,
       contracts,
       dec(100, 18),
-      (gasPrice = GAS_PRICE),
+      GAS_PRICE,
     );
 
     const B_BalAfterRedemption = await lusdToken.balanceOf(B);
@@ -621,7 +622,7 @@ contract("LQTYStaking revenue share tests", async (accounts) => {
       collaterals[0].address,
       contracts,
       dec(100, 18),
-      (gasPrice = GAS_PRICE),
+      GAS_PRICE,
     );
 
     const C_BalAfterRedemption = await lusdToken.balanceOf(C);
@@ -738,7 +739,7 @@ contract("LQTYStaking revenue share tests", async (accounts) => {
       collaterals[0].address,
       contracts,
       dec(100, 18),
-      (gasPrice = GAS_PRICE),
+      GAS_PRICE,
     );
 
     const B_BalAfterRedemption = await lusdToken.balanceOf(B);
@@ -757,7 +758,7 @@ contract("LQTYStaking revenue share tests", async (accounts) => {
       collaterals[1].address,
       contracts,
       dec(100, 18),
-      (gasPrice = GAS_PRICE),
+      GAS_PRICE,
     );
 
     const C_BalAfterRedemption = await lusdToken.balanceOf(C);
@@ -835,7 +836,7 @@ contract("LQTYStaking revenue share tests", async (accounts) => {
       collaterals[0].address,
       contracts,
       dec(100, 18),
-      (gasPrice = GAS_PRICE),
+      GAS_PRICE,
     );
 
     const B_BalAfterRedemption = await lusdToken.balanceOf(B);
@@ -854,7 +855,7 @@ contract("LQTYStaking revenue share tests", async (accounts) => {
       collaterals[0].address,
       contracts,
       dec(100, 18),
-      (gasPrice = GAS_PRICE),
+      GAS_PRICE,
     );
 
     const C_BalAfterRedemption = await lusdToken.balanceOf(C);
@@ -988,7 +989,7 @@ contract("LQTYStaking revenue share tests", async (accounts) => {
       collaterals[0].address,
       contracts,
       dec(45, 18),
-      (gasPrice = GAS_PRICE),
+      GAS_PRICE,
     );
     const emittedETHFee_1 = toBN(
       (await th.getEmittedRedemptionValues(redemptionTx_1))[3],
@@ -1001,7 +1002,7 @@ contract("LQTYStaking revenue share tests", async (accounts) => {
       collaterals[0].address,
       contracts,
       dec(197, 18),
-      (gasPrice = GAS_PRICE),
+      GAS_PRICE,
     );
     const emittedETHFee_2 = toBN(
       (await th.getEmittedRedemptionValues(redemptionTx_2))[3],
@@ -1054,7 +1055,7 @@ contract("LQTYStaking revenue share tests", async (accounts) => {
       collaterals[0].address,
       contracts,
       dec(197, 18),
-      (gasPrice = GAS_PRICE),
+      GAS_PRICE,
     );
     const emittedETHFee_3 = toBN(
       (await th.getEmittedRedemptionValues(redemptionTx_3))[3],

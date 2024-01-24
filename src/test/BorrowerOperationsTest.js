@@ -4,9 +4,7 @@ const testHelpers = require("../utils/testHelpers.js");
 const BorrowerOperationsTester = artifacts.require(
   "./BorrowerOperationsTester.sol",
 );
-const NonPayable = artifacts.require("NonPayable.sol");
 const TroveManagerTester = artifacts.require("TroveManagerTester");
-const LUSDTokenTester = artifacts.require("./LUSDTokenTester");
 
 const th = testHelpers.TestHelper;
 
@@ -28,30 +26,10 @@ const assertRevert = th.assertRevert;
  */
 
 contract("BorrowerOperations", async (accounts) => {
-  const [
-    owner,
-    alice,
-    bob,
-    carol,
-    dennis,
-    whale,
-    A,
-    B,
-    C,
-    D,
-    E,
-    F,
-    G,
-    H,
-    // defaulter_1, defaulter_2,
-    frontEnd_1,
-    frontEnd_2,
-    frontEnd_3,
-  ] = accounts;
+  const [owner, alice, bob, carol, dennis, whale, A, B, C, D, E, F, G, H] =
+    accounts;
 
   const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(997, 1000);
-
-  // const frontEnds = [frontEnd_1, frontEnd_2, frontEnd_3]
 
   let priceFeed;
   let lusdToken;
@@ -63,6 +41,8 @@ contract("BorrowerOperations", async (accounts) => {
   let borrowerOperations;
   let lqtyStaking;
   let stakingToken;
+  let hintHelpers;
+  let communityIssuance;
 
   let contracts;
   let collaterals;
@@ -71,8 +51,6 @@ contract("BorrowerOperations", async (accounts) => {
     th.getOpenTroveLUSDAmount(contracts, totalDebt);
   const getNetBorrowingAmount = async (debtWithFee) =>
     th.getNetBorrowingAmount(contracts, debtWithFee);
-  const getActualDebtFromComposite = async (compositeDebt) =>
-    th.getActualDebtFromComposite(compositeDebt, contracts);
   const openTrove = async (params) => th.openTrove(contracts, params);
   const getTroveEntireColl = async (trove, collAddress) =>
     th.getTroveEntireColl(contracts, trove, collAddress);
@@ -121,7 +99,6 @@ contract("BorrowerOperations", async (accounts) => {
           users,
         );
       }
-
       priceFeed = contracts.priceFeedTestnet;
       lusdToken = contracts.lusdToken;
       sortedTroves = contracts.sortedTroves;
@@ -464,6 +441,7 @@ contract("BorrowerOperations", async (accounts) => {
           alice,
           collaterals[0].address,
         );
+
       const bobPendingCollateralReward =
         await troveManager.getPendingCollateralReward(
           bob,
@@ -479,7 +457,7 @@ contract("BorrowerOperations", async (accounts) => {
           bob,
           collaterals[0].address,
         );
-      for (reward of [
+      for (const reward of [
         alicePendingCollateralReward,
         bobPendingCollateralReward,
         alicePendingLUSDDebtReward,
@@ -1461,7 +1439,7 @@ contract("BorrowerOperations", async (accounts) => {
         bob,
         collaterals[0].address,
       );
-      for (reward of [
+      for (const reward of [
         pendingCollReward_A,
         pendingDebtReward_A,
         pendingCollReward_B,
@@ -9839,7 +9817,7 @@ contract("BorrowerOperations", async (accounts) => {
       // 0, 0
       it("collChange = 0, debtChange = 0", async () => {
         await priceFeed.setPrice(collaterals[0].address, dec(200, 18));
-        price = await priceFeed.getPrice(collaterals[0].address);
+        const price = await priceFeed.getPrice(collaterals[0].address);
         const collDecimals =
           await contracts.collateralConfig.getCollateralDecimals(
             collaterals[0].address,
@@ -9867,7 +9845,7 @@ contract("BorrowerOperations", async (accounts) => {
       // 0, +ve
       it("collChange = 0, debtChange is positive", async () => {
         await priceFeed.setPrice(collaterals[0].address, dec(200, 18));
-        price = await priceFeed.getPrice(collaterals[0].address);
+        const price = await priceFeed.getPrice(collaterals[0].address);
         const collDecimals =
           await contracts.collateralConfig.getCollateralDecimals(
             collaterals[0].address,
@@ -9895,7 +9873,7 @@ contract("BorrowerOperations", async (accounts) => {
       // 0, -ve
       it("collChange = 0, debtChange is negative", async () => {
         await priceFeed.setPrice(collaterals[0].address, dec(200, 18));
-        price = await priceFeed.getPrice(collaterals[0].address);
+        const price = await priceFeed.getPrice(collaterals[0].address);
         const collDecimals =
           await contracts.collateralConfig.getCollateralDecimals(
             collaterals[0].address,
@@ -9923,7 +9901,7 @@ contract("BorrowerOperations", async (accounts) => {
       // +ve, 0
       it("collChange is positive, debtChange is 0", async () => {
         await priceFeed.setPrice(collaterals[1].address, dec(200, 18));
-        price = await priceFeed.getPrice(collaterals[1].address);
+        const price = await priceFeed.getPrice(collaterals[1].address);
         const collDecimals =
           await contracts.collateralConfig.getCollateralDecimals(
             collaterals[0].address,
@@ -9951,7 +9929,7 @@ contract("BorrowerOperations", async (accounts) => {
       // -ve, 0
       it("collChange is negative, debtChange is 0", async () => {
         await priceFeed.setPrice(collaterals[0].address, dec(200, 18));
-        price = await priceFeed.getPrice(collaterals[0].address);
+        const price = await priceFeed.getPrice(collaterals[0].address);
         const collDecimals =
           await contracts.collateralConfig.getCollateralDecimals(
             collaterals[0].address,
@@ -9979,7 +9957,7 @@ contract("BorrowerOperations", async (accounts) => {
       // -ve, -ve
       it("collChange is negative, debtChange is negative", async () => {
         await priceFeed.setPrice(collaterals[0].address, dec(200, 18));
-        price = await priceFeed.getPrice(collaterals[0].address);
+        const price = await priceFeed.getPrice(collaterals[0].address);
         const collDecimals =
           await contracts.collateralConfig.getCollateralDecimals(
             collaterals[0].address,
@@ -10007,7 +9985,7 @@ contract("BorrowerOperations", async (accounts) => {
       // +ve, +ve
       it("collChange is positive, debtChange is positive", async () => {
         await priceFeed.setPrice(collaterals[0].address, dec(200, 18));
-        price = await priceFeed.getPrice(collaterals[0].address);
+        const price = await priceFeed.getPrice(collaterals[0].address);
         const collDecimals =
           await contracts.collateralConfig.getCollateralDecimals(
             collaterals[0].address,
@@ -10035,7 +10013,7 @@ contract("BorrowerOperations", async (accounts) => {
       // +ve, -ve
       it("collChange is positive, debtChange is negative", async () => {
         await priceFeed.setPrice(collaterals[0].address, dec(200, 18));
-        price = await priceFeed.getPrice(collaterals[0].address);
+        const price = await priceFeed.getPrice(collaterals[0].address);
         const collDecimals =
           await contracts.collateralConfig.getCollateralDecimals(
             collaterals[0].address,
@@ -10063,7 +10041,7 @@ contract("BorrowerOperations", async (accounts) => {
       // -ve, +ve
       it("collChange is negative, debtChange is positive", async () => {
         await priceFeed.setPrice(collaterals[0].address, dec(200, 18));
-        price = await priceFeed.getPrice(collaterals[0].address);
+        const price = await priceFeed.getPrice(collaterals[0].address);
         const collDecimals =
           await contracts.collateralConfig.getCollateralDecimals(
             collaterals[0].address,

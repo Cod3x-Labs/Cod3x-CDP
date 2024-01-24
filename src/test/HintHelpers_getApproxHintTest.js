@@ -70,7 +70,7 @@ contract("HintHelpers", async (accounts) => {
 
   // Sequentially add coll and withdraw LUSD, 1 account at a time
   const makeTrovesInSequence = async (accounts, n) => {
-    activeAccounts = accounts.slice(0, n);
+    const activeAccounts = accounts.slice(0, n);
     // console.log(`number of accounts used is: ${activeAccounts.length}`)
 
     let ICR = 200;
@@ -209,7 +209,7 @@ contract("HintHelpers", async (accounts) => {
       Number(web3.utils.fromWei(ICR_hintAddress_250, "ether")) * 100;
 
     // check the hint position is at most sqrtLength positions away from the correct position
-    ICR_Difference_250 = ICRPercent_hintAddress_250 - CRPercent_250;
+    const ICR_Difference_250 = ICRPercent_hintAddress_250 - CRPercent_250;
     assert.isBelow(ICR_Difference_250, sqrtLength);
 
     // CR = 287%
@@ -231,7 +231,7 @@ contract("HintHelpers", async (accounts) => {
       Number(web3.utils.fromWei(ICR_hintAddress_287, "ether")) * 100;
 
     // check the hint position is at most sqrtLength positions away from the correct position
-    ICR_Difference_287 = ICRPercent_hintAddress_287 - CRPercent_287;
+    const ICR_Difference_287 = ICRPercent_hintAddress_287 - CRPercent_287;
     assert.isBelow(ICR_Difference_287, sqrtLength);
 
     // CR = 213%
@@ -253,7 +253,7 @@ contract("HintHelpers", async (accounts) => {
       Number(web3.utils.fromWei(ICR_hintAddress_213, "ether")) * 100;
 
     // check the hint position is at most sqrtLength positions away from the correct position
-    ICR_Difference_213 = ICRPercent_hintAddress_213 - CRPercent_213;
+    const ICR_Difference_213 = ICRPercent_hintAddress_213 - CRPercent_213;
     assert.isBelow(ICR_Difference_213, sqrtLength);
 
     // CR = 201%
@@ -275,7 +275,7 @@ contract("HintHelpers", async (accounts) => {
       Number(web3.utils.fromWei(ICR_hintAddress_201, "ether")) * 100;
 
     // check the hint position is at most sqrtLength positions away from the correct position
-    ICR_Difference_201 = ICRPercent_hintAddress_201 - CRPercent_201;
+    const ICR_Difference_201 = ICRPercent_hintAddress_201 - CRPercent_201;
     assert.isBelow(ICR_Difference_201, sqrtLength);
   });
 
@@ -336,7 +336,8 @@ contract("HintHelpers", async (accounts) => {
       Number(web3.utils.fromWei(ICR_FirstTrove, "ether")) * 100;
 
     // check the hint position is at most sqrtLength positions away from the correct position
-    ICR_Difference_Max = ICRPercent_hintAddress_Max - ICRPercent_FirstTrove;
+    const ICR_Difference_Max =
+      ICRPercent_hintAddress_Max - ICRPercent_FirstTrove;
     assert.isBelow(ICR_Difference_Max, sqrtLength);
   });
 
