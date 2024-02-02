@@ -4,8 +4,17 @@
   "rules": {
     "prettier/prettier": "error",
     "compiler-version": ["error", "^0.8.23"],
-    "immutable-vars-naming": ["warn", { "immutablesAsConstants": false }],
-    "func-visibility": ["warn", { "ignoreConstructors": true }]
+    "func-visibility": ["warn", { "ignoreConstructors": true }],
+    "explicit-types": ["off", "explicit"],
+    "custom-errors": "off",
+    "reason-string": ["off"],
+    "var-name-mixedcase": "off",
+    "func-name-mixedcase": "off",
+    "contract-name-camelcase": "off",
+    "no-global-import": "off",
+    "const-name-snakecase": "off",
+    "event-name-camelcase": "off",
+    "immutable-vars-naming": ["off"]
   },
-  "excludedFiles": [""]
+  "excludedFiles": ["contracts/TestContracts", "contracts/Proxy"]
 }
