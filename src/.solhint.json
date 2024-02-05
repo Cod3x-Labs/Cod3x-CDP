@@ -14,7 +14,8 @@
     "no-global-import": "off",
     "const-name-snakecase": "off",
     "event-name-camelcase": "off",
-    "immutable-vars-naming": ["off"]
+    "immutable-vars-naming": ["off"],
+    "max-states-count": ["warn", 25]
   },
   "excludedFiles": ["contracts/TestContracts", "contracts/Proxy"]
 }

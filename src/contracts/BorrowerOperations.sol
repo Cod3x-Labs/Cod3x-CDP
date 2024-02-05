@@ -34,9 +34,9 @@ contract BorrowerOperations is
     ICollateralConfig public collateralConfig;
     ITroveManager public troveManager;
 
-    address gasPoolAddress;
+    address internal gasPoolAddress;
 
-    ICollSurplusPool collSurplusPool;
+    ICollSurplusPool internal collSurplusPool;
 
     ILQTYStaking public lqtyStaking;
     address public lqtyStakingAddress;
@@ -213,7 +213,6 @@ contract BorrowerOperations is
                 _lowerHint
             );
     }
-
     function openTrove(
         address _collateral,
         uint _collAmount,

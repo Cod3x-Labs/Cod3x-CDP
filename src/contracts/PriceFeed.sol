@@ -28,7 +28,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     bool public initialized = false;
 
     mapping(address => AggregatorV3Interface) public priceAggregator; // collateral => Mainnet Chainlink aggregator
-    ITellorCaller tellorCaller; // Wrapper contract that calls the Tellor system
+    ITellorCaller internal tellorCaller; // Wrapper contract that calls the Tellor system
     mapping(address => bytes32) public tellorQueryId; // collateral => Tellor query ID
 
     // Core Liquity contracts
@@ -74,7 +74,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         usingChainlinkTellorUntrusted
     }
 
-    // The current status of the PricFeed for each collateral, which determines the conditions for the next price fetch attempt
+    // The current status of the PriceFeed for each collateral, which determines the conditions for the next price fetch attempt
     mapping(address => Status) public status;
 
     event CollateralConfigAddressChanged(address _newCollateralConfigAddress);

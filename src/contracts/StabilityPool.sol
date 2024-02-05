@@ -155,7 +155,7 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
 
     ITroveManager public troveManager;
 
-    ILiquidationHelper liquidationHelper;
+    ILiquidationHelper internal liquidationHelper;
 
     ILUSDToken public lusdToken;
 

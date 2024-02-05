@@ -17,7 +17,7 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
     ITroveManager public troveManager;
     ICollateralConfig public collateralConfig;
     IStabilityPool public stabilityPool;
-    ICollSurplusPool collSurplusPool;
+    ICollSurplusPool internal collSurplusPool;
     ISortedTroves public sortedTroves;
 
     /*

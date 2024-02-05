@@ -24,9 +24,9 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
 
     ICollateralConfig public collateralConfig;
 
-    address gasPoolAddress;
+    address internal gasPoolAddress;
 
-    ICollSurplusPool collSurplusPool;
+    ICollSurplusPool internal collSurplusPool;
 
     ILUSDToken public override lusdToken;
 

@@ -12,6 +12,7 @@ pragma solidity ^0.8.23;
  * 50 LUSD debt on the trove is cancelled.
  * See this issue for more context: https://github.com/liquity/dev/issues/186
  */
+// solhint-disable-next-line no-empty-blocks
 contract GasPool {
     // do nothing, as the core contracts have permission to send to and burn from this address
 }
