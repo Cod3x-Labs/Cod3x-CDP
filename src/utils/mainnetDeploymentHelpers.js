@@ -363,7 +363,6 @@ class MainnetDeploymentHelper {
           collaterals.map((c) => c.limit),
           collaterals.map((c) => c.chainlinkTimeout),
           collaterals.map((c) => c.tellorTimeout),
-          contracts.activePool.address,
           contracts.priceFeed.address,
           { gasPrice },
         ),

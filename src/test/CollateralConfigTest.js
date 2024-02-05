@@ -101,7 +101,6 @@ contract("CollateralConfig", async (accounts) => {
         [ethers.MaxUint256, ethers.MaxUint256],
         [14400, 14400], // 4 hour Chainlink timeouts
         [14400, 14400], // 4 hour Tellor timeouts
-        coreContracts.activePool.address,
         coreContracts.priceFeedTestnet.address,
       ),
       "Can only initialize once",
@@ -212,7 +211,6 @@ contract("CollateralConfig", async (accounts) => {
         ethers.MaxUint256,
         14400,
         14400,
-        coreContracts.reapervaults[1].address,
         mockChainlinkAggregator.address,
         "0x1",
       ),

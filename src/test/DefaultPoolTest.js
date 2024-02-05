@@ -4,7 +4,6 @@ const ActivePool = artifacts.require("./ActivePool.sol");
 const DefaultPool = artifacts.require("./DefaultPool.sol");
 const NonPayable = artifacts.require("NonPayable.sol");
 const ERC20 = artifacts.require("ERC20Mock.sol");
-const ReaperVaultV2 = artifacts.require("ReaperVaultV2Minimal.sol");
 
 const th = testHelpers.TestHelper;
 const dec = th.dec;
@@ -46,11 +45,6 @@ contract("DefaultPool", async (accounts) => {
       mockTreasury.address,
       0,
     );
-    const vault = await ReaperVaultV2.new(
-      collateral.address,
-      "wETH Crypt",
-      "rfwETH",
-    );
 
     await collateralConfig.initialize(
       [collateral.address],
@@ -59,7 +53,6 @@ contract("DefaultPool", async (accounts) => {
       [ethers.MaxUint256],
       [14400], // 4 hour Chainlink timeout
       [14400], // 4 hour Tellor timeouts
-      activePool.address,
       mockPriceFeed.address,
     );
     await defaultPool.setAddresses(
@@ -76,8 +69,6 @@ contract("DefaultPool", async (accounts) => {
       mockStabilityPool.address,
       defaultPool.address,
       mockCollSurplusPool.address,
-      mockTreasury.address,
-      [vault.address],
     );
   });
 

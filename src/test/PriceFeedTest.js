@@ -53,7 +53,6 @@ contract("PriceFeed", async (accounts) => {
       [ethers.MaxUint256, ethers.MaxUint256],
       [14400, 14400], // 4 hour Chainlink timeouts
       [14400, 14400], // 4 hour Tellor timeouts
-      mockActivePool.address,
       mockPriceFeed.address,
     );
   });

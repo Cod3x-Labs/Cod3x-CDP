@@ -42,7 +42,6 @@ contract("All Liquity functions with onlyOwner modifier", async (accounts) => {
       [ethers.MaxUint256, ethers.MaxUint256],
       [14400, 14400], // 4 hour Chainlink timeouts
       [14400, 14400], // 4 hour Tellor timeouts
-      contracts.activePool.address,
       contracts.priceFeedTestnet.address,
     );
 
@@ -174,7 +173,7 @@ contract("All Liquity functions with onlyOwner modifier", async (accounts) => {
 
   describe("ActivePool", async (accounts) => {
     it("setAddresses(): reverts when called by non-owner, with wrong addresses, or twice", async () => {
-      await testSetAddresses(activePool, 9, true, true, true);
+      await testSetAddresses(activePool, 8, true, false, true);
     });
   });
 

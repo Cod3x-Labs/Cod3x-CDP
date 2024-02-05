@@ -392,7 +392,6 @@ class DeploymentHelper {
       [ethers.MaxUint256], // No debt limit
       [14400], // 4 hour Chainlink timeout
       [14400], // 4 hour Tellor timeout
-      contracts.activePool.address,
       contracts.priceFeedTestnet.address,
     );
 
@@ -487,8 +486,6 @@ class DeploymentHelper {
       contracts.stabilityPool.address,
       contracts.defaultPool.address,
       contracts.collSurplusPool.address,
-      contracts.governance.address, // using governance as treasury
-      [contracts.reapervaults[0].address],
     );
 
     await contracts.defaultPool.setAddresses(
@@ -520,7 +517,6 @@ class DeploymentHelper {
       ethers.MaxUint256, // No debt limit
       14400, // 4 hour Chainlink timeout
       14400, // 4 hour Tellor timeout
-      contracts.reapervaults[1].address,
       mockChainlinkAggregator.address,
       "0x1", // mock Tellor query ID
     );

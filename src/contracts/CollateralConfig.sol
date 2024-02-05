@@ -5,7 +5,6 @@ import "./Dependencies/CheckContract.sol";
 import "./Dependencies/Ownable.sol";
 import "./Dependencies/SafeERC20.sol";
 import "./Interfaces/ICollateralConfig.sol";
-import "./Interfaces/IActivePool.sol";
 import "./Interfaces/IPriceFeed.sol";
 
 /**
@@ -38,7 +37,6 @@ contract CollateralConfig is ICollateralConfig, CheckContract, Ownable {
     address[] public collaterals; // for returning entire list of allowed collaterals
     mapping(address => Config) public collateralConfig; // for O(1) checking of collateral's validity and properties
 
-    IActivePool public activePool;
     IPriceFeed public priceFeed;
 
     event CollateralWhitelisted(
@@ -78,7 +76,6 @@ contract CollateralConfig is ICollateralConfig, CheckContract, Ownable {
         uint256[] calldata _debtLimits,
         uint256[] calldata _chainlinkTimeouts,
         uint256[] calldata _tellorTimeouts,
-        address _activePool,
         address _priceFeed
     ) external onlyOwner {
         require(!initialized, "Can only initialize once");
@@ -115,9 +112,7 @@ contract CollateralConfig is ICollateralConfig, CheckContract, Ownable {
             );
         }
 
-        checkContract(_activePool);
         checkContract(_priceFeed);
-        activePool = IActivePool(_activePool);
         priceFeed = IPriceFeed(_priceFeed);
 
         initialized = true;
@@ -130,7 +125,6 @@ contract CollateralConfig is ICollateralConfig, CheckContract, Ownable {
         uint256 _debtLimit,
         uint256 _chainlinkTimeout,
         uint256 _tellorTimeout,
-        address _vault,
         address _chainlinkAggregator,
         bytes32 _tellorQueryId
     ) external onlyOwner {
@@ -142,7 +136,6 @@ contract CollateralConfig is ICollateralConfig, CheckContract, Ownable {
             _chainlinkTimeout,
             _tellorTimeout
         );
-        activePool.setYieldGenerator(_collateral, _vault);
         priceFeed.updateChainlinkAggregator(_collateral, _chainlinkAggregator);
         priceFeed.updateTellorQueryID(_collateral, _tellorQueryId);
     }
