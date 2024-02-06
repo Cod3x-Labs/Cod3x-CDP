@@ -66,10 +66,7 @@ contract LUSDTokenTester is LUSDToken {
     }
 
     function getChainId() external view returns (uint256 chainID) {
-        //return _chainID(); // it’s private
-        assembly {
-            chainID := chainid()
-        }
+        chainID = block.chainid;
     }
 
     function getDigest(
