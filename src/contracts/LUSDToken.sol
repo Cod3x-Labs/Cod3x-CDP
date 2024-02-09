@@ -86,7 +86,7 @@ contract LUSDToken is CheckContract, ILUSDToken {
         address _borrowerOperationsAddress,
         address _governanceAddress,
         address _guardianAddress
-    ) public {
+    ) {
         checkContract(_troveManagerAddress);
         checkContract(_stabilityPoolAddress);
         checkContract(_borrowerOperationsAddress);

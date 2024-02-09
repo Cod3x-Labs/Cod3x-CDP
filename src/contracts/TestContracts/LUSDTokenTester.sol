@@ -15,7 +15,6 @@ contract LUSDTokenTester is LUSDToken {
         address _governanceAddress,
         address _guardianAddress
     )
-        public
         LUSDToken(
             _troveManagerAddress,
             _stabilityPoolAddress,
