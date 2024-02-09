@@ -5,7 +5,6 @@ const ActivePool = artifacts.require("./ActivePool.sol");
 const DefaultPool = artifacts.require("./DefaultPool.sol");
 const NonPayable = artifacts.require("./NonPayable.sol");
 const ERC20 = artifacts.require("ERC20Mock.sol");
-const ReaperVaultV2 = artifacts.require("ReaperVaultV2Minimal.sol");
 
 const testHelpers = require("../utils/testHelpers.js");
 
@@ -57,7 +56,7 @@ contract("ActivePool", async (accounts) => {
     troveManager,
     mockRedemptionHelper,
     mockLiquidationHelper;
-  let collaterals, vaults;
+  let collaterals;
   let treasury;
   let stabilityPool;
 
@@ -78,18 +77,8 @@ contract("ActivePool", async (accounts) => {
       treasury.address,
       0,
     ); // 8 decimal places
-    const vault1 = await ReaperVaultV2.new(
-      collateral1.address,
-      "wETH Crypt",
-      "rfwETH",
-    );
-    const vault2 = await ReaperVaultV2.new(
-      collateral2.address,
-      "wBTC Crypt",
-      "rfwBTC",
-    );
+
     collaterals = [collateral1, collateral2];
-    vaults = [vault1, vault2];
 
     activePool = await ActivePool.new();
     collateralConfig = await CollateralConfig.new();
@@ -279,7 +268,7 @@ contract("ActivePool", async (accounts) => {
     assert.equal(pool_BalanceChange, _minus_1_Ether);
   });
 
-  it("sendCollateral works with default values, vault share bal is 0 before and after", async () => {
+  it("sendCollateral works with default values", async () => {
     // start pool with 2 ether
     await collaterals[0].mint(mockBorrowerOperations.address, dec(2, "ether"));
     await collaterals[0].approveInternal(
@@ -297,12 +286,8 @@ contract("ActivePool", async (accounts) => {
       activePool.address,
     );
     const alice_CollBalBefore = await collaterals[0].balanceOf(alice);
-    const activePool_VaultBalBefore = await vaults[0].balanceOf(
-      activePool.address,
-    );
 
     assert.equal(activePool_CollBalBefore, dec(2, "ether"));
-    assert.equal(activePool_VaultBalBefore, 0);
 
     // send 1 ether to alice
     const sendCollData = th.getTransactionData(
@@ -317,16 +302,12 @@ contract("ActivePool", async (accounts) => {
       activePool.address,
     );
     const alice_CollBalAfter = await collaterals[0].balanceOf(alice);
-    const activePool_VaultBalAfter = await vaults[0].balanceOf(
-      activePool.address,
-    );
 
     assert.equal(activePool_CollBalAfter, dec(1, "ether"));
-    assert.equal(activePool_VaultBalAfter, 0);
     assert.equal(alice_CollBalAfter.sub(alice_CollBalBefore), dec(1, "ether"));
   });
 
-  it("pullCollateral works with default values, vault share bal is 0 before and after", async () => {
+  it("pullCollateral works with default values", async () => {
     // start pool with 2 ether
     await collaterals[0].mint(mockBorrowerOperations.address, dec(2, "ether"));
     await collaterals[0].approveInternal(
@@ -343,12 +324,8 @@ contract("ActivePool", async (accounts) => {
     const activePool_CollBalBefore = await collaterals[0].balanceOf(
       activePool.address,
     );
-    const activePool_VaultBalBefore = await vaults[0].balanceOf(
-      activePool.address,
-    );
 
     assert.equal(activePool_CollBalBefore, dec(2, "ether"));
-    assert.equal(activePool_VaultBalBefore, 0);
 
     // pull some more collateral from borrower ops
     await collaterals[0].mint(mockBorrowerOperations.address, dec(3, "ether"));
@@ -366,12 +343,8 @@ contract("ActivePool", async (accounts) => {
     const activePool_CollBalAfter = await collaterals[0].balanceOf(
       activePool.address,
     );
-    const activePool_VaultBalAfter = await vaults[0].balanceOf(
-      activePool.address,
-    );
 
     assert.equal(activePool_CollBalAfter, dec(5, "ether"));
-    assert.equal(activePool_VaultBalAfter, 0);
   });
 
   const setReasonableDefaultStateForYielding = async () => {

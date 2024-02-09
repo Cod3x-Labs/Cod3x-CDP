@@ -19,7 +19,6 @@ const LQTYStaking = artifacts.require("./LQTYStaking.sol");
 const CommunityIssuance = artifacts.require("./CommunityIssuance.sol");
 
 const ERC20 = artifacts.require("ERC20Mock.sol");
-const ReaperVaultV2 = artifacts.require("ReaperVaultV2Minimal.sol");
 const Governance = artifacts.require("MockGovernance.sol");
 const Guardian = artifacts.require("MockGuardian.sol");
 
@@ -286,19 +285,7 @@ class DeploymentHelper {
       multisig,
       0,
     ); // 8 decimal places
-    const vault1 = await ReaperVaultV2.new(
-      collateral1.address,
-      "wETH Crypt",
-      "rfwETH",
-    );
-    const vault2 = await ReaperVaultV2.new(
-      collateral2.address,
-      "wBTC Crypt",
-      "rfwBTC",
-    );
-
     contracts.collaterals = [collateral1, collateral2];
-    contracts.reapervaults = [vault1, vault2];
     return contracts;
   }
 

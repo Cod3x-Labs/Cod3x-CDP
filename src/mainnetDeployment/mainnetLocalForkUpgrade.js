@@ -120,15 +120,6 @@ async function upgrade(isTest) {
       liquityCore.stabilityPool.address,
       liquityCore.borrowerOperations.address,
     );
-  const ReaperVault = await ethers.getContractFactory(
-    "ReaperVaultV2Minimal",
-    governance,
-  );
-  const wstethVault = await ReaperVault.deploy(
-    wsteth.address,
-    "Ethos Reserve wstETH Vault",
-    "ethos-wstETH",
-  );
   await liquityCore.collateralConfig
     .connect(governance)
     .addNewCollateral(
@@ -138,7 +129,6 @@ async function upgrade(isTest) {
       ethers.utils.parseEther("2000000"),
       97200,
       14400,
-      wstethVault.address,
       "0x698B585CbC4407e2D54aa898B2600B53C68958f7",
       "0x1962cde2f19178fe2bb2229e78a6d386e6406979edc7b9a1966d89d83b3ebf2e",
     );
