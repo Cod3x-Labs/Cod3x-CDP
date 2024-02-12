@@ -5,6 +5,7 @@ const MockChainlink = artifacts.require("./MockAggregator.sol");
 const MockTellor = artifacts.require("./MockTellor.sol");
 const TellorCaller = artifacts.require("./TellorCaller.sol");
 const ERC20 = artifacts.require("ERC20Mock.sol");
+const ERC4626 = artifacts.require("ERC4626Mock.sol");
 const NonPayable = artifacts.require("./NonPayable.sol");
 
 const testHelpers = require("../utils/testHelpers.js");
@@ -40,10 +41,32 @@ contract("PriceFeed", async (accounts) => {
   };
 
   before(async () => {
-    collateral1 = await ERC20.new("Wrapped Ether", "wETH", 12, multisig, 0); // 12 decimal places
-    collateral2 = await ERC20.new("Wrapped Bitcoin", "wBTC", 8, multisig, 0); // 8 decimal places
+    const wETHCollAsset = await ERC20.new(
+      "Wrapped Ether",
+      "wETH",
+      12,
+      multisig,
+      0,
+    ); // 12 decimal places
+    const wBTCCollAsset = await ERC20.new(
+      "Wrapped Bitcoin",
+      "wBTC",
+      8,
+      multisig,
+      0,
+    ); // 8 decimal places
+
+    collateral1 = await ERC4626.new(
+      wETHCollAsset.address,
+      "Vault Wrapped Ether",
+      "vwETH",
+    );
+    collateral2 = await ERC4626.new(
+      wBTCCollAsset.address,
+      "Vault Wrapped Bitcoin",
+      "vwBTC",
+    );
     collateralConfig = await CollateralConfig.new();
-    const mockActivePool = await NonPayable.new();
     const mockPriceFeed = await NonPayable.new();
     CollateralConfig.setAsDeployed(collateralConfig);
     await collateralConfig.initialize(
@@ -188,17 +211,23 @@ contract("PriceFeed", async (accounts) => {
     });
   });
 
-  it("C1 Chainlink working: fetchPrice should return the correct price, taking into account the number of decimal digits on the aggregator", async () => {
+  it("C1 Chainlink working: fetchPrice should return the correct price, taking into account the number of decimal digits on the aggregator and the vault asset per share value", async () => {
     await setAddresses();
 
     // Oracle price price is 10.00000000
     await mockChainlink.setDecimals(8);
     await mockChainlink.setPrevPrice(dec(1, 9));
     await mockChainlink.setPrice(dec(1, 9));
+
+    //ERC4626 collateral support setup
+    const assetsPerShare = 2;
+    await collateral1.setAssetsPerShare(assetsPerShare);
+
     await priceFeed.fetchPrice(collateral1.address);
     let price = await priceFeed.lastGoodPrice(collateral1.address);
+
     // Check Liquity PriceFeed gives 10, with 18 digit precision
-    assert.equal(price, dec(10, 18));
+    assert.equal(price, dec(10, 18) * assetsPerShare);
 
     // Oracle price is 1e9
     await mockChainlink.setDecimals(0);
@@ -207,18 +236,16 @@ contract("PriceFeed", async (accounts) => {
     await priceFeed.fetchPrice(collateral1.address);
     price = await priceFeed.lastGoodPrice(collateral1.address);
     // Check Liquity PriceFeed gives 1e9, with 18 digit precision
-    assert.isTrue(price.eq(toBN(dec(1, 27))));
+    assert.isTrue(price.eq(toBN(dec(1 * assetsPerShare, 27))));
 
     // Oracle price is 0.0001
     await mockChainlink.setDecimals(18);
-    const decimals = await mockChainlink.decimals();
-
     await mockChainlink.setPrevPrice(dec(1, 14));
     await mockChainlink.setPrice(dec(1, 14));
     await priceFeed.fetchPrice(collateral1.address);
     price = await priceFeed.lastGoodPrice(collateral1.address);
     // Check Liquity PriceFeed gives 0.0001 with 18 digit precision
-    assert.isTrue(price.eq(toBN(dec(1, 14))));
+    assert.isTrue(price.eq(toBN(dec(1 * assetsPerShare, 14))));
 
     // Oracle price is 1234.56789
     await mockChainlink.setDecimals(5);
@@ -227,7 +254,8 @@ contract("PriceFeed", async (accounts) => {
     await priceFeed.fetchPrice(collateral1.address);
     price = await priceFeed.lastGoodPrice(collateral1.address);
     // Check Liquity PriceFeed gives 0.0001 with 18 digit precision
-    assert.equal(price, "1234567890000000000000");
+    assert.equal(price, 1234567890000000000000 * assetsPerShare);
+    collateral1.resetAssetsPerShare();
   });
 
   // --- Chainlink breaks ---

@@ -2,15 +2,16 @@
 
 pragma solidity ^0.8.23;
 
-import "./Interfaces/ICollateralConfig.sol";
-import "./Interfaces/IPriceFeed.sol";
-import "./Interfaces/ITellorCaller.sol";
-import "./Dependencies/AggregatorV3Interface.sol";
-import "./Dependencies/SafeMath.sol";
-import "./Dependencies/Ownable.sol";
-import "./Dependencies/CheckContract.sol";
-import "./Dependencies/BaseMath.sol";
-import "./Dependencies/LiquityMath.sol";
+import {IERC4626} from "@openzeppelin/contracts/interfaces/IERC4626.sol";
+import {ICollateralConfig} from "./Interfaces/ICollateralConfig.sol";
+import {IPriceFeed} from "./Interfaces/IPriceFeed.sol";
+import {ITellorCaller} from "./Interfaces/ITellorCaller.sol";
+import {AggregatorV3Interface} from "./Dependencies/AggregatorV3Interface.sol";
+import {SafeMath} from "./Dependencies/SafeMath.sol";
+import {Ownable} from "./Dependencies/Ownable.sol";
+import {CheckContract} from "./Dependencies/CheckContract.sol";
+import {BaseMath} from "./Dependencies/BaseMath.sol";
+import {LiquityMath} from "./Dependencies/LiquityMath.sol";
 
 /*
  * PriceFeed for mainnet deployment, to be connected to Chainlink's live ETH:USD aggregator reference
@@ -27,7 +28,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
 
     bool public initialized = false;
 
-    mapping(address => AggregatorV3Interface) public priceAggregator; // collateral => Mainnet Chainlink aggregator
+    mapping(address => AggregatorV3Interface) public priceAggregator; // collateral => Mainnet Chainlink aggregator for collateral's(Vault) underlying
     ITellorCaller internal tellorCaller; // Wrapper contract that calls the Tellor system
     mapping(address => bytes32) public tellorQueryId; // collateral => Tellor query ID
 
@@ -141,7 +142,6 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
                     !_chainlinkIsFrozen(chainlinkResponse, collateral),
                 "PriceFeed: Chainlink must be working and current"
             );
-
             _storeChainlinkPrice(collateral, chainlinkResponse);
         }
 
@@ -513,6 +513,17 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
 
     // --- Helper functions ---
 
+    function _convertToSharePrice(
+        address _collateral,
+        uint vaultAssetUnitPrice
+    ) internal returns (uint) {
+        IERC4626 vault = IERC4626(_collateral);
+        uint256 oneShare = 10 ** vault.decimals();
+        uint256 assetsForOneShare = vault.convertToAssets(oneShare);
+        return
+            (assetsForOneShare * vaultAssetUnitPrice) / 10 ** vault.decimals();
+    }
+
     /* Chainlink is considered broken if its current or previous round data is in any way bad. We check the previous round
      * for two reasons:
      *
@@ -710,9 +721,14 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         emit PriceFeedStatusChanged(_collateral, _status);
     }
 
-    function _storePrice(address _collateral, uint _currentPrice) internal {
-        lastGoodPrice[_collateral] = _currentPrice;
-        emit LastGoodPriceUpdated(_collateral, _currentPrice);
+    function _storePrice(
+        address _collateral,
+        uint _currentPrice
+    ) internal returns (uint) {
+        uint convertedPrice = _convertToSharePrice(_collateral, _currentPrice);
+        lastGoodPrice[_collateral] = convertedPrice;
+        emit LastGoodPriceUpdated(_collateral, convertedPrice);
+        return convertedPrice;
     }
 
     function _storeTellorPrice(
@@ -722,9 +738,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         uint scaledTellorPrice = _scaleTellorPriceByDigits(
             _tellorResponse.value
         );
-        _storePrice(_collateral, scaledTellorPrice);
-
-        return scaledTellorPrice;
+        return _storePrice(_collateral, scaledTellorPrice);
     }
 
     function _storeChainlinkPrice(
@@ -735,9 +749,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
             uint256(_chainlinkResponse.answer),
             _chainlinkResponse.decimals
         );
-        _storePrice(_collateral, scaledChainlinkPrice);
-
-        return scaledChainlinkPrice;
+        return _storePrice(_collateral, scaledChainlinkPrice);
     }
 
     // --- Oracle response wrapper functions ---
