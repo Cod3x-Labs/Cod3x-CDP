@@ -29,8 +29,8 @@ contract LUSDToken is CheckContract, ILUSDToken {
     using SafeMath for uint256;
 
     uint256 private _totalSupply;
-    string internal constant _NAME = "Ethos Reserve Note";
-    string internal constant _SYMBOL = "ERN";
+    string internal constant _NAME = "Pluc USD";
+    string internal constant _SYMBOL = "plUSD";
     string internal constant _VERSION = "1";
     uint8 internal constant _DECIMALS = 18;
 
