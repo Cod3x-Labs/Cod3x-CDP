@@ -85,6 +85,7 @@ class MainnetDeploymentHelper {
     const priceFeedFactory = await this.getFactory("PriceFeed");
     const sortedTrovesFactory = await this.getFactory("SortedTroves");
     const troveManagerFactory = await this.getFactory("TroveManager");
+    const rewarderManagerFactory = await this.getFactory("RewarderManager");
     const activePoolFactory = await this.getFactory("ActivePool");
     const stabilityPoolFactory = await this.getFactory("StabilityPool");
     const gasPoolFactory = await this.getFactory("GasPool");
@@ -118,6 +119,11 @@ class MainnetDeploymentHelper {
     const troveManager = await this.loadOrDeploy(
       troveManagerFactory,
       "troveManager",
+      deploymentState,
+    );
+    const rewarderManager = await this.loadOrDeploy(
+      rewarderManagerFactory,
+      "rewarderManager",
       deploymentState,
     );
     const activePool = await this.loadOrDeploy(
@@ -207,6 +213,7 @@ class MainnetDeploymentHelper {
       await this.verifyContract("priceFeed", deploymentState);
       await this.verifyContract("sortedTroves", deploymentState);
       await this.verifyContract("troveManager", deploymentState);
+      await this.verifyContract("rewarderManager", deploymentState);
       await this.verifyContract("activePool", deploymentState);
       await this.verifyContract("stabilityPool", deploymentState);
       await this.verifyContract("gasPool", deploymentState);
@@ -425,10 +432,19 @@ class MainnetDeploymentHelper {
           contracts.sortedTroves.address,
           oathAddress,
           LQTYContracts.lqtyStaking.address,
+          contracts.rewarderManager.address,
           contracts.redemptionHelper.address,
           contracts.liquidationHelper.address,
           { gasPrice },
         ),
+      ));
+
+    // set contracts in RewarderManager
+    (await this.isOwnershipRenounced(contracts.rewarderManager)) ||
+      (await this.sendAndWaitForTransaction(
+        contracts.rewarderManager.setAddresses(contracts.troveManager.address, {
+          gasPrice,
+        }),
       ));
 
     // set contracts in RedemptionHelper

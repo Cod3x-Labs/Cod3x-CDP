@@ -1,6 +1,7 @@
 const CollateralConfig = artifacts.require("./CollateralConfig.sol");
 const SortedTroves = artifacts.require("./SortedTroves.sol");
 const TroveManager = artifacts.require("./TroveManager.sol");
+const RewarderManager = artifacts.require("./RewarderManager.sol");
 const RedemptionHelper = artifacts.require("./RedemptionHelper.sol");
 const LiquidationHelper = artifacts.require("./LiquidationHelper.sol");
 const PriceFeedTestnet = artifacts.require("./PriceFeedTestnet.sol");
@@ -85,6 +86,7 @@ class DeploymentHelper {
     const priceFeedTestnet = await PriceFeedTestnet.new();
     const sortedTroves = await SortedTroves.new();
     const troveManager = await TroveManager.new();
+    const rewarderManager = await RewarderManager.new();
     const redemptionHelper = await RedemptionHelper.new();
     const liquidationHelper = await LiquidationHelper.new();
     const activePool = await ActivePool.new();
@@ -111,6 +113,7 @@ class DeploymentHelper {
     PriceFeedTestnet.setAsDeployed(priceFeedTestnet);
     SortedTroves.setAsDeployed(sortedTroves);
     TroveManager.setAsDeployed(troveManager);
+    RewarderManager.setAsDeployed(rewarderManager);
     RedemptionHelper.setAsDeployed(redemptionHelper);
     LiquidationHelper.setAsDeployed(liquidationHelper);
     ActivePool.setAsDeployed(activePool);
@@ -130,6 +133,7 @@ class DeploymentHelper {
       lusdToken,
       sortedTroves,
       troveManager,
+      rewarderManager,
       redemptionHelper,
       liquidationHelper,
       activePool,
@@ -154,6 +158,7 @@ class DeploymentHelper {
     testerContracts.collateralConfig = await CollateralConfig.new();
     testerContracts.priceFeedTestnet = await PriceFeedTestnet.new();
     testerContracts.sortedTroves = await SortedTroves.new();
+    testerContracts.rewarderManager = await RewarderManager.new();
     testerContracts.redemptionHelper = await RedemptionHelper.new();
     testerContracts.liquidationHelper = await LiquidationHelper.new();
     // Actual tester contracts
@@ -409,8 +414,13 @@ class DeploymentHelper {
       contracts.sortedTroves.address,
       LQTYContracts.stakingToken.address,
       LQTYContracts.lqtyStaking.address,
+      contracts.rewarderManager.address,
       contracts.redemptionHelper.address,
       contracts.liquidationHelper.address,
+    );
+
+    await contracts.rewarderManager.setAddresses(
+      contracts.troveManager.address,
     );
 
     await contracts.redemptionHelper.setAddresses(

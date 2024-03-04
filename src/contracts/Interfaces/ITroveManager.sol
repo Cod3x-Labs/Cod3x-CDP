@@ -37,6 +37,7 @@ interface ITroveManager is ILiquityBase {
     event SortedTrovesAddressChanged(address _sortedTrovesAddress);
     event LQTYTokenAddressChanged(address _lqtyTokenAddress);
     event LQTYStakingAddressChanged(address _lqtyStakingAddress);
+    event RewarderManagerAddressChanged(address _rewarderManagerAddress);
 
     event Liquidation(
         address _collateral,
@@ -105,6 +106,7 @@ interface ITroveManager is ILiquityBase {
         address _sortedTrovesAddress,
         address _lqtyTokenAddress,
         address _lqtyStakingAddress,
+        address _rewarderManagerAddress,
         address _redemptionHelperAddress,
         address _liquidationHelperAddress
     ) external;

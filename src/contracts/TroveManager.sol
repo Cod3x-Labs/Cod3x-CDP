@@ -9,6 +9,7 @@ import "./Interfaces/ISortedTroves.sol";
 import "./Interfaces/ILQTYStaking.sol";
 import "./Interfaces/IRedemptionHelper.sol";
 import "./Interfaces/ILiquidationHelper.sol";
+import "./Interfaces/IRewarderManager.sol";
 import "./Dependencies/LiquityBase.sol";
 import "./Dependencies/CheckContract.sol";
 import "./Dependencies/IERC20.sol";
@@ -33,6 +34,8 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
     IERC20 public override lqtyToken;
 
     ILQTYStaking public override lqtyStaking;
+
+    IRewarderManager public rewarderManager;
 
     // A doubly linked list of Troves, sorted by their sorted by their collateral ratios
     ISortedTroves public sortedTroves;
@@ -181,7 +184,6 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
     event CollateralConfigAddressChanged(address _newCollateralConfigAddress);
     event RedemptionHelperAddressChanged(address _redemptionHelperAddress);
     event LiquidationHelperAddressChanged(address _liquidationHelperAddress);
-
     event TroveUpdated(
         address indexed _borrower,
         address _collateral,
@@ -205,7 +207,7 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
         redeemCollateral
     }
 
-    constructor() public {
+    constructor() {
         // makeshift ownable implementation to circumvent contract size limit
         owner = msg.sender;
     }
@@ -224,6 +226,7 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
         address _sortedTrovesAddress,
         address _lqtyTokenAddress,
         address _lqtyStakingAddress,
+        address _rewarderManagerAddress,
         address _redemptionHelperAddress,
         address _liquidationHelperAddress
     ) external override {
@@ -240,6 +243,7 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
         checkContract(_sortedTrovesAddress);
         checkContract(_lqtyTokenAddress);
         checkContract(_lqtyStakingAddress);
+        checkContract(_rewarderManagerAddress);
         checkContract(_redemptionHelperAddress);
         checkContract(_liquidationHelperAddress);
 
@@ -254,6 +258,7 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
         sortedTroves = ISortedTroves(_sortedTrovesAddress);
         lqtyToken = IERC20(_lqtyTokenAddress);
         lqtyStaking = ILQTYStaking(_lqtyStakingAddress);
+        rewarderManager = IRewarderManager(_rewarderManagerAddress);
         redemptionHelper = IRedemptionHelper(_redemptionHelperAddress);
         liquidationHelper = ILiquidationHelper(_liquidationHelperAddress);
 
@@ -268,6 +273,7 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
         emit SortedTrovesAddressChanged(_sortedTrovesAddress);
         emit LQTYTokenAddressChanged(_lqtyTokenAddress);
         emit LQTYStakingAddressChanged(_lqtyStakingAddress);
+        emit RewarderManagerAddressChanged(_rewarderManagerAddress);
         emit RedemptionHelperAddressChanged(_redemptionHelperAddress);
         emit LiquidationHelperAddressChanged(_liquidationHelperAddress);
 
@@ -484,6 +490,18 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
         uint256 _newColl
     ) external override {
         _requireCallerIsRedemptionHelper();
+        uint256 oldDebt = Troves[_borrower][_collateral].debt;
+        uint256 oldColl = Troves[_borrower][_collateral].coll;
+        rewarderManager.onDebtDecrease(
+            _borrower,
+            _collateral,
+            oldDebt.sub(_newDebt)
+        );
+        rewarderManager.onCollDecrease(
+            _borrower,
+            _collateral,
+            oldColl.sub(_newColl)
+        );
         Troves[_borrower][_collateral].debt = _newDebt;
         Troves[_borrower][_collateral].coll = _newColl;
         _updateStakeAndTotalStakes(_borrower, _collateral);
@@ -662,6 +680,18 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
             uint pendingLUSDDebtReward = getPendingLUSDDebtReward(
                 _borrower,
                 _collateral
+            );
+
+            // Call RewarderManager hooks
+            rewarderManager.onCollIncrease(
+                _borrower,
+                _collateral,
+                pendingCollateralReward
+            );
+            rewarderManager.onDebtIncrease(
+                _borrower,
+                _collateral,
+                pendingLUSDDebtReward
             );
 
             // Apply pending rewards to trove's state
@@ -995,6 +1025,12 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
         assert(
             closedStatus != TroveStatus.nonExistent &&
                 closedStatus != TroveStatus.active
+        );
+
+        rewarderManager.onTroveClose(
+            _borrower,
+            _collateral,
+            uint(closedStatus)
         );
 
         uint TroveOwnersArrayLength = TroveOwners[_collateral].length;
@@ -1408,6 +1444,9 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
             collateralConfig.getCollateralDebtLimit(_collateral) != 0,
             "TroveManager: Cannot deposit collateral with debt limit of 0"
         );
+
+        rewarderManager.onCollIncrease(_borrower, _collateral, _collIncrease);
+
         uint newColl = Troves[_borrower][_collateral].coll.add(_collIncrease);
         Troves[_borrower][_collateral].coll = newColl;
         return newColl;
@@ -1419,6 +1458,7 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
         uint _collDecrease
     ) external override returns (uint) {
         _requireCallerIsBorrowerOperations();
+        rewarderManager.onCollDecrease(_borrower, _collateral, _collDecrease);
         uint newColl = Troves[_borrower][_collateral].coll.sub(_collDecrease);
         Troves[_borrower][_collateral].coll = newColl;
         return newColl;
@@ -1435,6 +1475,7 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
                 getEntireSystemDebt(_collateral).add(_debtIncrease),
             "TroveManager: Debt increase exceeds limit"
         );
+        rewarderManager.onDebtIncrease(_borrower, _collateral, _debtIncrease);
         uint newDebt = Troves[_borrower][_collateral].debt.add(_debtIncrease);
         Troves[_borrower][_collateral].debt = newDebt;
         return newDebt;
@@ -1446,6 +1487,7 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
         uint _debtDecrease
     ) external override returns (uint) {
         _requireCallerIsBorrowerOperations();
+        rewarderManager.onDebtDecrease(_borrower, _collateral, _debtDecrease);
         uint newDebt = Troves[_borrower][_collateral].debt.sub(_debtDecrease);
         Troves[_borrower][_collateral].debt = newDebt;
         return newDebt;

@@ -110,6 +110,7 @@ contract("ActivePool", async (accounts) => {
       dumbContractAddress,
       dumbContractAddress,
       dumbContractAddress,
+      dumbContractAddress,
       mockRedemptionHelper.address,
       mockLiquidationHelper.address,
     );
