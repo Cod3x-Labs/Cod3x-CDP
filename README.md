@@ -1,28 +1,11 @@
-# Solidity template
+# Pluc RWA stablecoin
 
-## Template frameworks
+NOTE: This repository started as a fork of [Ethos 2.1](https://github.com/Byte-Masons/liquity-dev/tree/v2.1) -> [commit](https://github.com/Byte-Masons/pluc-stablecoin/commit/0b837a74bfbe03cf77ea16b90151f8291237c2d0)
 
-This template utilizes set of various frameworks:
+## Collateral
 
-- **Hardhat** with **TypeScript** for compilation, deployments and tests
-- **Forge** for tests (it is possible to write tests with both Hardhat and Forge)
-- **NPM** used as a package manager
-- **GitHub Action** are used for CI/CD pipelines
-- **Solhint** and its integration with **Prettier** (`npm run lint` with trigger both **Solhint** and **Prettier** runs)
+Pluc collateral is an ERC20 Vault token. Since Pluc is a Real World Asset (RWA)-based protocol, the Vault's underlying tokens are RWA assets. Pluc does not rehypothecate from the Active Pool, instead, rehypothecation occurs within the Vault. This approach allows for maximum capital efficiency and abstracts the rehypothecation logic away from the Stablecoin protocol.
 
-## How to use it
+## Oracle
 
-Certainly, here's your README text with improved grammar and clarity:
-
-- Create a new GitHub project using this template.
-- Navigate to the `src` folder and run `npm install`.
-
-- All commands, both for Hardhat and Forge, are encapsulated via NPM. For example, running `npm run test` will execute both `hardhat test` and `forge tests` commands. This means you should avoid running Hardhat or Forge commands directly. If you find it necessary to update the commands, please modify the `package.json` with the new set of commands. To view the available scripts, refer to the `package.json` file.
-
-- The `/test` directory may contain both Forge and Hardhat types of tests.
-
-- The `/utils` directory currently contains a generic TypeScript script that can be used for deploying various Smart Contracts. An example of usage can be found in `main.ts` under the `/scripts` directory.
-
-- The `/.github` directory contains both workflow definitions for GitHub Actions and a `dependabot.yml` file with configuration for Dependabot, which automatically opens pull requests to keep your project's dependencies up to date.
-
-NOTE: This is a fork of [Ethos 2.1](https://github.com/Byte-Masons/liquity-dev/tree/v2.1)
+The Price Feed contract is a contract that encapsulates interactions with Oracles, with error handling implemented. In Pluc, the Price Feed will refer to the [Tellor](https://tellor.io) and [Chronicle Labs](https://chroniclelabs.org) oracles.
