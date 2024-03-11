@@ -516,7 +516,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     function _convertToSharePrice(
         address _collateral,
         uint vaultAssetUnitPrice
-    ) internal returns (uint) {
+    ) internal view returns (uint) {
         IERC4626 vault = IERC4626(_collateral);
         uint256 oneShare = 10 ** vault.decimals();
         uint256 assetsForOneShare = vault.convertToAssets(oneShare);
