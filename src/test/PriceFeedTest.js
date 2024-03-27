@@ -209,6 +209,9 @@ contract("PriceFeed", async (accounts) => {
 
   it("C1 Chainlink working: fetchPrice should return the correct price, taking into account the number of decimal digits on the aggregator", async () => {
     await setAddresses();
+    //ERC4626 collateral support setup
+    const assetsPerShare = 2;
+    await collateral1.setAssetsPerShare(assetsPerShare);
 
     // Oracle price price is 10.00000000
     await mockChainlink.setDecimals(8);
@@ -217,9 +220,11 @@ contract("PriceFeed", async (accounts) => {
 
     await priceFeed.fetchPrice(collateral1.address);
     let oraclePrice = await priceFeed.lastGoodPrice(collateral1.address);
-
     // Check Liquity PriceFeed gives 10, with 18 digit precision
     assert.equal(oraclePrice, dec(10, 18));
+
+    let fetchedPrice = await priceFeed.fetchPrice.call(collateral1.address);
+    assert.equal(fetchedPrice, dec(10, 18) * assetsPerShare);
 
     // Oracle price is 1e9
     await mockChainlink.setDecimals(0);
@@ -229,6 +234,9 @@ contract("PriceFeed", async (accounts) => {
     oraclePrice = await priceFeed.lastGoodPrice(collateral1.address);
     // Check Liquity PriceFeed gives 1e9, with 18 digit precision
     assert.isTrue(oraclePrice.eq(toBN(dec(1, 27))));
+    //ERC4626 collateral test
+    fetchedPrice = await priceFeed.fetchPrice.call(collateral1.address);
+    assert.equal(fetchedPrice, dec(1, 27) * assetsPerShare);
 
     // Oracle price is 0.0001
     await mockChainlink.setDecimals(18);
@@ -238,6 +246,9 @@ contract("PriceFeed", async (accounts) => {
     oraclePrice = await priceFeed.lastGoodPrice(collateral1.address);
     // Check Liquity PriceFeed gives 0.0001 with 18 digit precision
     assert.isTrue(oraclePrice.eq(toBN(dec(1, 14))));
+    //ERC4626 collateral test
+    fetchedPrice = await priceFeed.fetchPrice.call(collateral1.address);
+    assert.equal(fetchedPrice, dec(1, 14) * assetsPerShare);
 
     // Oracle price is 1234.56789
     await mockChainlink.setDecimals(5);
@@ -250,6 +261,8 @@ contract("PriceFeed", async (accounts) => {
     oraclePrice = await priceFeed.lastGoodPrice(collateral1.address);
     // Check Liquity PriceFeed gives 0.0001 with 18 digit precision
     assert.equal(oraclePrice, 1234567890000000000000);
+    fetchedPrice = await priceFeed.fetchPrice.call(collateral1.address);
+    assert.equal(fetchedPrice, 1234567890000000000000 * assetsPerShare);
     collateral1.resetAssetsPerShare();
   });
 
@@ -258,22 +271,26 @@ contract("PriceFeed", async (accounts) => {
     let tellorUpdateTime = await th.getLatestBlockTimestamp(web3);
     tellorUpdateTime = tellorUpdateTime - 60 * 25; // needs to be at least 20 minutes old and greater than previous update time
     await setAddresses();
+    //ERC4626 collateral support setup
+    const assetsPerShare = 2;
+    await collateral1.setAssetsPerShare(assetsPerShare);
     // --- Chainlink fails, system switches to Tellor ---
     const statusBefore = await priceFeed.status(collateral1.address);
     assert.equal(statusBefore, "0"); // status 0: Chainlink working
 
     // Chainlink breaks with negative price
     await mockChainlink.setPrice("-5000");
-
     await mockTellor.setPrice(dec(123, 18));
     await mockChainlink.setUpdateTime(0);
 
-    const priceFetchTx = await priceFeed.fetchPrice(collateral1.address);
+    await priceFeed.fetchPrice(collateral1.address);
     const statusAfter = await priceFeed.status(collateral1.address);
     assert.equal(statusAfter, "1"); // status 1: using Tellor, Chainlink untrusted
 
     let price = await priceFeed.lastGoodPrice(collateral1.address);
     assert.equal(price, dec(123, 18));
+    let fetchedPrice = await priceFeed.fetchPrice.call(collateral1.address);
+    assert.equal(fetchedPrice, dec(123, 18) * assetsPerShare);
 
     // Tellor price is 10 at 18-digit precision
     await mockTellor.setPrice(dec(10, 18));
@@ -282,6 +299,8 @@ contract("PriceFeed", async (accounts) => {
     price = await priceFeed.lastGoodPrice(collateral1.address);
     // Check Liquity PriceFeed gives 10, with 18 digit precision
     assert.equal(price, dec(10, 18));
+    fetchedPrice = await priceFeed.fetchPrice.call(collateral1.address);
+    assert.equal(fetchedPrice, dec(10, 18) * assetsPerShare);
 
     // Tellor price is 1e9 at 18-digit precision
     await mockTellor.setPrice(dec(1, 27));
@@ -290,6 +309,8 @@ contract("PriceFeed", async (accounts) => {
     price = await priceFeed.lastGoodPrice(collateral1.address);
     // Check Liquity PriceFeed gives 1e9, with 18 digit precision
     assert.equal(price, dec(1, 27));
+    fetchedPrice = await priceFeed.fetchPrice.call(collateral1.address);
+    assert.equal(fetchedPrice, dec(1, 27) * assetsPerShare);
 
     // Tellor price is 0.0001 at 18-digit precision
     await mockTellor.setPrice(dec(1, 14));
@@ -299,6 +320,8 @@ contract("PriceFeed", async (accounts) => {
     // Check Liquity PriceFeed gives 0.0001 with 18 digit precision
 
     assert.equal(price, dec(1, 14));
+    fetchedPrice = await priceFeed.fetchPrice.call(collateral1.address);
+    assert.equal(fetchedPrice, dec(1, 14) * assetsPerShare);
 
     // Tellor price is 1234.56789 at 18-digit precision
     await mockTellor.setPrice(dec(123456789, 13));
@@ -307,6 +330,8 @@ contract("PriceFeed", async (accounts) => {
     price = await priceFeed.lastGoodPrice(collateral1.address);
     // Check Liquity PriceFeed gives 0.0001 with 18 digit precision
     assert.equal(price, "1234567890000000000000");
+    fetchedPrice = await priceFeed.fetchPrice.call(collateral1.address);
+    assert.equal(fetchedPrice, 1234567890000000000000 * assetsPerShare);
   });
 
   it("C1 Chainlink breaks, Tellor working: fetchPrice should return the correct Tellor price, taking into account TellorCaller's last saved timestamp", async () => {
