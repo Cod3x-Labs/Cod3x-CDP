@@ -107,11 +107,7 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
     // --- Trove Liquidation functions ---
 
     // Single liquidation function. Closes the trove if its ICR is lower than the minimum collateral ratio.
-    function liquidate(
-        address _borrower,
-        address _collateral,
-        address _caller
-    ) external override {
+    function liquidate(address _borrower, address _collateral, address _caller) external override {
         _requireCallerIsTroveManager();
         _requireTroveIsActive(_borrower, _collateral);
 
@@ -167,11 +163,7 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
             _LUSDInStabPool
         );
 
-        troveManager.closeTrove(
-            _borrower,
-            _collateral,
-            uint(TroveStatus.closedByLiquidation)
-        );
+        troveManager.closeTrove(_borrower, _collateral, uint(TroveStatus.closedByLiquidation));
         troveManager.emitTroveLiquidatedAndTroveUpdated(
             _borrower,
             _collateral,
@@ -226,15 +218,10 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
 
             singleLiquidation.debtToOffset = 0;
             singleLiquidation.collToSendToSP = 0;
-            singleLiquidation.debtToRedistribute = singleLiquidation
-                .entireTroveDebt;
+            singleLiquidation.debtToRedistribute = singleLiquidation.entireTroveDebt;
             singleLiquidation.collToRedistribute = vars.collToLiquidate;
 
-            troveManager.closeTrove(
-                _borrower,
-                _collateral,
-                uint(TroveStatus.closedByLiquidation)
-            );
+            troveManager.closeTrove(_borrower, _collateral, uint(TroveStatus.closedByLiquidation));
             troveManager.emitTroveLiquidatedAndTroveUpdated(
                 _borrower,
                 _collateral,
@@ -265,11 +252,7 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
                 _LUSDInStabPool
             );
 
-            troveManager.closeTrove(
-                _borrower,
-                _collateral,
-                uint(TroveStatus.closedByLiquidation)
-            );
+            troveManager.closeTrove(_borrower, _collateral, uint(TroveStatus.closedByLiquidation));
             troveManager.emitTroveLiquidatedAndTroveUpdated(
                 _borrower,
                 _collateral,
@@ -284,9 +267,7 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
              * The remainder due to the capped rate will be claimable as collateral surplus.
              */
         } else if (
-            (_ICR >= _MCR) &&
-            (_ICR < _TCR) &&
-            (singleLiquidation.entireTroveDebt <= _LUSDInStabPool)
+            (_ICR >= _MCR) && (_ICR < _TCR) && (singleLiquidation.entireTroveDebt <= _LUSDInStabPool)
         ) {
             troveManager.movePendingTroveRewardsToActivePool(
                 _activePool,
@@ -298,9 +279,7 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
             assert(_LUSDInStabPool != 0);
 
             troveManager.removeStake(_borrower, _collateral);
-            uint collDecimals = collateralConfig.getCollateralDecimals(
-                _collateral
-            );
+            uint collDecimals = collateralConfig.getCollateralDecimals(_collateral);
             singleLiquidation = _getCappedOffsetVals(
                 singleLiquidation.entireTroveDebt,
                 singleLiquidation.entireTroveColl,
@@ -309,11 +288,7 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
                 collDecimals
             );
 
-            troveManager.closeTrove(
-                _borrower,
-                _collateral,
-                uint(TroveStatus.closedByLiquidation)
-            );
+            troveManager.closeTrove(_borrower, _collateral, uint(TroveStatus.closedByLiquidation));
             if (singleLiquidation.collSurplus > 0) {
                 collSurplusPool.accountSurplus(
                     _borrower,
@@ -401,9 +376,7 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
             );
         }
 
-        singleLiquidation.collGasCompensation = _getCollGasCompensation(
-            cappedCollPortion
-        );
+        singleLiquidation.collGasCompensation = _getCollGasCompensation(cappedCollPortion);
         singleLiquidation.LUSDGasCompensation = LUSD_GAS_COMPENSATION;
 
         singleLiquidation.debtToOffset = _entireTroveDebt;
@@ -419,11 +392,7 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
      * Liquidate a sequence of troves. Closes a maximum number of n under-collateralized Troves,
      * starting from the one with the lowest collateral ratio in the system, and moving upwards
      */
-    function liquidateTroves(
-        address _collateral,
-        uint _n,
-        address _caller
-    ) external override {
+    function liquidateTroves(address _collateral, uint _n, address _caller) external override {
         _requireCallerIsTroveManager();
 
         IActivePool activePoolCached = activePool;
@@ -504,10 +473,9 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
         );
 
         vars.liquidatedDebt = totals.totalDebtInSequence;
-        vars.liquidatedColl = totals
-            .totalCollInSequence
-            .sub(totals.totalCollGasCompensation)
-            .sub(totals.totalCollSurplus);
+        vars.liquidatedColl = totals.totalCollInSequence.sub(totals.totalCollGasCompensation).sub(
+            totals.totalCollSurplus
+        );
         troveManager.emitLiquidationEvent(
             _collateral,
             vars.liquidatedDebt,
@@ -556,18 +524,11 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
             // we need to cache it, because current user is likely going to be deleted
             address nextUser = _sortedTroves.getPrev(_collateral, vars.user);
 
-            vars.ICR = troveManager.getCurrentICR(
-                vars.user,
-                _collateral,
-                _price
-            );
+            vars.ICR = troveManager.getCurrentICR(vars.user, _collateral, _price);
 
             if (!vars.backToNormalMode) {
                 // Break the loop if ICR is greater than MCR and Stability Pool is empty
-                if (
-                    vars.ICR >= vars.collMCR &&
-                    vars.remainingLUSDInStabPool == 0
-                ) {
+                if (vars.ICR >= vars.collMCR && vars.remainingLUSDInStabPool == 0) {
                     break;
                 }
 
@@ -594,9 +555,7 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
                 vars.remainingLUSDInStabPool = vars.remainingLUSDInStabPool.sub(
                     singleLiquidation.debtToOffset
                 );
-                vars.entireSystemDebt = vars.entireSystemDebt.sub(
-                    singleLiquidation.debtToOffset
-                );
+                vars.entireSystemDebt = vars.entireSystemDebt.sub(singleLiquidation.debtToOffset);
                 vars.entireSystemColl = vars
                     .entireSystemColl
                     .sub(singleLiquidation.collToSendToSP)
@@ -604,10 +563,7 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
                     .sub(singleLiquidation.collSurplus);
 
                 // Add liquidation values to their respective running totals
-                totals = _addLiquidationValuesToTotals(
-                    totals,
-                    singleLiquidation
-                );
+                totals = _addLiquidationValuesToTotals(totals, singleLiquidation);
 
                 vars.backToNormalMode = !_checkPotentialRecoveryMode(
                     vars.entireSystemColl,
@@ -630,10 +586,7 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
                 );
 
                 // Add liquidation values to their respective running totals
-                totals = _addLiquidationValuesToTotals(
-                    totals,
-                    singleLiquidation
-                );
+                totals = _addLiquidationValuesToTotals(totals, singleLiquidation);
             } else break; // break if the loop reaches a Trove with ICR >= MCR
 
             vars.user = nextUser;
@@ -657,11 +610,7 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
 
         for (vars.i = 0; vars.i < _n; vars.i++) {
             vars.user = sortedTrovesCached.getLast(_collateral);
-            vars.ICR = troveManager.getCurrentICR(
-                vars.user,
-                _collateral,
-                _price
-            );
+            vars.ICR = troveManager.getCurrentICR(vars.user, _collateral, _price);
 
             if (vars.ICR < _MCR) {
                 singleLiquidation = _liquidateNormalMode(
@@ -677,10 +626,7 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
                 );
 
                 // Add liquidation values to their respective running totals
-                totals = _addLiquidationValuesToTotals(
-                    totals,
-                    singleLiquidation
-                );
+                totals = _addLiquidationValuesToTotals(totals, singleLiquidation);
             } else break; // break if the loop reaches a Trove with ICR >= MCR
         }
     }
@@ -773,10 +719,9 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
         );
 
         vars.liquidatedDebt = totals.totalDebtInSequence;
-        vars.liquidatedColl = totals
-            .totalCollInSequence
-            .sub(totals.totalCollGasCompensation)
-            .sub(totals.totalCollSurplus);
+        vars.liquidatedColl = totals.totalCollInSequence.sub(totals.totalCollGasCompensation).sub(
+            totals.totalCollSurplus
+        );
         troveManager.emitLiquidationEvent(
             _collateral,
             vars.liquidatedDebt,
@@ -821,24 +766,14 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
         for (vars.i = 0; vars.i < _troveArray.length; vars.i++) {
             vars.user = _troveArray[vars.i];
             // Skip non-active troves
-            if (
-                troveManager.getTroveStatus(vars.user, _collateral) !=
-                uint(TroveStatus.active)
-            ) {
+            if (troveManager.getTroveStatus(vars.user, _collateral) != uint(TroveStatus.active)) {
                 continue;
             }
-            vars.ICR = troveManager.getCurrentICR(
-                vars.user,
-                _collateral,
-                _price
-            );
+            vars.ICR = troveManager.getCurrentICR(vars.user, _collateral, _price);
 
             if (!vars.backToNormalMode) {
                 // Skip this trove if ICR is greater than MCR and Stability Pool is empty
-                if (
-                    vars.ICR >= vars.collMCR &&
-                    vars.remainingLUSDInStabPool == 0
-                ) {
+                if (vars.ICR >= vars.collMCR && vars.remainingLUSDInStabPool == 0) {
                     continue;
                 }
 
@@ -865,9 +800,7 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
                 vars.remainingLUSDInStabPool = vars.remainingLUSDInStabPool.sub(
                     singleLiquidation.debtToOffset
                 );
-                vars.entireSystemDebt = vars.entireSystemDebt.sub(
-                    singleLiquidation.debtToOffset
-                );
+                vars.entireSystemDebt = vars.entireSystemDebt.sub(singleLiquidation.debtToOffset);
                 vars.entireSystemColl = vars
                     .entireSystemColl
                     .sub(singleLiquidation.collToSendToSP)
@@ -875,10 +808,7 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
                     .sub(singleLiquidation.collSurplus);
 
                 // Add liquidation values to their respective running totals
-                totals = _addLiquidationValuesToTotals(
-                    totals,
-                    singleLiquidation
-                );
+                totals = _addLiquidationValuesToTotals(totals, singleLiquidation);
 
                 vars.backToNormalMode = !_checkPotentialRecoveryMode(
                     vars.entireSystemColl,
@@ -900,10 +830,7 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
                 );
 
                 // Add liquidation values to their respective running totals
-                totals = _addLiquidationValuesToTotals(
-                    totals,
-                    singleLiquidation
-                );
+                totals = _addLiquidationValuesToTotals(totals, singleLiquidation);
             } else continue; // In Normal Mode skip troves with ICR >= MCR
         }
     }
@@ -924,11 +851,7 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
 
         for (vars.i = 0; vars.i < _troveArray.length; vars.i++) {
             vars.user = _troveArray[vars.i];
-            vars.ICR = troveManager.getCurrentICR(
-                vars.user,
-                _collateral,
-                _price
-            );
+            vars.ICR = troveManager.getCurrentICR(vars.user, _collateral, _price);
 
             if (vars.ICR < _MCR) {
                 singleLiquidation = _liquidateNormalMode(
@@ -943,10 +866,7 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
                 );
 
                 // Add liquidation values to their respective running totals
-                totals = _addLiquidationValuesToTotals(
-                    totals,
-                    singleLiquidation
-                );
+                totals = _addLiquidationValuesToTotals(totals, singleLiquidation);
             }
         }
     }
@@ -958,12 +878,12 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
         LiquidationValues memory singleLiquidation
     ) internal pure returns (LiquidationTotals memory newTotals) {
         // Tally all the values with their respective running totals
-        newTotals.totalCollGasCompensation = oldTotals
-            .totalCollGasCompensation
-            .add(singleLiquidation.collGasCompensation);
-        newTotals.totalLUSDGasCompensation = oldTotals
-            .totalLUSDGasCompensation
-            .add(singleLiquidation.LUSDGasCompensation);
+        newTotals.totalCollGasCompensation = oldTotals.totalCollGasCompensation.add(
+            singleLiquidation.collGasCompensation
+        );
+        newTotals.totalLUSDGasCompensation = oldTotals.totalLUSDGasCompensation.add(
+            singleLiquidation.LUSDGasCompensation
+        );
         newTotals.totalDebtInSequence = oldTotals.totalDebtInSequence.add(
             singleLiquidation.entireTroveDebt
         );
@@ -976,15 +896,13 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
         newTotals.totalCollToSendToSP = oldTotals.totalCollToSendToSP.add(
             singleLiquidation.collToSendToSP
         );
-        newTotals.totalDebtToRedistribute = oldTotals
-            .totalDebtToRedistribute
-            .add(singleLiquidation.debtToRedistribute);
-        newTotals.totalCollToRedistribute = oldTotals
-            .totalCollToRedistribute
-            .add(singleLiquidation.collToRedistribute);
-        newTotals.totalCollSurplus = oldTotals.totalCollSurplus.add(
-            singleLiquidation.collSurplus
+        newTotals.totalDebtToRedistribute = oldTotals.totalDebtToRedistribute.add(
+            singleLiquidation.debtToRedistribute
         );
+        newTotals.totalCollToRedistribute = oldTotals.totalCollToRedistribute.add(
+            singleLiquidation.collToRedistribute
+        );
+        newTotals.totalCollSurplus = oldTotals.totalCollSurplus.add(singleLiquidation.collSurplus);
 
         return newTotals;
     }
@@ -1008,13 +926,9 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
     }
 
     // --- 'require' wrapper functions ---
-    function _requireTroveIsActive(
-        address _borrower,
-        address _collateral
-    ) internal view {
+    function _requireTroveIsActive(address _borrower, address _collateral) internal view {
         require(
-            troveManager.getTroveStatus(_borrower, _collateral) ==
-                uint(TroveStatus.active),
+            troveManager.getTroveStatus(_borrower, _collateral) == uint(TroveStatus.active),
             "LiquidationHelper: Trove not active"
         );
     }

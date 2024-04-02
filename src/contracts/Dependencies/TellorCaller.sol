@@ -23,9 +23,7 @@ contract TellorCaller is UsingTellor, ITellorCaller {
     mapping(bytes32 => uint256) public lastStoredTimestamps;
     mapping(bytes32 => uint256) public lastStoredPrices;
 
-    constructor(
-        address payable _tellorMasterAddress
-    ) public UsingTellor(_tellorMasterAddress) {}
+    constructor(address payable _tellorMasterAddress) public UsingTellor(_tellorMasterAddress) {}
 
     /*
      * getTellorCurrentValue(): identical to getCurrentValue() in UsingTellor.sol
@@ -38,11 +36,7 @@ contract TellorCaller is UsingTellor, ITellorCaller {
      */
     function getTellorCurrentValue(
         bytes32 _queryId
-    )
-        external
-        override
-        returns (bool ifRetrieve, uint256 value, uint256 _timestampRetrieved)
-    {
+    ) external override returns (bool ifRetrieve, uint256 value, uint256 _timestampRetrieved) {
         (bytes memory data, uint256 timestamp) = getDataBefore(
             _queryId,
             block.timestamp - 20 minutes
@@ -54,11 +48,7 @@ contract TellorCaller is UsingTellor, ITellorCaller {
             lastStoredPrices[_queryId] = _value;
             return (true, _value, timestamp);
         } else {
-            return (
-                true,
-                lastStoredPrices[_queryId],
-                lastStoredTimestamps[_queryId]
-            );
+            return (true, lastStoredPrices[_queryId], lastStoredTimestamps[_queryId]);
         }
     }
 }

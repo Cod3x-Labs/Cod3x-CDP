@@ -28,11 +28,7 @@ interface ISwapper {
         uint256 _index
     ) external returns (address);
 
-    function balSwapPoolIDs(
-        address _from,
-        address _to,
-        address _vault
-    ) external returns (bytes32);
+    function balSwapPoolIDs(address _from, address _to, address _vault) external returns (bytes32);
 
     function veloSwapPaths(
         address _from,
@@ -77,11 +73,7 @@ interface ISwapper {
         UniV3SwapData calldata _swapPathAndFees
     ) external;
 
-    function updateTokenAggregator(
-        address _token,
-        address _aggregator,
-        uint256 _timeout
-    ) external;
+    function updateTokenAggregator(address _token, address _aggregator, uint256 _timeout) external;
 
     function swapUniV2(
         address _from,
@@ -122,7 +114,5 @@ interface ISwapper {
      * - asset's aggregator is considered broken (doesn't have valid historical response)
      * - asset's aggregator is considered frozen (last response exceeds asset's allowed timeout)
      */
-    function getChainlinkPriceTargetDigits(
-        address _token
-    ) external view returns (uint256 price);
+    function getChainlinkPriceTargetDigits(address _token) external view returns (uint256 price);
 }

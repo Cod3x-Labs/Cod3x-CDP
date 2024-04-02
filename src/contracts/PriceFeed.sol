@@ -94,14 +94,8 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         address[] memory collaterals = collateralConfig.getAllowedCollaterals();
         uint256 numCollaterals = collaterals.length;
         require(numCollaterals != 0, "At least one collateral required");
-        require(
-            _priceAggregatorAddresses.length == numCollaterals,
-            "Array lengths must match"
-        );
-        require(
-            _tellorQueryIds.length == numCollaterals,
-            "Array lengths must match"
-        );
+        require(_priceAggregatorAddresses.length == numCollaterals, "Array lengths must match");
+        require(_tellorQueryIds.length == numCollaterals, "Array lengths must match");
 
         checkContract(_tellorCallerAddress);
         tellorCaller = ITellorCaller(_tellorCallerAddress);
@@ -114,19 +108,14 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
             checkContract(priceAggregatorAddress);
             require(queryId != bytes32(0), "Invalid Tellor Query ID");
 
-            priceAggregator[collateral] = AggregatorV3Interface(
-                priceAggregatorAddress
-            );
+            priceAggregator[collateral] = AggregatorV3Interface(priceAggregatorAddress);
             tellorQueryId[collateral] = queryId;
 
             // Explicitly set initial system status
             status[collateral] = Status.chainlinkWorking;
 
             // Get an initial price from Chainlink to serve as first reference for lastGoodPrice
-            ChainlinkResponse
-                memory chainlinkResponse = _getCurrentChainlinkResponse(
-                    collateral
-                );
+            ChainlinkResponse memory chainlinkResponse = _getCurrentChainlinkResponse(collateral);
 
             require(
                 !_chainlinkIsBroken(chainlinkResponse) &&
@@ -149,18 +138,13 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         _requireCallerIsOwnerOrCollateralConfig();
         _requireValidCollateralAddress(_collateral);
         checkContract(_priceAggregatorAddress);
-        priceAggregator[_collateral] = AggregatorV3Interface(
-            _priceAggregatorAddress
-        );
+        priceAggregator[_collateral] = AggregatorV3Interface(_priceAggregatorAddress);
 
         // Explicitly set initial system status
         status[_collateral] = Status.chainlinkWorking;
 
         // Get an initial price from Chainlink to serve as first reference for lastGoodPrice
-        ChainlinkResponse
-            memory chainlinkResponse = _getCurrentChainlinkResponse(
-                _collateral
-            );
+        ChainlinkResponse memory chainlinkResponse = _getCurrentChainlinkResponse(_collateral);
 
         require(
             !_chainlinkIsBroken(chainlinkResponse) &&
@@ -174,9 +158,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     // Admin function to update the TellorCaller.
     //
     // !!!PLEASE USE EXTREME CARE AND CAUTION!!!
-    function updateTellorCaller(
-        address _tellorCallerAddress
-    ) external onlyOwner {
+    function updateTellorCaller(address _tellorCallerAddress) external onlyOwner {
         checkContract(_tellorCallerAddress);
         tellorCaller = ITellorCaller(_tellorCallerAddress);
     }
@@ -184,10 +166,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     // Admin function to update the Tellor query ID for a particular collateral.
     //
     // !!!PLEASE USE EXTREME CARE AND CAUTION!!!
-    function updateTellorQueryID(
-        address _collateral,
-        bytes32 _queryId
-    ) external override {
+    function updateTellorQueryID(address _collateral, bytes32 _queryId) external override {
         _requireCallerIsOwnerOrCollateralConfig();
         _requireValidCollateralAddress(_collateral);
         require(_queryId != bytes32(0), "Invalid Tellor Query ID");
@@ -212,19 +191,14 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         _requireValidCollateralAddress(_collateral);
 
         // Get current and previous price data from Chainlink, and current price data from Tellor
-        ChainlinkResponse
-            memory chainlinkResponse = _getCurrentChainlinkResponse(
-                _collateral
-            );
+        ChainlinkResponse memory chainlinkResponse = _getCurrentChainlinkResponse(_collateral);
 
         uint _lastGoodSharePrice = _convertToShareToUSDPrice(
             _collateral,
             lastGoodPrice[_collateral]
         );
 
-        TellorResponse memory tellorResponse = _getCurrentTellorResponse(
-            _collateral
-        );
+        TellorResponse memory tellorResponse = _getCurrentTellorResponse(_collateral);
 
         // --- CASE 1: System fetched last price from Chainlink  ---
         if (status[_collateral] == Status.chainlinkWorking) {
@@ -240,23 +214,14 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
                  * Tellor may need to be tipped to return current data.
                  */
                 if (_tellorIsFrozen(tellorResponse, _collateral)) {
-                    _changeStatus(
-                        _collateral,
-                        Status.usingTellorChainlinkUntrusted
-                    );
+                    _changeStatus(_collateral, Status.usingTellorChainlinkUntrusted);
                     return _lastGoodSharePrice;
                 }
 
                 // If Chainlink is broken and Tellor is working, switch to Tellor and return current Tellor price
-                _changeStatus(
-                    _collateral,
-                    Status.usingTellorChainlinkUntrusted
-                );
+                _changeStatus(_collateral, Status.usingTellorChainlinkUntrusted);
 
-                uint storedPrice = _storeTellorPrice(
-                    _collateral,
-                    tellorResponse
-                );
+                uint storedPrice = _storeTellorPrice(_collateral, tellorResponse);
                 return _convertToShareToUSDPrice(_collateral, storedPrice);
             }
 
@@ -264,10 +229,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
             if (_chainlinkIsFrozen(chainlinkResponse, _collateral)) {
                 // If Tellor is broken too, remember Tellor broke, and return last good price
                 if (_tellorIsBroken(tellorResponse)) {
-                    _changeStatus(
-                        _collateral,
-                        Status.usingChainlinkTellorUntrusted
-                    );
+                    _changeStatus(_collateral, Status.usingChainlinkTellorUntrusted);
                     return _lastGoodSharePrice;
                 }
 
@@ -279,20 +241,12 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
                 }
 
                 // If Tellor is working, use it
-                uint storedPrice = _storeTellorPrice(
-                    _collateral,
-                    tellorResponse
-                );
+                uint storedPrice = _storeTellorPrice(_collateral, tellorResponse);
                 return _convertToShareToUSDPrice(_collateral, storedPrice);
             }
 
             // If Chainlink price has changed by > 50% between two consecutive rounds, compare it to Tellor's price
-            if (
-                _chainlinkPriceChangeAboveMax(
-                    chainlinkResponse,
-                    lastGoodPrice[_collateral]
-                )
-            ) {
+            if (_chainlinkPriceChangeAboveMax(chainlinkResponse, lastGoodPrice[_collateral])) {
                 // If Tellor is broken, both oracles are untrusted, and return last good price
                 if (_tellorIsBroken(tellorResponse)) {
                     _changeStatus(_collateral, Status.bothOraclesUntrusted);
@@ -301,10 +255,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
 
                 // If Tellor is frozen, switch to Tellor and return last good price
                 if (_tellorIsFrozen(tellorResponse, _collateral)) {
-                    _changeStatus(
-                        _collateral,
-                        Status.usingTellorChainlinkUntrusted
-                    );
+                    _changeStatus(_collateral, Status.usingTellorChainlinkUntrusted);
                     return _lastGoodSharePrice;
                 }
 
@@ -312,43 +263,26 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
                  * If Tellor is live and both oracles have a similar price, conclude that Chainlink's large price deviation between
                  * two consecutive rounds was likely a legitmate market price movement, and so continue using Chainlink
                  */
-                if (
-                    _bothOraclesSimilarPrice(chainlinkResponse, tellorResponse)
-                ) {
-                    uint storedPrice = _storeChainlinkPrice(
-                        _collateral,
-                        chainlinkResponse
-                    );
+                if (_bothOraclesSimilarPrice(chainlinkResponse, tellorResponse)) {
+                    uint storedPrice = _storeChainlinkPrice(_collateral, chainlinkResponse);
                     return _convertToShareToUSDPrice(_collateral, storedPrice);
                 }
 
                 // If Tellor is live but the oracles differ too much in price, conclude that Chainlink's initial price deviation was
                 // an oracle failure. Switch to Tellor, and use Tellor price
-                _changeStatus(
-                    _collateral,
-                    Status.usingTellorChainlinkUntrusted
-                );
+                _changeStatus(_collateral, Status.usingTellorChainlinkUntrusted);
 
-                uint storedPrice = _storeTellorPrice(
-                    _collateral,
-                    tellorResponse
-                );
+                uint storedPrice = _storeTellorPrice(_collateral, tellorResponse);
                 return _convertToShareToUSDPrice(_collateral, storedPrice);
             }
 
             // If Chainlink is working and Tellor is broken, remember Tellor is broken
             if (_tellorIsBroken(tellorResponse)) {
-                _changeStatus(
-                    _collateral,
-                    Status.usingChainlinkTellorUntrusted
-                );
+                _changeStatus(_collateral, Status.usingChainlinkTellorUntrusted);
             }
 
             // If Chainlink is working, return Chainlink current price (no status change)
-            uint storedPrice = _storeChainlinkPrice(
-                _collateral,
-                chainlinkResponse
-            );
+            uint storedPrice = _storeChainlinkPrice(_collateral, chainlinkResponse);
             return _convertToShareToUSDPrice(_collateral, storedPrice);
         }
 
@@ -363,10 +297,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
                 )
             ) {
                 _changeStatus(_collateral, Status.chainlinkWorking);
-                uint storedPrice = _storeChainlinkPrice(
-                    _collateral,
-                    chainlinkResponse
-                );
+                uint storedPrice = _storeChainlinkPrice(_collateral, chainlinkResponse);
                 return _convertToShareToUSDPrice(_collateral, storedPrice);
             }
 
@@ -402,10 +333,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
                 )
             ) {
                 _changeStatus(_collateral, Status.chainlinkWorking);
-                uint storedPrice = _storeChainlinkPrice(
-                    _collateral,
-                    chainlinkResponse
-                );
+                uint storedPrice = _storeChainlinkPrice(_collateral, chainlinkResponse);
                 return _convertToShareToUSDPrice(_collateral, storedPrice);
             }
 
@@ -423,30 +351,21 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
                 }
 
                 // If Chainlink is broken, remember it and switch to using Tellor
-                _changeStatus(
-                    _collateral,
-                    Status.usingTellorChainlinkUntrusted
-                );
+                _changeStatus(_collateral, Status.usingTellorChainlinkUntrusted);
 
                 if (_tellorIsFrozen(tellorResponse, _collateral)) {
                     return _lastGoodSharePrice;
                 }
 
                 // If Tellor is working, return Tellor current price
-                uint storedPrice = _storeTellorPrice(
-                    _collateral,
-                    tellorResponse
-                );
+                uint storedPrice = _storeTellorPrice(_collateral, tellorResponse);
                 return _convertToShareToUSDPrice(_collateral, storedPrice);
             }
 
             if (_chainlinkIsFrozen(chainlinkResponse, _collateral)) {
                 // if Chainlink is frozen and Tellor is broken, remember Tellor broke, and return last good price
                 if (_tellorIsBroken(tellorResponse)) {
-                    _changeStatus(
-                        _collateral,
-                        Status.usingChainlinkTellorUntrusted
-                    );
+                    _changeStatus(_collateral, Status.usingChainlinkTellorUntrusted);
                     return _lastGoodSharePrice;
                 }
 
@@ -456,23 +375,14 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
                 }
 
                 // if Chainlink is frozen and Tellor is working, keep using Tellor (no status change)
-                uint storedPrice = _storeTellorPrice(
-                    _collateral,
-                    tellorResponse
-                );
+                uint storedPrice = _storeTellorPrice(_collateral, tellorResponse);
                 return _convertToShareToUSDPrice(_collateral, storedPrice);
             }
 
             // if Chainlink is live and Tellor is broken, remember Tellor broke, and return Chainlink price
             if (_tellorIsBroken(tellorResponse)) {
-                _changeStatus(
-                    _collateral,
-                    Status.usingChainlinkTellorUntrusted
-                );
-                uint storedPrice = _storeChainlinkPrice(
-                    _collateral,
-                    chainlinkResponse
-                );
+                _changeStatus(_collateral, Status.usingChainlinkTellorUntrusted);
+                uint storedPrice = _storeChainlinkPrice(_collateral, chainlinkResponse);
                 return _convertToShareToUSDPrice(_collateral, storedPrice);
             }
 
@@ -485,10 +395,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
             // if prices are within 5%, and return Chainlink price.
             if (_bothOraclesSimilarPrice(chainlinkResponse, tellorResponse)) {
                 _changeStatus(_collateral, Status.chainlinkWorking);
-                uint storedPrice = _storeChainlinkPrice(
-                    _collateral,
-                    chainlinkResponse
-                );
+                uint storedPrice = _storeChainlinkPrice(_collateral, chainlinkResponse);
                 return _convertToShareToUSDPrice(_collateral, storedPrice);
             }
 
@@ -520,31 +427,20 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
                 )
             ) {
                 _changeStatus(_collateral, Status.chainlinkWorking);
-                uint storedPrice = _storeChainlinkPrice(
-                    _collateral,
-                    chainlinkResponse
-                );
+                uint storedPrice = _storeChainlinkPrice(_collateral, chainlinkResponse);
                 return _convertToShareToUSDPrice(_collateral, storedPrice);
             }
 
             // If Chainlink is live but deviated >50% from it's previous price and Tellor is still untrusted, switch
             // to bothOraclesUntrusted and return last good price
-            if (
-                _chainlinkPriceChangeAboveMax(
-                    chainlinkResponse,
-                    lastGoodPrice[_collateral]
-                )
-            ) {
+            if (_chainlinkPriceChangeAboveMax(chainlinkResponse, lastGoodPrice[_collateral])) {
                 _changeStatus(_collateral, Status.bothOraclesUntrusted);
                 return _lastGoodSharePrice;
             }
 
             // Otherwise if Chainlink is live and deviated <50% from it's previous price and Tellor is still untrusted,
             // return Chainlink price (no status change)
-            uint storedPrice = _storeChainlinkPrice(
-                _collateral,
-                chainlinkResponse
-            );
+            uint storedPrice = _storeChainlinkPrice(_collateral, chainlinkResponse);
             return _convertToShareToUSDPrice(_collateral, storedPrice);
         }
     }
@@ -558,8 +454,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         IERC4626 vault = IERC4626(_collateral);
         uint256 oneShare = 10 ** vault.decimals();
         uint256 assetsForOneShare = vault.convertToAssets(oneShare);
-        return
-            (assetsForOneShare * _vaultAssetUnitPrice) / 10 ** vault.decimals();
+        return (assetsForOneShare * _vaultAssetUnitPrice) / 10 ** vault.decimals();
     }
 
     /* Chainlink is considered broken if its current or previous round data is in any way bad. We check the previous round
@@ -576,9 +471,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         return _badChainlinkResponse(_currentResponse);
     }
 
-    function _badChainlinkResponse(
-        ChainlinkResponse memory _response
-    ) internal view returns (bool) {
+    function _badChainlinkResponse(ChainlinkResponse memory _response) internal view returns (bool) {
         // Check for response call reverted
         if (!_response.success) {
             return true;
@@ -617,32 +510,21 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
             _currentResponse.decimals
         );
 
-        uint minPrice = LiquityMath._min(
-            currentScaledPrice,
-            _lastGoodOraclePrice
-        );
-        uint maxPrice = LiquityMath._max(
-            currentScaledPrice,
-            _lastGoodOraclePrice
-        );
+        uint minPrice = LiquityMath._min(currentScaledPrice, _lastGoodOraclePrice);
+        uint maxPrice = LiquityMath._max(currentScaledPrice, _lastGoodOraclePrice);
 
         /*
          * Use the larger price as the denominator:
          * - If price decreased, the percentage deviation is in relation to the the previous price.
          * - If price increased, the percentage deviation is in relation to the current price.
          */
-        uint percentDeviation = maxPrice
-            .sub(minPrice)
-            .mul(DECIMAL_PRECISION)
-            .div(maxPrice);
+        uint percentDeviation = maxPrice.sub(minPrice).mul(DECIMAL_PRECISION).div(maxPrice);
 
         // Return true if price has more than doubled, or more than halved.
         return percentDeviation > MAX_PRICE_DEVIATION_FROM_PREVIOUS_ROUND;
     }
 
-    function _tellorIsBroken(
-        TellorResponse memory _response
-    ) internal view returns (bool) {
+    function _tellorIsBroken(TellorResponse memory _response) internal view returns (bool) {
         // Check for response call reverted
         if (!_response.success) {
             return true;
@@ -694,23 +576,12 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
             uint256(_chainlinkResponse.answer),
             _chainlinkResponse.decimals
         );
-        uint scaledTellorPrice = _scaleTellorPriceByDigits(
-            _tellorResponse.value
-        );
+        uint scaledTellorPrice = _scaleTellorPriceByDigits(_tellorResponse.value);
 
         // Get the relative price difference between the oracles. Use the lower price as the denominator, i.e. the reference for the calculation.
-        uint minPrice = LiquityMath._min(
-            scaledTellorPrice,
-            scaledChainlinkPrice
-        );
-        uint maxPrice = LiquityMath._max(
-            scaledTellorPrice,
-            scaledChainlinkPrice
-        );
-        uint percentPriceDifference = maxPrice
-            .sub(minPrice)
-            .mul(DECIMAL_PRECISION)
-            .div(minPrice);
+        uint minPrice = LiquityMath._min(scaledTellorPrice, scaledChainlinkPrice);
+        uint maxPrice = LiquityMath._max(scaledTellorPrice, scaledChainlinkPrice);
+        uint percentPriceDifference = maxPrice.sub(minPrice).mul(DECIMAL_PRECISION).div(minPrice);
 
         /*
          * Return true if the relative price difference is <= 5%: if so, we assume both oracles are probably reporting
@@ -740,9 +611,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         return price;
     }
 
-    function _scaleTellorPriceByDigits(
-        uint _price
-    ) internal pure returns (uint) {
+    function _scaleTellorPriceByDigits(uint _price) internal pure returns (uint) {
         uint256 price = _price;
         if (TARGET_DIGITS > TELLOR_DIGITS) {
             price = price.mul(10 ** (TARGET_DIGITS - TELLOR_DIGITS));
@@ -757,10 +626,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         emit PriceFeedStatusChanged(_collateral, _status);
     }
 
-    function _storePrice(
-        address _collateral,
-        uint _currentPrice
-    ) internal returns (uint) {
+    function _storePrice(address _collateral, uint _currentPrice) internal returns (uint) {
         lastGoodPrice[_collateral] = _currentPrice;
         emit LastGoodPriceUpdated(_collateral, _currentPrice);
         return _currentPrice;
@@ -770,9 +636,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         address _collateral,
         TellorResponse memory _tellorResponse
     ) internal returns (uint) {
-        uint scaledTellorPrice = _scaleTellorPriceByDigits(
-            _tellorResponse.value
-        );
+        uint scaledTellorPrice = _scaleTellorPriceByDigits(_tellorResponse.value);
         return _storePrice(_collateral, scaledTellorPrice);
     }
 
@@ -792,9 +656,11 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     function _getCurrentTellorResponse(
         address _collateral
     ) internal returns (TellorResponse memory tellorResponse) {
-        try
-            tellorCaller.getTellorCurrentValue(tellorQueryId[_collateral])
-        returns (bool ifRetrieve, uint256 value, uint256 _timestampRetrieved) {
+        try tellorCaller.getTellorCurrentValue(tellorQueryId[_collateral]) returns (
+            bool ifRetrieve,
+            uint256 value,
+            uint256 _timestampRetrieved
+        ) {
             // If call to Tellor succeeds, return the response and success = true
             tellorResponse.ifRetrieve = ifRetrieve;
             tellorResponse.value = value;
@@ -843,10 +709,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     // --- 'require' functions ---
 
     function _requireValidCollateralAddress(address _collateral) internal view {
-        require(
-            collateralConfig.isCollateralAllowed(_collateral),
-            "Invalid collateral address"
-        );
+        require(collateralConfig.isCollateralAllowed(_collateral), "Invalid collateral address");
     }
 
     function _requireCallerIsOwnerOrCollateralConfig() internal view {

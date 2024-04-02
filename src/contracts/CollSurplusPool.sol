@@ -63,9 +63,7 @@ contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
 
     /* Returns the collAmount state variable.
        Not necessarily equal to the raw collateral balance - collateral can be forcibly sent to contracts. */
-    function getCollateral(
-        address _collateral
-    ) external view override returns (uint) {
+    function getCollateral(address _collateral) external view override returns (uint) {
         _requireValidCollateralAddress(_collateral);
         return collAmount[_collateral];
     }
@@ -80,11 +78,7 @@ contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
 
     // --- Pool functionality ---
 
-    function accountSurplus(
-        address _account,
-        address _collateral,
-        uint _amount
-    ) external override {
+    function accountSurplus(address _account, address _collateral, uint _amount) external override {
         _requireValidCollateralAddress(_collateral);
         _requireCallerIsTroveManagerOrLiquidationHelper();
 
@@ -94,17 +88,11 @@ contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
         emit CollBalanceUpdated(_account, _collateral, newAmount);
     }
 
-    function claimColl(
-        address _account,
-        address _collateral
-    ) external override {
+    function claimColl(address _account, address _collateral) external override {
         _requireValidCollateralAddress(_collateral);
         _requireCallerIsBorrowerOperations();
         uint claimableColl = balances[_account][_collateral];
-        require(
-            claimableColl > 0,
-            "CollSurplusPool: No collateral available to claim"
-        );
+        require(claimableColl > 0, "CollSurplusPool: No collateral available to claim");
 
         balances[_account][_collateral] = 0;
         emit CollBalanceUpdated(_account, _collateral, 0);
@@ -115,28 +103,19 @@ contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
         IERC20(_collateral).safeTransfer(_account, claimableColl);
     }
 
-    function pullCollateralFromActivePool(
-        address _collateral,
-        uint _amount
-    ) external override {
+    function pullCollateralFromActivePool(address _collateral, uint _amount) external override {
         _requireValidCollateralAddress(_collateral);
         _requireCallerIsActivePool();
         collAmount[_collateral] = collAmount[_collateral].add(_amount);
 
-        IERC20(_collateral).safeTransferFrom(
-            activePoolAddress,
-            address(this),
-            _amount
-        );
+        IERC20(_collateral).safeTransferFrom(activePoolAddress, address(this), _amount);
     }
 
     // --- 'require' functions ---
 
     function _requireValidCollateralAddress(address _collateral) internal view {
         require(
-            ICollateralConfig(collateralConfigAddress).isCollateralAllowed(
-                _collateral
-            ),
+            ICollateralConfig(collateralConfigAddress).isCollateralAllowed(_collateral),
             "Invalid collateral address"
         );
     }
@@ -150,16 +129,12 @@ contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
 
     function _requireCallerIsTroveManagerOrLiquidationHelper() internal view {
         require(
-            msg.sender == troveManagerAddress ||
-                msg.sender == liquidationHelperAddress,
+            msg.sender == troveManagerAddress || msg.sender == liquidationHelperAddress,
             "CollSurplusPool: Caller is not TroveManager or LiquidationHelper"
         );
     }
 
     function _requireCallerIsActivePool() internal view {
-        require(
-            msg.sender == activePoolAddress,
-            "CollSurplusPool: Caller is not Active Pool"
-        );
+        require(msg.sender == activePoolAddress, "CollSurplusPool: Caller is not Active Pool");
     }
 }

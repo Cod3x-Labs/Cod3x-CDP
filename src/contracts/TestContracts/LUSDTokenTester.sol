@@ -36,11 +36,7 @@ contract LUSDTokenTester is LUSDToken {
         _burn(_account, _amount);
     }
 
-    function unprotectedSendToPool(
-        address _sender,
-        address _poolAddress,
-        uint256 _amount
-    ) external {
+    function unprotectedSendToPool(address _sender, address _poolAddress, uint256 _amount) external {
         // No check on caller here
 
         _transfer(_sender, _poolAddress, _amount);
@@ -80,16 +76,7 @@ contract LUSDTokenTester is LUSDToken {
                 abi.encodePacked(
                     uint16(0x1901),
                     domainSeparator(),
-                    keccak256(
-                        abi.encode(
-                            _PERMIT_TYPEHASH,
-                            owner,
-                            spender,
-                            amount,
-                            nonce,
-                            deadline
-                        )
-                    )
+                    keccak256(abi.encode(_PERMIT_TYPEHASH, owner, spender, amount, nonce, deadline))
                 )
             );
     }

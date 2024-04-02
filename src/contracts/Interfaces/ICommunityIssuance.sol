@@ -11,10 +11,7 @@ interface ICommunityIssuance {
 
     // --- Functions ---
 
-    function setAddresses(
-        address _lqtyTokenAddress,
-        address _stabilityPoolAddress
-    ) external;
+    function setAddresses(address _lqtyTokenAddress, address _stabilityPoolAddress) external;
 
     function issueOath() external returns (uint);
 

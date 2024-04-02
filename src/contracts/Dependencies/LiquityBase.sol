@@ -47,24 +47,18 @@ contract LiquityBase is BaseMath, ILiquityBase {
     }
 
     // Return the amount of ETH to be drawn from a trove's collateral and sent as gas compensation.
-    function _getCollGasCompensation(
-        uint _entireColl
-    ) internal pure returns (uint) {
+    function _getCollGasCompensation(uint _entireColl) internal pure returns (uint) {
         return _entireColl / PERCENT_DIVISOR;
     }
 
-    function getEntireSystemColl(
-        address _collateral
-    ) public view returns (uint entireSystemColl) {
+    function getEntireSystemColl(address _collateral) public view returns (uint entireSystemColl) {
         uint activeColl = activePool.getCollateral(_collateral);
         uint liquidatedColl = defaultPool.getCollateral(_collateral);
 
         return activeColl.add(liquidatedColl);
     }
 
-    function getEntireSystemDebt(
-        address _collateral
-    ) public view returns (uint entireSystemDebt) {
+    function getEntireSystemDebt(address _collateral) public view returns (uint entireSystemDebt) {
         uint activeDebt = activePool.getLUSDDebt(_collateral);
         uint closedDebt = defaultPool.getLUSDDebt(_collateral);
 
@@ -100,15 +94,8 @@ contract LiquityBase is BaseMath, ILiquityBase {
         return TCR < _CCR;
     }
 
-    function _requireUserAcceptsFee(
-        uint _fee,
-        uint _amount,
-        uint _maxFeePercentage
-    ) internal pure {
+    function _requireUserAcceptsFee(uint _fee, uint _amount, uint _maxFeePercentage) internal pure {
         uint feePercentage = _fee.mul(DECIMAL_PRECISION).div(_amount);
-        require(
-            feePercentage <= _maxFeePercentage,
-            "Fee exceeded provided maximum"
-        );
+        require(feePercentage <= _maxFeePercentage, "Fee exceeded provided maximum");
     }
 }

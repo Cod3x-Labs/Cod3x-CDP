@@ -25,12 +25,8 @@ contract ERC4626Mock is ERC4626 {
         assetPerShareOverriden = false;
     }
 
-    function convertToAssets(
-        uint256 shares
-    ) public view override returns (uint256) {
+    function convertToAssets(uint256 shares) public view override returns (uint256) {
         return
-            assetPerShareOverriden
-                ? assetsPerShare
-                : _convertToAssets(shares, Math.Rounding.Floor);
+            assetPerShareOverriden ? assetsPerShare : _convertToAssets(shares, Math.Rounding.Floor);
     }
 }

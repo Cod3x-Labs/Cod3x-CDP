@@ -110,10 +110,7 @@ interface IVeloRouter {
         address _factory,
         uint256 amountADesired,
         uint256 amountBDesired
-    )
-        external
-        view
-        returns (uint256 amountA, uint256 amountB, uint256 liquidity);
+    ) external view returns (uint256 amountA, uint256 amountB, uint256 liquidity);
 
     /// @notice Quote the amount of liquidity removed from a Pool
     /// @param tokenA       .
@@ -175,10 +172,7 @@ interface IVeloRouter {
         uint256 amountETHMin,
         address to,
         uint256 deadline
-    )
-        external
-        payable
-        returns (uint256 amountToken, uint256 amountETH, uint256 liquidity);
+    ) external payable returns (uint256 amountToken, uint256 amountETH, uint256 liquidity);
 
     // **** REMOVE LIQUIDITY ****
 

@@ -53,16 +53,11 @@ contract TroveManagerTester is TroveManager {
         getRedemptionFee(_ETHDrawn);
     }
 
-    function getActualDebtFromComposite(
-        uint _debtVal
-    ) external pure returns (uint) {
+    function getActualDebtFromComposite(uint _debtVal) external pure returns (uint) {
         return _getNetDebt(_debtVal);
     }
 
-    function callInternalRemoveTroveOwner(
-        address _troveOwner,
-        address _collateral
-    ) external {
+    function callInternalRemoveTroveOwner(address _troveOwner, address _collateral) external {
         uint troveOwnersArrayLength = TroveOwners[_collateral].length;
         _removeTroveOwner(_troveOwner, _collateral, troveOwnersArrayLength);
     }

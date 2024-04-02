@@ -23,11 +23,7 @@
 pragma solidity ^0.4.23;
 
 contract DSAuthority {
-    function canCall(
-        address src,
-        address dst,
-        bytes4 sig
-    ) public view returns (bool);
+    function canCall(address src, address dst, bytes4 sig) public view returns (bool);
 }
 
 contract DSAuthEvents {
@@ -59,10 +55,7 @@ contract DSAuth is DSAuthEvents {
         _;
     }
 
-    function isAuthorized(
-        address src,
-        bytes4 sig
-    ) internal view returns (bool) {
+    function isAuthorized(address src, bytes4 sig) internal view returns (bool) {
         if (src == address(this)) {
             return true;
         } else if (src == owner) {
@@ -165,12 +158,7 @@ contract DSProxy is DSAuth, DSNote {
 // This factory deploys new proxy instances through build()
 // Deployed proxy addresses are logged
 contract DSProxyFactory {
-    event Created(
-        address indexed sender,
-        address indexed owner,
-        address proxy,
-        address cache
-    );
+    event Created(address indexed sender, address indexed owner, address proxy, address cache);
     mapping(address => bool) public isProxy;
     DSProxyCache public cache = new DSProxyCache();
 

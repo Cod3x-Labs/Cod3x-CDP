@@ -93,10 +93,7 @@ library LiquityMath {
         return decMul(x, y);
     }
 
-    function _getAbsoluteDifference(
-        uint _a,
-        uint _b
-    ) internal pure returns (uint) {
+    function _getAbsoluteDifference(uint _a, uint _b) internal pure returns (uint) {
         return (_a >= _b) ? _a.sub(_b) : _b.sub(_a);
     }
 
@@ -141,13 +138,9 @@ library LiquityMath {
     ) internal pure returns (uint256 scaledColl) {
         scaledColl = _collAmount;
         if (_collDecimals > CR_CALCULATION_DECIMALS) {
-            scaledColl = scaledColl.div(
-                10 ** (_collDecimals - CR_CALCULATION_DECIMALS)
-            );
+            scaledColl = scaledColl.div(10 ** (_collDecimals - CR_CALCULATION_DECIMALS));
         } else if (_collDecimals < CR_CALCULATION_DECIMALS) {
-            scaledColl = scaledColl.mul(
-                10 ** (CR_CALCULATION_DECIMALS - _collDecimals)
-            );
+            scaledColl = scaledColl.mul(10 ** (CR_CALCULATION_DECIMALS - _collDecimals));
         }
     }
 }

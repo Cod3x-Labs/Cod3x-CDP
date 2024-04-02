@@ -97,71 +97,47 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
      *
      *Not necessarily equal to the the contract's raw collateral balance - collateral can be forcibly sent to contracts.
      */
-    function getCollateral(
-        address _collateral
-    ) external view override returns (uint) {
+    function getCollateral(address _collateral) external view override returns (uint) {
         _requireValidCollateralAddress(_collateral);
         return collAmount[_collateral];
     }
 
-    function getLUSDDebt(
-        address _collateral
-    ) external view override returns (uint) {
+    function getLUSDDebt(address _collateral) external view override returns (uint) {
         _requireValidCollateralAddress(_collateral);
         return LUSDDebt[_collateral];
     }
 
     // --- Pool functionality ---
 
-    function sendCollateral(
-        address _collateral,
-        address _account,
-        uint _amount
-    ) external override {
+    function sendCollateral(address _collateral, address _account, uint _amount) external override {
         _requireValidCollateralAddress(_collateral);
         _requireCallerIsBOorTroveMorSPorLH();
         collAmount[_collateral] = collAmount[_collateral].sub(_amount);
-        emit ActivePoolCollateralBalanceUpdated(
-            _collateral,
-            collAmount[_collateral]
-        );
+        emit ActivePoolCollateralBalanceUpdated(_collateral, collAmount[_collateral]);
         emit CollateralSent(_collateral, _account, _amount);
 
         if (_account == defaultPoolAddress) {
-            IERC20(_collateral).safeIncreaseAllowance(
-                defaultPoolAddress,
-                _amount
-            );
-            IDefaultPool(defaultPoolAddress).pullCollateralFromActivePool(
+            IERC20(_collateral).safeIncreaseAllowance(defaultPoolAddress, _amount);
+            IDefaultPool(defaultPoolAddress).pullCollateralFromActivePool(_collateral, _amount);
+        } else if (_account == collSurplusPoolAddress) {
+            IERC20(_collateral).safeIncreaseAllowance(collSurplusPoolAddress, _amount);
+            ICollSurplusPool(collSurplusPoolAddress).pullCollateralFromActivePool(
                 _collateral,
                 _amount
             );
-        } else if (_account == collSurplusPoolAddress) {
-            IERC20(_collateral).safeIncreaseAllowance(
-                collSurplusPoolAddress,
-                _amount
-            );
-            ICollSurplusPool(collSurplusPoolAddress)
-                .pullCollateralFromActivePool(_collateral, _amount);
         } else {
             IERC20(_collateral).safeTransfer(_account, _amount);
         }
     }
 
-    function increaseLUSDDebt(
-        address _collateral,
-        uint _amount
-    ) external override {
+    function increaseLUSDDebt(address _collateral, uint _amount) external override {
         _requireValidCollateralAddress(_collateral);
         _requireCallerIsBOorTroveM();
         LUSDDebt[_collateral] = LUSDDebt[_collateral].add(_amount);
         emit ActivePoolLUSDDebtUpdated(_collateral, LUSDDebt[_collateral]);
     }
 
-    function decreaseLUSDDebt(
-        address _collateral,
-        uint _amount
-    ) external override {
+    function decreaseLUSDDebt(address _collateral, uint _amount) external override {
         _requireValidCollateralAddress(_collateral);
         _requireCallerIsBOorTroveMorSPorRH();
         LUSDDebt[_collateral] = LUSDDebt[_collateral].sub(_amount);
@@ -175,33 +151,23 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
         _requireValidCollateralAddress(_collateral);
         _requireCallerIsBorrowerOperationsOrDefaultPool();
         collAmount[_collateral] = collAmount[_collateral].add(_amount);
-        emit ActivePoolCollateralBalanceUpdated(
-            _collateral,
-            collAmount[_collateral]
-        );
+        emit ActivePoolCollateralBalanceUpdated(_collateral, collAmount[_collateral]);
 
-        IERC20(_collateral).safeTransferFrom(
-            msg.sender,
-            address(this),
-            _amount
-        );
+        IERC20(_collateral).safeTransferFrom(msg.sender, address(this), _amount);
     }
 
     // --- 'require' functions ---
 
     function _requireValidCollateralAddress(address _collateral) internal view {
         require(
-            ICollateralConfig(collateralConfigAddress).isCollateralAllowed(
-                _collateral
-            ),
+            ICollateralConfig(collateralConfigAddress).isCollateralAllowed(_collateral),
             "Invalid collateral address"
         );
     }
 
     function _requireCallerIsBorrowerOperationsOrDefaultPool() internal view {
         require(
-            msg.sender == borrowerOperationsAddress ||
-                msg.sender == defaultPoolAddress,
+            msg.sender == borrowerOperationsAddress || msg.sender == defaultPoolAddress,
             "ActivePool: Caller is neither BO nor Default Pool"
         );
     }
@@ -229,8 +195,7 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
 
     function _requireCallerIsBOorTroveM() internal view {
         require(
-            msg.sender == borrowerOperationsAddress ||
-                msg.sender == troveManagerAddress,
+            msg.sender == borrowerOperationsAddress || msg.sender == troveManagerAddress,
             "ActivePool: Caller is neither BorrowerOperations nor TroveManager"
         );
     }

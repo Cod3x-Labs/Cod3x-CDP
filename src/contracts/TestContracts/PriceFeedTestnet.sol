@@ -18,9 +18,7 @@ contract PriceFeedTestnet is IPriceFeed {
         return _price[_collateral];
     }
 
-    function fetchPrice(
-        address _collateral
-    ) external override returns (uint256) {
+    function fetchPrice(address _collateral) external override returns (uint256) {
         // Fire an event just like the mainnet version would.
         // This lets the subgraph rely on events to get the latest price even when developing locally.
         emit LastGoodPriceUpdated(_collateral, _price[_collateral]);
@@ -28,10 +26,7 @@ contract PriceFeedTestnet is IPriceFeed {
     }
 
     // Manual external price setter.
-    function setPrice(
-        address _collateral,
-        uint256 price
-    ) external returns (bool) {
+    function setPrice(address _collateral, uint256 price) external returns (bool) {
         _price[_collateral] = price;
         return true;
     }
@@ -41,8 +36,5 @@ contract PriceFeedTestnet is IPriceFeed {
         address _collateral,
         address _priceAggregatorAddress
     ) external override {}
-    function updateTellorQueryID(
-        address _collateral,
-        bytes32 _queryId
-    ) external override {}
+    function updateTellorQueryID(address _collateral, bytes32 _queryId) external override {}
 }

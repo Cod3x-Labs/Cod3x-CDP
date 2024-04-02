@@ -15,17 +15,11 @@ contract TokenScript is CheckContract {
         token = IERC20(_tokenAddress);
     }
 
-    function transfer(
-        address recipient,
-        uint256 amount
-    ) external returns (bool) {
+    function transfer(address recipient, uint256 amount) external returns (bool) {
         token.transfer(recipient, amount);
     }
 
-    function allowance(
-        address owner,
-        address spender
-    ) external view returns (uint256) {
+    function allowance(address owner, address spender) external view returns (uint256) {
         token.allowance(owner, spender);
     }
 
@@ -41,17 +35,11 @@ contract TokenScript is CheckContract {
         token.transferFrom(sender, recipient, amount);
     }
 
-    function increaseAllowance(
-        address spender,
-        uint256 addedValue
-    ) external returns (bool) {
+    function increaseAllowance(address spender, uint256 addedValue) external returns (bool) {
         token.increaseAllowance(spender, addedValue);
     }
 
-    function decreaseAllowance(
-        address spender,
-        uint256 subtractedValue
-    ) external returns (bool) {
+    function decreaseAllowance(address spender, uint256 subtractedValue) external returns (bool) {
         token.decreaseAllowance(spender, subtractedValue);
     }
 }

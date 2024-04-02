@@ -29,106 +29,61 @@ contract RewarderManager is Ownable, CheckContract, IRewarderManager {
 
     /// @notice Adds a child rewarder to the childrenRewarders set.
     /// @param _childRewarder Address of the child rewarder contract to add.
-    function addChild(
-        address _collateral,
-        address _childRewarder
-    ) external onlyOwner {
+    function addChild(address _collateral, address _childRewarder) external onlyOwner {
         checkContract(_childRewarder);
-        require(
-            childrenRewarders[_collateral].add(_childRewarder),
-            "Address already in set"
-        );
+        require(childrenRewarders[_collateral].add(_childRewarder), "Address already in set");
         emit ChildAdded(_collateral, _childRewarder);
     }
 
     /// @notice Removes a child rewarder from the childrenRewarders set.
     /// @param _childRewarder Address of the child rewarder contract to remove.
-    function removeChild(
-        address _collateral,
-        address _childRewarder
-    ) external onlyOwner {
-        require(
-            childrenRewarders[_collateral].remove(_childRewarder),
-            "Address not in set"
-        );
+    function removeChild(address _collateral, address _childRewarder) external onlyOwner {
+        require(childrenRewarders[_collateral].remove(_childRewarder), "Address not in set");
         emit ChildRemoved(_collateral, _childRewarder);
     }
 
     /// @notice Returns the length of the childrenRewarders set.
-    function getChildrenRewardersLength(
-        address _collateral
-    ) public view returns (uint) {
+    function getChildrenRewardersLength(address _collateral) public view returns (uint) {
         return childrenRewarders[_collateral].length();
     }
 
     /// @notice Returns the address for the child rewarder at a given index.
     /// NOTE: The EnumerableSet is not sorted in any particular order, even order of addition to the set.
-    function getChildRewarderAt(
-        address _collateral,
-        uint _index
-    ) public view returns (address) {
+    function getChildRewarderAt(address _collateral, uint _index) public view returns (address) {
         return childrenRewarders[_collateral].at(_index);
     }
 
     // --- Hooks ---
 
-    function onDebtIncrease(
-        address _borrower,
-        address _collateral,
-        uint _amount
-    ) external override {
+    function onDebtIncrease(address _borrower, address _collateral, uint _amount) external override {
         _requireCallerIsTroveManager();
         uint length = getChildrenRewardersLength(_collateral);
         for (uint i; i < length; ++i) {
-            IRewarder(getChildRewarderAt(_collateral, i)).onDebtIncrease(
-                _borrower,
-                _amount
-            );
+            IRewarder(getChildRewarderAt(_collateral, i)).onDebtIncrease(_borrower, _amount);
         }
     }
 
-    function onDebtDecrease(
-        address _borrower,
-        address _collateral,
-        uint _amount
-    ) external override {
+    function onDebtDecrease(address _borrower, address _collateral, uint _amount) external override {
         _requireCallerIsTroveManager();
         uint length = getChildrenRewardersLength(_collateral);
         for (uint i; i < length; ++i) {
-            IRewarder(getChildRewarderAt(_collateral, i)).onDebtDecrease(
-                _borrower,
-                _amount
-            );
+            IRewarder(getChildRewarderAt(_collateral, i)).onDebtDecrease(_borrower, _amount);
         }
     }
 
-    function onCollIncrease(
-        address _borrower,
-        address _collateral,
-        uint _amount
-    ) external override {
+    function onCollIncrease(address _borrower, address _collateral, uint _amount) external override {
         _requireCallerIsTroveManager();
         uint length = getChildrenRewardersLength(_collateral);
         for (uint i; i < length; ++i) {
-            IRewarder(getChildRewarderAt(_collateral, i)).onCollIncrease(
-                _borrower,
-                _amount
-            );
+            IRewarder(getChildRewarderAt(_collateral, i)).onCollIncrease(_borrower, _amount);
         }
     }
 
-    function onCollDecrease(
-        address _borrower,
-        address _collateral,
-        uint _amount
-    ) external override {
+    function onCollDecrease(address _borrower, address _collateral, uint _amount) external override {
         _requireCallerIsTroveManager();
         uint length = getChildrenRewardersLength(_collateral);
         for (uint i; i < length; ++i) {
-            IRewarder(getChildRewarderAt(_collateral, i)).onCollDecrease(
-                _borrower,
-                _amount
-            );
+            IRewarder(getChildRewarderAt(_collateral, i)).onCollDecrease(_borrower, _amount);
         }
     }
 
@@ -140,19 +95,13 @@ contract RewarderManager is Ownable, CheckContract, IRewarderManager {
         _requireCallerIsTroveManager();
         uint length = getChildrenRewardersLength(_collateral);
         for (uint i; i < length; ++i) {
-            IRewarder(getChildRewarderAt(_collateral, i)).onTroveClose(
-                _borrower,
-                _closedStatus
-            );
+            IRewarder(getChildRewarderAt(_collateral, i)).onTroveClose(_borrower, _closedStatus);
         }
     }
 
     // --- 'Require' wrapper functions ---
 
     function _requireCallerIsTroveManager() internal view {
-        require(
-            msg.sender == troveManagerAddress,
-            "RewarderManager: Caller is not Trove Manager"
-        );
+        require(msg.sender == troveManagerAddress, "RewarderManager: Caller is not Trove Manager");
     }
 }

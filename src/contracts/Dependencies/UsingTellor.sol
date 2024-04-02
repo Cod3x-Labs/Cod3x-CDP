@@ -37,10 +37,7 @@ contract UsingTellor is IERC2362 {
         bytes32 _queryId,
         uint256 _timestamp
     ) public view returns (bytes memory _value, uint256 _timestampRetrieved) {
-        (bool _found, uint256 _index) = getIndexForDataAfter(
-            _queryId,
-            _timestamp
-        );
+        (bool _found, uint256 _index) = getIndexForDataAfter(_queryId, _timestamp);
         if (!_found) {
             return ("", 0);
         }
@@ -60,10 +57,7 @@ contract UsingTellor is IERC2362 {
         bytes32 _queryId,
         uint256 _timestamp
     ) public view returns (bytes memory _value, uint256 _timestampRetrieved) {
-        (, _value, _timestampRetrieved) = tellor.getDataBefore(
-            _queryId,
-            _timestamp
-        );
+        (, _value, _timestampRetrieved) = tellor.getDataBefore(_queryId, _timestamp);
     }
 
     /**
@@ -97,16 +91,10 @@ contract UsingTellor is IERC2362 {
         // since the value is within our boundaries, do a binary search
         while (_search) {
             _middle = (_end + _start) / 2;
-            _timestampRetrieved = getTimestampbyQueryIdandIndex(
-                _queryId,
-                _middle
-            );
+            _timestampRetrieved = getTimestampbyQueryIdandIndex(_queryId, _middle);
             if (_timestampRetrieved > _timestamp) {
                 // get immediate previous value
-                uint256 _prevTime = getTimestampbyQueryIdandIndex(
-                    _queryId,
-                    _middle - 1
-                );
+                uint256 _prevTime = getTimestampbyQueryIdandIndex(_queryId, _middle - 1);
                 if (_prevTime <= _timestamp) {
                     // candidate found, check for disputes
                     _search = false;
@@ -116,10 +104,7 @@ contract UsingTellor is IERC2362 {
                 }
             } else {
                 // get immediate next value
-                uint256 _nextTime = getTimestampbyQueryIdandIndex(
-                    _queryId,
-                    _middle + 1
-                );
+                uint256 _nextTime = getTimestampbyQueryIdandIndex(_queryId, _middle + 1);
                 if (_nextTime > _timestamp) {
                     // candidate found, check for disputes
                     _search = false;
@@ -137,18 +122,11 @@ contract UsingTellor is IERC2362 {
             return (true, _middle);
         } else {
             // iterate forward until we find a non-disputed value
-            while (
-                isInDispute(_queryId, _timestampRetrieved) && _middle < _count
-            ) {
+            while (isInDispute(_queryId, _timestampRetrieved) && _middle < _count) {
                 _middle++;
-                _timestampRetrieved = getTimestampbyQueryIdandIndex(
-                    _queryId,
-                    _middle
-                );
+                _timestampRetrieved = getTimestampbyQueryIdandIndex(_queryId, _middle);
             }
-            if (
-                _middle == _count && isInDispute(_queryId, _timestampRetrieved)
-            ) {
+            if (_middle == _count && isInDispute(_queryId, _timestampRetrieved)) {
                 return (false, 0);
             }
             // _timestampRetrieved is correct
@@ -185,11 +163,7 @@ contract UsingTellor is IERC2362 {
         uint256 _timestamp,
         uint256 _maxAge,
         uint256 _maxCount
-    )
-        public
-        view
-        returns (bytes[] memory _values, uint256[] memory _timestamps)
-    {
+    ) public view returns (bytes[] memory _values, uint256[] memory _timestamps) {
         // get index of first possible value
         (bool _ifRetrieve, uint256 _startIndex) = getIndexForDataAfter(
             _queryId,
@@ -237,9 +211,7 @@ contract UsingTellor is IERC2362 {
      * @param _queryId the id to look up
      * @return uint256 count of the number of values received for the queryId
      */
-    function getNewValueCountbyQueryId(
-        bytes32 _queryId
-    ) public view returns (uint256) {
+    function getNewValueCountbyQueryId(bytes32 _queryId) public view returns (uint256) {
         return tellor.getNewValueCountbyQueryId(_queryId);
     }
 
@@ -275,10 +247,7 @@ contract UsingTellor is IERC2362 {
      * @param _timestamp is the timestamp of the value to look up
      * @return bool true if queryId/timestamp is under dispute
      */
-    function isInDispute(
-        bytes32 _queryId,
-        uint256 _timestamp
-    ) public view returns (bool) {
+    function isInDispute(bytes32 _queryId, uint256 _timestamp) public view returns (bool) {
         return tellor.isInDispute(_queryId, _timestamp);
     }
 
@@ -288,10 +257,7 @@ contract UsingTellor is IERC2362 {
      * @param _timestamp to retrieve data/value from
      * @return bytes value for query/timestamp submitted
      */
-    function retrieveData(
-        bytes32 _queryId,
-        uint256 _timestamp
-    ) public view returns (bytes memory) {
+    function retrieveData(bytes32 _queryId, uint256 _timestamp) public view returns (bytes memory) {
         return tellor.retrieveData(_queryId, _timestamp);
     }
 
@@ -313,18 +279,10 @@ contract UsingTellor is IERC2362 {
      */
     function valueFor(
         bytes32 _id
-    )
-        external
-        view
-        override
-        returns (int256 _value, uint256 _timestamp, uint256 _statusCode)
-    {
+    ) external view override returns (int256 _value, uint256 _timestamp, uint256 _statusCode) {
         bytes32 _queryId = idMappingContract.getTellorID(_id);
         bytes memory _valueBytes;
-        (_valueBytes, _timestamp) = getDataBefore(
-            _queryId,
-            block.timestamp + 1
-        );
+        (_valueBytes, _timestamp) = getDataBefore(_queryId, block.timestamp + 1);
         if (_timestamp == 0) {
             return (0, 0, 404);
         }
@@ -339,9 +297,7 @@ contract UsingTellor is IERC2362 {
      * @param _b bytes value to convert to uint256
      * @return _number uint256 converted from bytes
      */
-    function _sliceUint(
-        bytes memory _b
-    ) internal pure returns (uint256 _number) {
+    function _sliceUint(bytes memory _b) internal pure returns (uint256 _number) {
         for (uint256 _i = 0; _i < _b.length; _i++) {
             _number = _number * 256 + uint8(_b[_i]);
         }

@@ -117,16 +117,9 @@ contract RedemptionHelper is LiquityBase, Ownable, IRedemptionHelper {
         _requireAfterBootstrapPeriod();
         totals.price = priceFeed.fetchPrice(_collateral);
         ICollateralConfig collateralConfigCached = collateralConfig;
-        totals.collDecimals = collateralConfigCached.getCollateralDecimals(
-            _collateral
-        );
+        totals.collDecimals = collateralConfigCached.getCollateralDecimals(_collateral);
         totals.collMCR = collateralConfigCached.getCollateralMCR(_collateral);
-        _requireTCRoverMCR(
-            _collateral,
-            totals.price,
-            totals.collDecimals,
-            totals.collMCR
-        );
+        _requireTCRoverMCR(_collateral, totals.price, totals.collDecimals, totals.collMCR);
         _requireAmountGreaterThanZero(_LUSDamount);
         _requireLUSDBalanceCoversRedemption(lusdToken, _redeemer, _LUSDamount);
 
@@ -152,11 +145,7 @@ contract RedemptionHelper is LiquityBase, Ownable, IRedemptionHelper {
             // Find the first trove with ICR >= MCR
             while (
                 totals.currentBorrower != address(0) &&
-                troveManager.getCurrentICR(
-                    totals.currentBorrower,
-                    _collateral,
-                    totals.price
-                ) <
+                troveManager.getCurrentICR(totals.currentBorrower, _collateral, totals.price) <
                 totals.collMCR
             ) {
                 totals.currentBorrower = sortedTrovesCached.getPrev(
@@ -171,9 +160,7 @@ contract RedemptionHelper is LiquityBase, Ownable, IRedemptionHelper {
             _maxIterations = type(uint).max;
         }
         while (
-            totals.currentBorrower != address(0) &&
-            totals.remainingLUSD > 0 &&
-            _maxIterations > 0
+            totals.currentBorrower != address(0) && totals.remainingLUSD > 0 && _maxIterations > 0
         ) {
             _maxIterations--;
             // Save the address of the Trove preceding the current one, before potentially modifying the list
@@ -182,35 +169,25 @@ contract RedemptionHelper is LiquityBase, Ownable, IRedemptionHelper {
                 totals.currentBorrower
             );
 
-            troveManager.applyPendingRewards(
-                totals.currentBorrower,
-                _collateral
-            );
+            troveManager.applyPendingRewards(totals.currentBorrower, _collateral);
 
-            SingleRedemptionValues
-                memory singleRedemption = _redeemCollateralFromTrove(
-                    totals.currentBorrower,
-                    _collateral,
-                    totals.remainingLUSD,
-                    totals.price,
-                    _upperPartialRedemptionHint,
-                    _lowerPartialRedemptionHint,
-                    _partialRedemptionHintNICR,
-                    collateralConfigCached
-                );
+            SingleRedemptionValues memory singleRedemption = _redeemCollateralFromTrove(
+                totals.currentBorrower,
+                _collateral,
+                totals.remainingLUSD,
+                totals.price,
+                _upperPartialRedemptionHint,
+                _lowerPartialRedemptionHint,
+                _partialRedemptionHintNICR,
+                collateralConfigCached
+            );
 
             if (singleRedemption.cancelledPartial) break; // Partial redemption was cancelled (out-of-date hint, or new net debt < minimum), therefore we could not redeem from the last Trove
 
-            totals.totalLUSDToRedeem = totals.totalLUSDToRedeem.add(
-                singleRedemption.LUSDLot
-            );
-            totals.totalCollateralDrawn = totals.totalCollateralDrawn.add(
-                singleRedemption.collLot
-            );
+            totals.totalLUSDToRedeem = totals.totalLUSDToRedeem.add(singleRedemption.LUSDLot);
+            totals.totalCollateralDrawn = totals.totalCollateralDrawn.add(singleRedemption.collLot);
 
-            totals.remainingLUSD = totals.remainingLUSD.sub(
-                singleRedemption.LUSDLot
-            );
+            totals.remainingLUSD = totals.remainingLUSD.sub(singleRedemption.LUSDLot);
             totals.currentBorrower = nextUserToCheck;
         }
         require(
@@ -228,27 +205,15 @@ contract RedemptionHelper is LiquityBase, Ownable, IRedemptionHelper {
         );
 
         // Calculate the ETH fee
-        totals.collateralFee = troveManager.getRedemptionFee(
-            totals.totalCollateralDrawn
-        );
+        totals.collateralFee = troveManager.getRedemptionFee(totals.totalCollateralDrawn);
 
-        _requireUserAcceptsFee(
-            totals.collateralFee,
-            totals.totalCollateralDrawn,
-            _maxFeePercentage
-        );
+        _requireUserAcceptsFee(totals.collateralFee, totals.totalCollateralDrawn, _maxFeePercentage);
 
         // Send the collateral fee to the LQTY staking contract
-        activePool.sendCollateral(
-            _collateral,
-            address(lqtyStaking),
-            totals.collateralFee
-        );
+        activePool.sendCollateral(_collateral, address(lqtyStaking), totals.collateralFee);
         lqtyStaking.increaseF_Collateral(_collateral, totals.collateralFee);
 
-        totals.collateralToSendToRedeemer = totals.totalCollateralDrawn.sub(
-            totals.collateralFee
-        );
+        totals.collateralToSendToRedeemer = totals.totalCollateralDrawn.sub(totals.collateralFee);
 
         // Burn the total LUSD that is cancelled with debt, and send the redeemed collateral to _redeemer
         troveManager.burnLUSDAndEmitRedemptionEvent(
@@ -262,11 +227,7 @@ contract RedemptionHelper is LiquityBase, Ownable, IRedemptionHelper {
 
         // Update Active Pool LUSD, and send ETH to account
         activePool.decreaseLUSDDebt(_collateral, totals.totalLUSDToRedeem);
-        activePool.sendCollateral(
-            _collateral,
-            _redeemer,
-            totals.collateralToSendToRedeemer
-        );
+        activePool.sendCollateral(_collateral, _redeemer, totals.collateralToSendToRedeemer);
     }
 
     function _isValidFirstRedemptionHint(
@@ -279,20 +240,12 @@ contract RedemptionHelper is LiquityBase, Ownable, IRedemptionHelper {
         if (
             _firstRedemptionHint == address(0) ||
             !_sortedTroves.contains(_collateral, _firstRedemptionHint) ||
-            troveManager.getCurrentICR(
-                _firstRedemptionHint,
-                _collateral,
-                _price
-            ) <
-            _MCR
+            troveManager.getCurrentICR(_firstRedemptionHint, _collateral, _price) < _MCR
         ) {
             return false;
         }
 
-        address nextTrove = _sortedTroves.getNext(
-            _collateral,
-            _firstRedemptionHint
-        );
+        address nextTrove = _sortedTroves.getNext(_collateral, _firstRedemptionHint);
         return
             nextTrove == address(0) ||
             troveManager.getCurrentICR(nextTrove, _collateral, _price) < _MCR;
@@ -312,21 +265,14 @@ contract RedemptionHelper is LiquityBase, Ownable, IRedemptionHelper {
         // Determine the remaining amount (lot) to be redeemed, capped by the entire debt of the Trove minus the liquidation reserve
         singleRedemption.LUSDLot = LiquityMath._min(
             _maxLUSDamount,
-            troveManager.getTroveDebt(_borrower, _collateral).sub(
-                LUSD_GAS_COMPENSATION
-            )
+            troveManager.getTroveDebt(_borrower, _collateral).sub(LUSD_GAS_COMPENSATION)
         );
 
         LocalVariables_redeemCollateralFromTrove memory vars;
-        vars.collDecimals = _collateralConfig.getCollateralDecimals(
-            _collateral
-        );
+        vars.collDecimals = _collateralConfig.getCollateralDecimals(_collateral);
 
         // Get the collLot of equivalent value in USD
-        singleRedemption.collLot = singleRedemption
-            .LUSDLot
-            .mul(10 ** vars.collDecimals)
-            .div(_price);
+        singleRedemption.collLot = singleRedemption.LUSDLot.mul(10 ** vars.collDecimals).div(_price);
 
         // Decrease the debt and collateral of the current Trove according to the LUSD lot and corresponding collateral to send
         vars.newDebt = troveManager.getTroveDebt(_borrower, _collateral).sub(
@@ -339,11 +285,7 @@ contract RedemptionHelper is LiquityBase, Ownable, IRedemptionHelper {
         if (vars.newDebt == LUSD_GAS_COMPENSATION) {
             // No debt left in the Trove (except for the liquidation reserve), therefore the trove gets closed
             troveManager.removeStake(_borrower, _collateral);
-            troveManager.closeTrove(
-                _borrower,
-                _collateral,
-                uint(TroveStatus.closedByRedemption)
-            );
+            troveManager.closeTrove(_borrower, _collateral, uint(TroveStatus.closedByRedemption));
             troveManager.redeemCloseTrove(
                 _borrower,
                 _collateral,
@@ -390,22 +332,14 @@ contract RedemptionHelper is LiquityBase, Ownable, IRedemptionHelper {
     }
 
     function _requireCallerIsTroveManager() internal view {
-        require(
-            msg.sender == address(troveManager),
-            "RedemptionHelper: Caller is not TroveManager"
-        );
+        require(msg.sender == address(troveManager), "RedemptionHelper: Caller is not TroveManager");
     }
 
     function _requireValidCollateralAddress(address _collateral) internal view {
-        require(
-            collateralConfig.isCollateralAllowed(_collateral),
-            "Invalid collateral address"
-        );
+        require(collateralConfig.isCollateralAllowed(_collateral), "Invalid collateral address");
     }
 
-    function _requireValidMaxFeePercentage(
-        uint _maxFeePercentage
-    ) internal view {
+    function _requireValidMaxFeePercentage(uint _maxFeePercentage) internal view {
         require(
             _maxFeePercentage >= troveManager.REDEMPTION_FEE_FLOOR() &&
                 _maxFeePercentage <= DECIMAL_PRECISION,
@@ -427,10 +361,7 @@ contract RedemptionHelper is LiquityBase, Ownable, IRedemptionHelper {
         uint256 _collDecimals,
         uint256 _MCR
     ) internal view {
-        require(
-            _getTCR(_collateral, _price, _collDecimals) >= _MCR,
-            "RedemptionHelper: TCR < MCR"
-        );
+        require(_getTCR(_collateral, _price, _collDecimals) >= _MCR, "RedemptionHelper: TCR < MCR");
     }
 
     function _requireAmountGreaterThanZero(uint _amount) internal pure {

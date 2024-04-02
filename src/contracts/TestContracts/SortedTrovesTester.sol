@@ -39,11 +39,7 @@ contract SortedTrovesTester {
         return 1;
     }
 
-    function getCurrentICR(
-        address,
-        address,
-        uint
-    ) external pure returns (uint) {
+    function getCurrentICR(address, address, uint) external pure returns (uint) {
         return 1;
     }
 }

@@ -24,9 +24,7 @@ enum TroveStatus {
 interface ITroveManager is ILiquityBase {
     // --- Events ---
 
-    event BorrowerOperationsAddressChanged(
-        address _newBorrowerOperationsAddress
-    );
+    event BorrowerOperationsAddressChanged(address _newBorrowerOperationsAddress);
     event PriceFeedAddressChanged(address _newPriceFeedAddress);
     event LUSDTokenAddressChanged(address _newLUSDTokenAddress);
     event ActivePoolAddressChanged(address _activePoolAddress);
@@ -69,21 +67,9 @@ interface ITroveManager is ILiquityBase {
         uint _totalStakesSnapshot,
         uint _totalCollateralSnapshot
     );
-    event LTermsUpdated(
-        address _collateral,
-        uint _L_Collateral,
-        uint _L_LUSDDebt
-    );
-    event TroveSnapshotsUpdated(
-        address _collateral,
-        uint _L_Collateral,
-        uint _L_LUSDDebt
-    );
-    event TroveIndexUpdated(
-        address _borrower,
-        address _collateral,
-        uint _newIndex
-    );
+    event LTermsUpdated(address _collateral, uint _L_Collateral, uint _L_LUSDDebt);
+    event TroveSnapshotsUpdated(address _collateral, uint _L_Collateral, uint _L_LUSDDebt);
+    event TroveIndexUpdated(address _borrower, address _collateral, uint _newIndex);
     event Redemption(
         address _collateral,
         uint _attemptedLUSDAmount,
@@ -116,19 +102,14 @@ interface ITroveManager is ILiquityBase {
     function lqtyToken() external view returns (IERC20);
     function lqtyStaking() external view returns (ILQTYStaking);
 
-    function getTroveOwnersCount(
-        address _collateral
-    ) external view returns (uint);
+    function getTroveOwnersCount(address _collateral) external view returns (uint);
 
     function getTroveFromTroveOwnersArray(
         address _collateral,
         uint _index
     ) external view returns (address);
 
-    function getNominalICR(
-        address _borrower,
-        address _collateral
-    ) external view returns (uint);
+    function getNominalICR(address _borrower, address _collateral) external view returns (uint);
     function getCurrentICR(
         address _borrower,
         address _collateral,
@@ -139,10 +120,7 @@ interface ITroveManager is ILiquityBase {
 
     function liquidateTroves(address _collateral, uint _n) external;
 
-    function batchLiquidateTroves(
-        address _collateral,
-        address[] calldata _troveArray
-    ) external;
+    function batchLiquidateTroves(address _collateral, address[] calldata _troveArray) external;
 
     function sendGasCompensation(
         IActivePool _activePool,
@@ -214,10 +192,7 @@ interface ITroveManager is ILiquityBase {
         address _collateral
     ) external returns (uint);
 
-    function updateTroveRewardSnapshots(
-        address _borrower,
-        address _collateral
-    ) external;
+    function updateTroveRewardSnapshots(address _borrower, address _collateral) external;
 
     function updateSystemSnapshots_excludeCollRemainder(
         IActivePool _activePool,
@@ -255,10 +230,7 @@ interface ITroveManager is ILiquityBase {
         address _collateral
     ) external returns (uint index);
 
-    function applyPendingRewards(
-        address _borrower,
-        address _collateral
-    ) external;
+    function applyPendingRewards(address _borrower, address _collateral) external;
 
     function getPendingCollateralReward(
         address _borrower,
@@ -270,10 +242,7 @@ interface ITroveManager is ILiquityBase {
         address _collateral
     ) external view returns (uint);
 
-    function hasPendingRewards(
-        address _borrower,
-        address _collateral
-    ) external view returns (bool);
+    function hasPendingRewards(address _borrower, address _collateral) external view returns (bool);
 
     function getEntireDebtAndColl(
         address _borrower,
@@ -281,66 +250,35 @@ interface ITroveManager is ILiquityBase {
     )
         external
         view
-        returns (
-            uint debt,
-            uint coll,
-            uint pendingLUSDDebtReward,
-            uint pendingCollateralReward
-        );
+        returns (uint debt, uint coll, uint pendingLUSDDebtReward, uint pendingCollateralReward);
 
-    function closeTrove(
-        address _borrower,
-        address _collateral,
-        uint256 _closedStatusNum
-    ) external;
+    function closeTrove(address _borrower, address _collateral, uint256 _closedStatusNum) external;
 
     function removeStake(address _borrower, address _collateral) external;
 
     function getRedemptionRate() external view returns (uint);
     function getRedemptionRateWithDecay() external view returns (uint);
 
-    function getRedemptionFee(
-        uint _collateralDrawn
-    ) external view returns (uint);
-    function getRedemptionFeeWithDecay(
-        uint _collateralDrawn
-    ) external view returns (uint);
+    function getRedemptionFee(uint _collateralDrawn) external view returns (uint);
+    function getRedemptionFeeWithDecay(uint _collateralDrawn) external view returns (uint);
 
     function getBorrowingRate() external view returns (uint);
     function getBorrowingRateWithDecay() external view returns (uint);
 
     function getBorrowingFee(uint LUSDDebt) external view returns (uint);
-    function getBorrowingFeeWithDecay(
-        uint _LUSDDebt
-    ) external view returns (uint);
+    function getBorrowingFeeWithDecay(uint _LUSDDebt) external view returns (uint);
 
     function decayBaseRateFromBorrowing() external;
 
-    function getTroveStatus(
-        address _borrower,
-        address _collateral
-    ) external view returns (uint);
+    function getTroveStatus(address _borrower, address _collateral) external view returns (uint);
 
-    function getTroveStake(
-        address _borrower,
-        address _collateral
-    ) external view returns (uint);
+    function getTroveStake(address _borrower, address _collateral) external view returns (uint);
 
-    function getTroveDebt(
-        address _borrower,
-        address _collateral
-    ) external view returns (uint);
+    function getTroveDebt(address _borrower, address _collateral) external view returns (uint);
 
-    function getTroveColl(
-        address _borrower,
-        address _collateral
-    ) external view returns (uint);
+    function getTroveColl(address _borrower, address _collateral) external view returns (uint);
 
-    function setTroveStatus(
-        address _borrower,
-        address _collateral,
-        uint num
-    ) external;
+    function setTroveStatus(address _borrower, address _collateral, uint num) external;
 
     function increaseTroveColl(
         address _borrower,
@@ -366,13 +304,7 @@ interface ITroveManager is ILiquityBase {
         uint _collDecrease
     ) external returns (uint);
 
-    function getTCR(
-        address _collateral,
-        uint _price
-    ) external view returns (uint);
+    function getTCR(address _collateral, uint _price) external view returns (uint);
 
-    function checkRecoveryMode(
-        address _collateral,
-        uint _price
-    ) external view returns (bool);
+    function checkRecoveryMode(address _collateral, uint _price) external view returns (bool);
 }

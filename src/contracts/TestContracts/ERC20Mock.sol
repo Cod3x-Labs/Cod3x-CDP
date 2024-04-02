@@ -32,11 +32,7 @@ contract ERC20Mock is ERC20 {
         _transfer(from, to, value);
     }
 
-    function approveInternal(
-        address owner,
-        address spender,
-        uint256 value
-    ) public {
+    function approveInternal(address owner, address spender, uint256 value) public {
         _approve(owner, spender, value);
     }
 

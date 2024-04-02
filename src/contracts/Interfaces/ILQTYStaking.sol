@@ -24,12 +24,7 @@ interface ILQTYStaking {
     event F_LUSDUpdated(uint _F_LUSD);
     event TotalLQTYStakedUpdated(uint _totalLQTYStaked);
     event CollateralSent(address _account, address _collateral, uint _amount);
-    event StakerSnapshotsUpdated(
-        address _staker,
-        address[] _assets,
-        uint[] _amounts,
-        uint _F_LUSD
-    );
+    event StakerSnapshotsUpdated(address _staker, address[] _assets, uint[] _amounts, uint _F_LUSD);
 
     // --- Functions ---
 

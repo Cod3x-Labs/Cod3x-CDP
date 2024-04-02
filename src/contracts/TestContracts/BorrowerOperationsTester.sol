@@ -39,9 +39,7 @@ contract BorrowerOperationsTester is BorrowerOperations {
         bool isDebtIncrease,
         uint _price
     ) external view returns (uint) {
-        uint256 collDecimals = collateralConfig.getCollateralDecimals(
-            _collateral
-        );
+        uint256 collDecimals = collateralConfig.getCollateralDecimals(_collateral);
         return
             _getNewTCRFromTroveChange(
                 _collateral,

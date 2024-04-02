@@ -38,10 +38,7 @@ contract EchidnaProxy {
         troveManager.liquidateTroves(_collateral, _n);
     }
 
-    function batchLiquidateTrovesPrx(
-        address _collateral,
-        address[] calldata _troveArray
-    ) external {
+    function batchLiquidateTrovesPrx(address _collateral, address[] calldata _troveArray) external {
         troveManager.batchLiquidateTroves(_collateral, _troveArray);
     }
 
@@ -76,15 +73,8 @@ contract EchidnaProxy {
         address _lowerHint,
         uint _maxFee
     ) external {
-        IERC20(_collateral).safeTransferFrom(
-            msg.sender,
-            address(this),
-            _collAmount
-        );
-        IERC20(_collateral).safeIncreaseAllowance(
-            address(borrowerOperations),
-            _collAmount
-        );
+        IERC20(_collateral).safeTransferFrom(msg.sender, address(this), _collAmount);
+        IERC20(_collateral).safeIncreaseAllowance(address(borrowerOperations), _collAmount);
         borrowerOperations.openTrove(
             _collateral,
             _collAmount,
@@ -101,21 +91,9 @@ contract EchidnaProxy {
         address _upperHint,
         address _lowerHint
     ) external {
-        IERC20(_collateral).safeTransferFrom(
-            msg.sender,
-            address(this),
-            _collAmount
-        );
-        IERC20(_collateral).safeIncreaseAllowance(
-            address(borrowerOperations),
-            _collAmount
-        );
-        borrowerOperations.addColl(
-            _collateral,
-            _collAmount,
-            _upperHint,
-            _lowerHint
-        );
+        IERC20(_collateral).safeTransferFrom(msg.sender, address(this), _collAmount);
+        IERC20(_collateral).safeIncreaseAllowance(address(borrowerOperations), _collAmount);
+        borrowerOperations.addColl(_collateral, _collAmount, _upperHint, _lowerHint);
     }
 
     function withdrawCollPrx(
@@ -124,12 +102,7 @@ contract EchidnaProxy {
         address _upperHint,
         address _lowerHint
     ) external {
-        borrowerOperations.withdrawColl(
-            _collateral,
-            _amount,
-            _upperHint,
-            _lowerHint
-        );
+        borrowerOperations.withdrawColl(_collateral, _amount, _upperHint, _lowerHint);
     }
 
     function withdrawLUSDPrx(
@@ -139,13 +112,7 @@ contract EchidnaProxy {
         address _lowerHint,
         uint _maxFee
     ) external {
-        borrowerOperations.withdrawLUSD(
-            _collateral,
-            _maxFee,
-            _amount,
-            _upperHint,
-            _lowerHint
-        );
+        borrowerOperations.withdrawLUSD(_collateral, _maxFee, _amount, _upperHint, _lowerHint);
     }
 
     function repayLUSDPrx(
@@ -154,12 +121,7 @@ contract EchidnaProxy {
         address _upperHint,
         address _lowerHint
     ) external {
-        borrowerOperations.repayLUSD(
-            _collateral,
-            _amount,
-            _upperHint,
-            _lowerHint
-        );
+        borrowerOperations.repayLUSD(_collateral, _amount, _upperHint, _lowerHint);
     }
 
     function closeTrovePrx(address _collateral) external {
@@ -176,15 +138,8 @@ contract EchidnaProxy {
         address _lowerHint,
         uint _maxFee
     ) external {
-        IERC20(_collateral).safeTransferFrom(
-            msg.sender,
-            address(this),
-            _collTopUp
-        );
-        IERC20(_collateral).safeIncreaseAllowance(
-            address(borrowerOperations),
-            _collTopUp
-        );
+        IERC20(_collateral).safeTransferFrom(msg.sender, address(this), _collTopUp);
+        IERC20(_collateral).safeIncreaseAllowance(address(borrowerOperations), _collTopUp);
         borrowerOperations.adjustTrove(
             _collateral,
             _maxFee,
@@ -208,17 +163,11 @@ contract EchidnaProxy {
 
     // LUSD Token
 
-    function transferPrx(
-        address recipient,
-        uint256 amount
-    ) external returns (bool) {
+    function transferPrx(address recipient, uint256 amount) external returns (bool) {
         return lusdToken.transfer(recipient, amount);
     }
 
-    function approvePrx(
-        address spender,
-        uint256 amount
-    ) external returns (bool) {
+    function approvePrx(address spender, uint256 amount) external returns (bool) {
         return lusdToken.approve(spender, amount);
     }
 
@@ -230,17 +179,11 @@ contract EchidnaProxy {
         return lusdToken.transferFrom(sender, recipient, amount);
     }
 
-    function increaseAllowancePrx(
-        address spender,
-        uint256 addedValue
-    ) external returns (bool) {
+    function increaseAllowancePrx(address spender, uint256 addedValue) external returns (bool) {
         return lusdToken.increaseAllowance(spender, addedValue);
     }
 
-    function decreaseAllowancePrx(
-        address spender,
-        uint256 subtractedValue
-    ) external returns (bool) {
+    function decreaseAllowancePrx(address spender, uint256 subtractedValue) external returns (bool) {
         return lusdToken.decreaseAllowance(spender, subtractedValue);
     }
 }

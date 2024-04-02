@@ -52,12 +52,6 @@ contract FunctionCaller {
         address _prevId,
         address _nextId
     ) external view returns (address, address) {
-        return
-            sortedTroves.findInsertPosition(
-                _collateral,
-                _NICR,
-                _prevId,
-                _nextId
-            );
+        return sortedTroves.findInsertPosition(_collateral, _NICR, _prevId, _nextId);
     }
 }

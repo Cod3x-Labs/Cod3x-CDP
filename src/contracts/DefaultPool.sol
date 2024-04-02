@@ -60,105 +60,70 @@ contract DefaultPool is Ownable, CheckContract, IDefaultPool {
      *
      * Not necessarily equal to the the contract's raw collateral balance - collateral can be forcibly sent to contracts.
      */
-    function getCollateral(
-        address _collateral
-    ) external view override returns (uint) {
+    function getCollateral(address _collateral) external view override returns (uint) {
         _requireValidCollateralAddress(_collateral);
         return collAmount[_collateral];
     }
 
-    function getLUSDDebt(
-        address _collateral
-    ) external view override returns (uint) {
+    function getLUSDDebt(address _collateral) external view override returns (uint) {
         _requireValidCollateralAddress(_collateral);
         return LUSDDebt[_collateral];
     }
 
     // --- Pool functionality ---
 
-    function sendCollateralToActivePool(
-        address _collateral,
-        uint _amount
-    ) external override {
+    function sendCollateralToActivePool(address _collateral, uint _amount) external override {
         _requireValidCollateralAddress(_collateral);
         _requireCallerIsTroveManager();
         address activePool = activePoolAddress; // cache to save an SLOAD
         collAmount[_collateral] = collAmount[_collateral].sub(_amount);
-        emit DefaultPoolCollateralBalanceUpdated(
-            _collateral,
-            collAmount[_collateral]
-        );
+        emit DefaultPoolCollateralBalanceUpdated(_collateral, collAmount[_collateral]);
         emit CollateralSent(_collateral, activePool, _amount);
 
         IERC20(_collateral).safeIncreaseAllowance(activePool, _amount);
-        IActivePool(activePoolAddress)
-            .pullCollateralFromBorrowerOperationsOrDefaultPool(
-                _collateral,
-                _amount
-            );
+        IActivePool(activePoolAddress).pullCollateralFromBorrowerOperationsOrDefaultPool(
+            _collateral,
+            _amount
+        );
     }
 
-    function increaseLUSDDebt(
-        address _collateral,
-        uint _amount
-    ) external override {
+    function increaseLUSDDebt(address _collateral, uint _amount) external override {
         _requireValidCollateralAddress(_collateral);
         _requireCallerIsTroveManager();
         LUSDDebt[_collateral] = LUSDDebt[_collateral].add(_amount);
         emit DefaultPoolLUSDDebtUpdated(_collateral, LUSDDebt[_collateral]);
     }
 
-    function decreaseLUSDDebt(
-        address _collateral,
-        uint _amount
-    ) external override {
+    function decreaseLUSDDebt(address _collateral, uint _amount) external override {
         _requireValidCollateralAddress(_collateral);
         _requireCallerIsTroveManager();
         LUSDDebt[_collateral] = LUSDDebt[_collateral].sub(_amount);
         emit DefaultPoolLUSDDebtUpdated(_collateral, LUSDDebt[_collateral]);
     }
 
-    function pullCollateralFromActivePool(
-        address _collateral,
-        uint _amount
-    ) external override {
+    function pullCollateralFromActivePool(address _collateral, uint _amount) external override {
         _requireValidCollateralAddress(_collateral);
         _requireCallerIsActivePool();
         collAmount[_collateral] = collAmount[_collateral].add(_amount);
-        emit DefaultPoolCollateralBalanceUpdated(
-            _collateral,
-            collAmount[_collateral]
-        );
+        emit DefaultPoolCollateralBalanceUpdated(_collateral, collAmount[_collateral]);
 
-        IERC20(_collateral).safeTransferFrom(
-            activePoolAddress,
-            address(this),
-            _amount
-        );
+        IERC20(_collateral).safeTransferFrom(activePoolAddress, address(this), _amount);
     }
 
     // --- 'require' functions ---
 
     function _requireValidCollateralAddress(address _collateral) internal view {
         require(
-            ICollateralConfig(collateralConfigAddress).isCollateralAllowed(
-                _collateral
-            ),
+            ICollateralConfig(collateralConfigAddress).isCollateralAllowed(_collateral),
             "Invalid collateral address"
         );
     }
 
     function _requireCallerIsActivePool() internal view {
-        require(
-            msg.sender == activePoolAddress,
-            "DefaultPool: Caller is not the ActivePool"
-        );
+        require(msg.sender == activePoolAddress, "DefaultPool: Caller is not the ActivePool");
     }
 
     function _requireCallerIsTroveManager() internal view {
-        require(
-            msg.sender == troveManagerAddress,
-            "DefaultPool: Caller is not the TroveManager"
-        );
+        require(msg.sender == troveManagerAddress, "DefaultPool: Caller is not the TroveManager");
     }
 }

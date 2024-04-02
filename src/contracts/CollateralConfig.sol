@@ -48,11 +48,7 @@ contract CollateralConfig is ICollateralConfig, CheckContract, Ownable {
         uint256 _chainlinkTimeout,
         uint256 _tellorTimeout
     );
-    event CollateralRatiosUpdated(
-        address _collateral,
-        uint256 _MCR,
-        uint256 _CCR
-    );
+    event CollateralRatiosUpdated(address _collateral, uint256 _MCR, uint256 _CCR);
     event CollateralDebtLimitUpdated(address _collateral, uint256 _debtLimit);
     event CollateralOracleTimeoutsUpdated(
         address _collateral,
@@ -80,26 +76,11 @@ contract CollateralConfig is ICollateralConfig, CheckContract, Ownable {
     ) external onlyOwner {
         require(!initialized, "Can only initialize once");
         require(_collaterals.length != 0, "At least one collateral required");
-        require(
-            _MCRs.length == _collaterals.length,
-            "Array lengths must match"
-        );
-        require(
-            _CCRs.length == _collaterals.length,
-            "Array lenghts must match"
-        );
-        require(
-            _debtLimits.length == _collaterals.length,
-            "Array lengths must match"
-        );
-        require(
-            _chainlinkTimeouts.length == _collaterals.length,
-            "Array lengths must match"
-        );
-        require(
-            _tellorTimeouts.length == _collaterals.length,
-            "Array lengths must match"
-        );
+        require(_MCRs.length == _collaterals.length, "Array lengths must match");
+        require(_CCRs.length == _collaterals.length, "Array lenghts must match");
+        require(_debtLimits.length == _collaterals.length, "Array lengths must match");
+        require(_chainlinkTimeouts.length == _collaterals.length, "Array lengths must match");
+        require(_tellorTimeouts.length == _collaterals.length, "Array lengths must match");
 
         for (uint256 i = 0; i < _collaterals.length; i++) {
             _addNewCollateral(
@@ -128,14 +109,7 @@ contract CollateralConfig is ICollateralConfig, CheckContract, Ownable {
         address _chainlinkAggregator,
         bytes32 _tellorQueryId
     ) external onlyOwner {
-        _addNewCollateral(
-            _collateral,
-            _MCR,
-            _CCR,
-            _debtLimit,
-            _chainlinkTimeout,
-            _tellorTimeout
-        );
+        _addNewCollateral(_collateral, _MCR, _CCR, _debtLimit, _chainlinkTimeout, _tellorTimeout);
         priceFeed.updateChainlinkAggregator(_collateral, _chainlinkAggregator);
         priceFeed.updateTellorQueryID(_collateral, _tellorQueryId);
     }
@@ -223,25 +197,14 @@ contract CollateralConfig is ICollateralConfig, CheckContract, Ownable {
         Config storage config = collateralConfig[_collateral];
         config.chainlinkTimeout = _chainlinkTimeout;
         config.tellorTimeout = _tellorTimeout;
-        emit CollateralOracleTimeoutsUpdated(
-            _collateral,
-            _chainlinkTimeout,
-            _tellorTimeout
-        );
+        emit CollateralOracleTimeoutsUpdated(_collateral, _chainlinkTimeout, _tellorTimeout);
     }
 
-    function getAllowedCollaterals()
-        external
-        view
-        override
-        returns (address[] memory)
-    {
+    function getAllowedCollaterals() external view override returns (address[] memory) {
         return collaterals;
     }
 
-    function isCollateralAllowed(
-        address _collateral
-    ) external view override returns (bool) {
+    function isCollateralAllowed(address _collateral) external view override returns (bool) {
         return collateralConfig[_collateral].allowed;
     }
 
@@ -282,10 +245,7 @@ contract CollateralConfig is ICollateralConfig, CheckContract, Ownable {
     }
 
     modifier checkCollateral(address _collateral) {
-        require(
-            collateralConfig[_collateral].allowed,
-            "Invalid collateral address"
-        );
+        require(collateralConfig[_collateral].allowed, "Invalid collateral address");
         _;
     }
 }

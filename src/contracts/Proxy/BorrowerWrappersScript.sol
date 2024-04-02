@@ -16,11 +16,7 @@ import "./ERC20TransferScript.sol";
 import "./LQTYStakingScript.sol";
 import "../Dependencies/SafeERC20.sol";
 
-contract BorrowerWrappersScript is
-    BorrowerOperationsScript,
-    ERC20TransferScript,
-    LQTYStakingScript
-{
+contract BorrowerWrappersScript is BorrowerOperationsScript, ERC20TransferScript, LQTYStakingScript {
     using SafeMath for uint;
     using SafeERC20 for IERC20;
 
@@ -42,15 +38,11 @@ contract BorrowerWrappersScript is
         address _lqtyStakingAddress
     )
         public
-        BorrowerOperationsScript(
-            IBorrowerOperations(_borrowerOperationsAddress)
-        )
+        BorrowerOperationsScript(IBorrowerOperations(_borrowerOperationsAddress))
         LQTYStakingScript(_lqtyStakingAddress)
     {
         checkContract(_collateralConfigAddress);
-        ICollateralConfig collateralConfigCached = ICollateralConfig(
-            _collateralConfigAddress
-        );
+        ICollateralConfig collateralConfigCached = ICollateralConfig(_collateralConfigAddress);
         collateralConfig = collateralConfigCached;
 
         checkContract(_troveManagerAddress);
@@ -101,15 +93,8 @@ contract BorrowerWrappersScript is
         uint totalCollateral = balanceAfter.sub(balanceBefore).add(_collAmount);
 
         // Open trove with obtained collateral, plus collateral sent by user
-        IERC20(_collateral).safeTransferFrom(
-            msg.sender,
-            address(this),
-            _collAmount
-        );
-        IERC20(_collateral).safeIncreaseAllowance(
-            address(borrowerOperations),
-            totalCollateral
-        );
+        IERC20(_collateral).safeTransferFrom(msg.sender, address(this), _collAmount);
+        IERC20(_collateral).safeIncreaseAllowance(address(borrowerOperations), totalCollateral);
         borrowerOperations.openTrove(
             _collateral,
             totalCollateral,
@@ -181,22 +166,15 @@ contract BorrowerWrappersScript is
         // Claim gains
         lqtyStaking.unstake(0);
 
-        uint gainedCollateral = IERC20(_collateral)
-            .balanceOf(address(this))
-            .sub(collBalanceBefore); // stack too deep issues :'(
-        uint gainedLUSD = lusdToken.balanceOf(address(this)).sub(
-            lusdBalanceBefore
-        );
+        uint gainedCollateral = IERC20(_collateral).balanceOf(address(this)).sub(collBalanceBefore); // stack too deep issues :'(
+        uint gainedLUSD = lusdToken.balanceOf(address(this)).sub(lusdBalanceBefore);
 
         uint netLUSDAmount;
         // Top up trove and get more LUSD, keeping ICR constant
         if (gainedCollateral > 0) {
             _requireUserHasTrove(address(this), _collateral);
             netLUSDAmount = _getNetLUSDAmount(_collateral, gainedCollateral);
-            IERC20(_collateral).safeIncreaseAllowance(
-                address(borrowerOperations),
-                gainedCollateral
-            );
+            IERC20(_collateral).safeIncreaseAllowance(address(borrowerOperations), gainedCollateral);
             borrowerOperations.adjustTrove(
                 _collateral,
                 _maxFee,
@@ -223,21 +201,12 @@ contract BorrowerWrappersScript is
         }
     }
 
-    function _getNetLUSDAmount(
-        address _collateral,
-        uint _collAmount
-    ) internal returns (uint) {
+    function _getNetLUSDAmount(address _collateral, uint _collAmount) internal returns (uint) {
         uint price = priceFeed.fetchPrice(_collateral);
-        uint ICR = troveManager.getCurrentICR(
-            address(this),
-            _collateral,
-            price
-        );
+        uint ICR = troveManager.getCurrentICR(address(this), _collateral, price);
 
         uint collDecimals = collateralConfig.getCollateralDecimals(_collateral);
-        uint LUSDAmount = _getScaledCollAmount(_collAmount, collDecimals)
-            .mul(price)
-            .div(ICR);
+        uint LUSDAmount = _getScaledCollAmount(_collAmount, collDecimals).mul(price).div(ICR);
         uint borrowingRate = troveManager.getBorrowingRateWithDecay();
         uint netDebt = LUSDAmount.mul(LiquityMath.DECIMAL_PRECISION).div(
             LiquityMath.DECIMAL_PRECISION.add(borrowingRate)
@@ -246,10 +215,7 @@ contract BorrowerWrappersScript is
         return netDebt;
     }
 
-    function _requireUserHasTrove(
-        address _depositor,
-        address _collateral
-    ) internal view {
+    function _requireUserHasTrove(address _depositor, address _collateral) internal view {
         require(
             troveManager.getTroveStatus(_depositor, _collateral) == 1,
             "BorrowerWrappersScript: caller must have an active trove"
@@ -262,13 +228,9 @@ contract BorrowerWrappersScript is
     ) internal pure returns (uint256 scaledColl) {
         scaledColl = _collAmount;
         if (_collDecimals > LiquityMath.CR_CALCULATION_DECIMALS) {
-            scaledColl = scaledColl.div(
-                10 ** (_collDecimals - LiquityMath.CR_CALCULATION_DECIMALS)
-            );
+            scaledColl = scaledColl.div(10 ** (_collDecimals - LiquityMath.CR_CALCULATION_DECIMALS));
         } else if (_collDecimals < LiquityMath.CR_CALCULATION_DECIMALS) {
-            scaledColl = scaledColl.mul(
-                10 ** (LiquityMath.CR_CALCULATION_DECIMALS - _collDecimals)
-            );
+            scaledColl = scaledColl.mul(10 ** (LiquityMath.CR_CALCULATION_DECIMALS - _collDecimals));
         }
     }
 }

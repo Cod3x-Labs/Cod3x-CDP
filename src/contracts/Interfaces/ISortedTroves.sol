@@ -13,10 +13,7 @@ interface ISortedTroves {
 
     // --- Functions ---
 
-    function setParams(
-        address _TroveManagerAddress,
-        address _borrowerOperationsAddress
-    ) external;
+    function setParams(address _TroveManagerAddress, address _borrowerOperationsAddress) external;
 
     function insert(
         address _collateral,
@@ -36,10 +33,7 @@ interface ISortedTroves {
         address _nextId
     ) external returns (address, address);
 
-    function contains(
-        address _collateral,
-        address _id
-    ) external view returns (bool);
+    function contains(address _collateral, address _id) external view returns (bool);
 
     function isEmpty(address _collateral) external view returns (bool);
 
@@ -49,15 +43,9 @@ interface ISortedTroves {
 
     function getLast(address _collateral) external view returns (address);
 
-    function getNext(
-        address _collateral,
-        address _id
-    ) external view returns (address);
+    function getNext(address _collateral, address _id) external view returns (address);
 
-    function getPrev(
-        address _collateral,
-        address _id
-    ) external view returns (address);
+    function getPrev(address _collateral, address _id) external view returns (address);
 
     function validInsertPosition(
         address _collateral,

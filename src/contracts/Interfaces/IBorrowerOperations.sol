@@ -34,11 +34,7 @@ interface IBorrowerOperations {
     event LUSDTokenAddressChanged(address _lusdTokenAddress);
     event LQTYStakingAddressChanged(address _lqtyStakingAddress);
 
-    event TroveCreated(
-        address indexed _borrower,
-        address _collateral,
-        uint arrayIndex
-    );
+    event TroveCreated(address indexed _borrower, address _collateral, uint arrayIndex);
     event TroveUpdated(
         address indexed _borrower,
         address _collateral,
@@ -47,11 +43,7 @@ interface IBorrowerOperations {
         uint stake,
         uint8 operation
     );
-    event LUSDBorrowingFeePaid(
-        address indexed _borrower,
-        address _collateral,
-        uint _LUSDFee
-    );
+    event LUSDBorrowingFeePaid(address indexed _borrower, address _collateral, uint _LUSDFee);
 
     // --- Functions ---
 
@@ -127,9 +119,7 @@ interface IBorrowerOperations {
         address _upperHint,
         address _lowerHint
     ) external;
-    function adjustTroveFor(
-        Params_adjustTroveFor memory
-    ) external returns (address, address);
+    function adjustTroveFor(Params_adjustTroveFor memory) external returns (address, address);
 
     function claimCollateral(address _collateral) external;
 

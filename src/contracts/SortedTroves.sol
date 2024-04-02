@@ -107,15 +107,7 @@ contract SortedTroves is Ownable, CheckContract, ISortedTroves {
         ITroveManager troveManagerCached = troveManager;
 
         _requireCallerIsBOorTroveM(troveManagerCached);
-        return
-            _insert(
-                troveManagerCached,
-                _collateral,
-                _id,
-                _NICR,
-                _prevId,
-                _nextId
-            );
+        return _insert(troveManagerCached, _collateral, _id, _NICR, _prevId, _nextId);
     }
 
     function _insert(
@@ -127,10 +119,7 @@ contract SortedTroves is Ownable, CheckContract, ISortedTroves {
         address _nextId
     ) internal returns (address, address) {
         // List must not already contain node
-        require(
-            !contains(_collateral, _id),
-            "SortedTroves: List already contains the node"
-        );
+        require(!contains(_collateral, _id), "SortedTroves: List already contains the node");
         // Node id must not be null
         require(_id != address(0), "SortedTroves: Id cannot be zero");
         // NICR must be non-zero
@@ -139,15 +128,7 @@ contract SortedTroves is Ownable, CheckContract, ISortedTroves {
         address prevId = _prevId;
         address nextId = _nextId;
 
-        if (
-            !_validInsertPosition(
-                _troveManager,
-                _collateral,
-                _NICR,
-                prevId,
-                nextId
-            )
-        ) {
+        if (!_validInsertPosition(_troveManager, _collateral, _NICR, prevId, nextId)) {
             // Sender's hint was not a valid insert position
             // Use sender's hint to find a valid insert position
             (prevId, nextId) = _findInsertPosition(
@@ -185,10 +166,7 @@ contract SortedTroves is Ownable, CheckContract, ISortedTroves {
 
         data[_collateral].size = data[_collateral].size.add(1);
         emit NodeAdded(_collateral, _id, _NICR);
-        return (
-            data[_collateral].nodes[_id].prevId,
-            data[_collateral].nodes[_id].nextId
-        );
+        return (data[_collateral].nodes[_id].prevId, data[_collateral].nodes[_id].nextId);
     }
 
     function remove(address _collateral, address _id) external override {
@@ -203,10 +181,7 @@ contract SortedTroves is Ownable, CheckContract, ISortedTroves {
      */
     function _remove(address _collateral, address _id) internal {
         // List must contain the node
-        require(
-            contains(_collateral, _id),
-            "SortedTroves: List does not contain the id"
-        );
+        require(contains(_collateral, _id), "SortedTroves: List does not contain the id");
 
         if (data[_collateral].size > 1) {
             // List contains more than a single node
@@ -215,27 +190,23 @@ contract SortedTroves is Ownable, CheckContract, ISortedTroves {
                 // Set head to next node
                 data[_collateral].head = data[_collateral].nodes[_id].nextId;
                 // Set prev pointer of new head to null
-                data[_collateral]
-                    .nodes[data[_collateral].head]
-                    .prevId = address(0);
+                data[_collateral].nodes[data[_collateral].head].prevId = address(0);
             } else if (_id == data[_collateral].tail) {
                 // The removed node is the tail
                 // Set tail to previous node
                 data[_collateral].tail = data[_collateral].nodes[_id].prevId;
                 // Set next pointer of new tail to null
-                data[_collateral]
-                    .nodes[data[_collateral].tail]
-                    .nextId = address(0);
+                data[_collateral].nodes[data[_collateral].tail].nextId = address(0);
             } else {
                 // The removed node is neither the head nor the tail
                 // Set next pointer of previous node to the next node
-                data[_collateral]
-                    .nodes[data[_collateral].nodes[_id].prevId]
-                    .nextId = data[_collateral].nodes[_id].nextId;
+                data[_collateral].nodes[data[_collateral].nodes[_id].prevId].nextId = data[
+                    _collateral
+                ].nodes[_id].nextId;
                 // Set prev pointer of next node to the previous node
-                data[_collateral]
-                    .nodes[data[_collateral].nodes[_id].nextId]
-                    .prevId = data[_collateral].nodes[_id].prevId;
+                data[_collateral].nodes[data[_collateral].nodes[_id].nextId].prevId = data[
+                    _collateral
+                ].nodes[_id].prevId;
             }
         } else {
             // List contains a single node
@@ -268,34 +239,20 @@ contract SortedTroves is Ownable, CheckContract, ISortedTroves {
 
         _requireCallerIsBOorTroveM(troveManagerCached);
         // List must contain the node
-        require(
-            contains(_collateral, _id),
-            "SortedTroves: List does not contain the id"
-        );
+        require(contains(_collateral, _id), "SortedTroves: List does not contain the id");
         // NICR must be non-zero
         require(_newNICR > 0, "SortedTroves: NICR must be positive");
 
         // Remove node from the list
         _remove(_collateral, _id);
 
-        return
-            _insert(
-                troveManagerCached,
-                _collateral,
-                _id,
-                _newNICR,
-                _prevId,
-                _nextId
-            );
+        return _insert(troveManagerCached, _collateral, _id, _newNICR, _prevId, _nextId);
     }
 
     /*
      * @dev Checks if the specified collateral's list contains a node
      */
-    function contains(
-        address _collateral,
-        address _id
-    ) public view override returns (bool) {
+    function contains(address _collateral, address _id) public view override returns (bool) {
         return data[_collateral].nodes[_id].exists;
     }
 
@@ -309,27 +266,21 @@ contract SortedTroves is Ownable, CheckContract, ISortedTroves {
     /*
      * @dev Returns the current size of the list for the specified collateral
      */
-    function getSize(
-        address _collateral
-    ) external view override returns (uint256) {
+    function getSize(address _collateral) external view override returns (uint256) {
         return data[_collateral].size;
     }
 
     /*
      * @dev Returns the first node in the list for the specified collateral (node with the largest NICR)
      */
-    function getFirst(
-        address _collateral
-    ) external view override returns (address) {
+    function getFirst(address _collateral) external view override returns (address) {
         return data[_collateral].head;
     }
 
     /*
      * @dev Returns the last node in the list for the specified collateral(node with the smallest NICR)
      */
-    function getLast(
-        address _collateral
-    ) external view override returns (address) {
+    function getLast(address _collateral) external view override returns (address) {
         return data[_collateral].tail;
     }
 
@@ -338,10 +289,7 @@ contract SortedTroves is Ownable, CheckContract, ISortedTroves {
      * @param _collateral Address of collateral whose list to look at
      * @param _id Node's id
      */
-    function getNext(
-        address _collateral,
-        address _id
-    ) external view override returns (address) {
+    function getNext(address _collateral, address _id) external view override returns (address) {
         return data[_collateral].nodes[_id].nextId;
     }
 
@@ -350,10 +298,7 @@ contract SortedTroves is Ownable, CheckContract, ISortedTroves {
      * @param _collateral Address of collateral whose list to look at
      * @param _id Node's id
      */
-    function getPrev(
-        address _collateral,
-        address _id
-    ) external view override returns (address) {
+    function getPrev(address _collateral, address _id) external view override returns (address) {
         return data[_collateral].nodes[_id].prevId;
     }
 
@@ -370,14 +315,7 @@ contract SortedTroves is Ownable, CheckContract, ISortedTroves {
         address _prevId,
         address _nextId
     ) external view override returns (bool) {
-        return
-            _validInsertPosition(
-                troveManager,
-                _collateral,
-                _NICR,
-                _prevId,
-                _nextId
-            );
+        return _validInsertPosition(troveManager, _collateral, _NICR, _prevId, _nextId);
     }
 
     function _validInsertPosition(
@@ -436,13 +374,7 @@ contract SortedTroves is Ownable, CheckContract, ISortedTroves {
         // Descend the list until we reach the end or until we find a valid insert position
         while (
             prevId != address(0) &&
-            !_validInsertPosition(
-                _troveManager,
-                _collateral,
-                _NICR,
-                prevId,
-                nextId
-            )
+            !_validInsertPosition(_troveManager, _collateral, _NICR, prevId, nextId)
         ) {
             prevId = data[_collateral].nodes[prevId].nextId;
             nextId = data[_collateral].nodes[prevId].nextId;
@@ -478,13 +410,7 @@ contract SortedTroves is Ownable, CheckContract, ISortedTroves {
         // Ascend the list until we reach the end or until we find a valid insertion point
         while (
             nextId != address(0) &&
-            !_validInsertPosition(
-                _troveManager,
-                _collateral,
-                _NICR,
-                prevId,
-                nextId
-            )
+            !_validInsertPosition(_troveManager, _collateral, _NICR, prevId, nextId)
         ) {
             nextId = data[_collateral].nodes[nextId].prevId;
             prevId = data[_collateral].nodes[nextId].prevId;
@@ -506,14 +432,7 @@ contract SortedTroves is Ownable, CheckContract, ISortedTroves {
         address _prevId,
         address _nextId
     ) external view override returns (address, address) {
-        return
-            _findInsertPosition(
-                troveManager,
-                _collateral,
-                _NICR,
-                _prevId,
-                _nextId
-            );
+        return _findInsertPosition(troveManager, _collateral, _NICR, _prevId, _nextId);
     }
 
     function _findInsertPosition(
@@ -548,13 +467,7 @@ contract SortedTroves is Ownable, CheckContract, ISortedTroves {
 
         if (prevId == address(0) && nextId == address(0)) {
             // No hint - descend list starting from head
-            return
-                _descendList(
-                    _troveManager,
-                    _collateral,
-                    _NICR,
-                    data[_collateral].head
-                );
+            return _descendList(_troveManager, _collateral, _NICR, data[_collateral].head);
         } else if (prevId == address(0)) {
             // No `prevId` for hint - ascend list starting from `nextId`
             return _ascendList(_troveManager, _collateral, _NICR, nextId);
@@ -570,18 +483,12 @@ contract SortedTroves is Ownable, CheckContract, ISortedTroves {
     // --- 'require' functions ---
 
     function _requireCallerIsTroveManager() internal view {
-        require(
-            msg.sender == address(troveManager),
-            "SortedTroves: Caller is not the TroveManager"
-        );
+        require(msg.sender == address(troveManager), "SortedTroves: Caller is not the TroveManager");
     }
 
-    function _requireCallerIsBOorTroveM(
-        ITroveManager _troveManager
-    ) internal view {
+    function _requireCallerIsBOorTroveM(ITroveManager _troveManager) internal view {
         require(
-            msg.sender == borrowerOperationsAddress ||
-                msg.sender == address(_troveManager),
+            msg.sender == borrowerOperationsAddress || msg.sender == address(_troveManager),
             "SortedTroves: Caller is neither BO nor TroveM"
         );
     }

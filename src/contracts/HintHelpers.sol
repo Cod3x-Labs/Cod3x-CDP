@@ -105,17 +105,9 @@ contract HintHelpers is LiquityBase, Ownable, CheckContract {
 
         while (
             vars.currentTroveuser != address(0) &&
-            troveManager.getCurrentICR(
-                vars.currentTroveuser,
-                _collateral,
-                _price
-            ) <
-            vars.collMCR
+            troveManager.getCurrentICR(vars.currentTroveuser, _collateral, _price) < vars.collMCR
         ) {
-            vars.currentTroveuser = vars.sortedTroves.getPrev(
-                _collateral,
-                vars.currentTroveuser
-            );
+            vars.currentTroveuser = vars.sortedTroves.getPrev(_collateral, vars.currentTroveuser);
         }
 
         firstRedemptionHint = vars.currentTroveuser;
@@ -124,20 +116,11 @@ contract HintHelpers is LiquityBase, Ownable, CheckContract {
             _maxIterations = type(uint).max;
         }
 
-        while (
-            vars.currentTroveuser != address(0) &&
-            vars.remainingLUSD > 0 &&
-            _maxIterations > 0
-        ) {
+        while (vars.currentTroveuser != address(0) && vars.remainingLUSD > 0 && _maxIterations > 0) {
             _maxIterations--;
             vars.netLUSDDebt = _getNetDebt(
                 troveManager.getTroveDebt(vars.currentTroveuser, _collateral)
-            ).add(
-                    troveManager.getPendingLUSDDebtReward(
-                        vars.currentTroveuser,
-                        _collateral
-                    )
-                );
+            ).add(troveManager.getPendingLUSDDebtReward(vars.currentTroveuser, _collateral));
 
             if (vars.netLUSDDebt > vars.remainingLUSD) {
                 if (vars.netLUSDDebt > MIN_NET_DEBT) {
@@ -156,9 +139,7 @@ contract HintHelpers is LiquityBase, Ownable, CheckContract {
                         );
 
                     vars.newColl = vars.collAmount.sub(
-                        vars.maxRedeemableLUSD.mul(10 ** vars.collDecimals).div(
-                            _price
-                        )
+                        vars.maxRedeemableLUSD.mul(10 ** vars.collDecimals).div(_price)
                     );
                     vars.newDebt = vars.netLUSDDebt.sub(vars.maxRedeemableLUSD);
 
@@ -169,19 +150,14 @@ contract HintHelpers is LiquityBase, Ownable, CheckContract {
                         vars.collDecimals
                     );
 
-                    vars.remainingLUSD = vars.remainingLUSD.sub(
-                        vars.maxRedeemableLUSD
-                    );
+                    vars.remainingLUSD = vars.remainingLUSD.sub(vars.maxRedeemableLUSD);
                 }
                 break;
             } else {
                 vars.remainingLUSD = vars.remainingLUSD.sub(vars.netLUSDDebt);
             }
 
-            vars.currentTroveuser = vars.sortedTroves.getPrev(
-                _collateral,
-                vars.currentTroveuser
-            );
+            vars.currentTroveuser = vars.sortedTroves.getPrev(_collateral, vars.currentTroveuser);
         }
 
         truncatedLUSDamount = _LUSDamount.sub(vars.remainingLUSD);
@@ -201,11 +177,7 @@ contract HintHelpers is LiquityBase, Ownable, CheckContract {
         uint _CR,
         uint _numTrials,
         uint _inputRandomSeed
-    )
-        external
-        view
-        returns (address hintAddress, uint diff, uint latestRandomSeed)
-    {
+    ) external view returns (address hintAddress, uint diff, uint latestRandomSeed) {
         _requireValidCollateralAddress(_collateral);
         uint arrayLength = troveManager.getTroveOwnersCount(_collateral);
 
@@ -223,25 +195,17 @@ contract HintHelpers is LiquityBase, Ownable, CheckContract {
         uint i = 1;
 
         while (i < _numTrials) {
-            latestRandomSeed = uint(
-                keccak256(abi.encodePacked(latestRandomSeed))
-            );
+            latestRandomSeed = uint(keccak256(abi.encodePacked(latestRandomSeed)));
 
             uint arrayIndex = latestRandomSeed % arrayLength;
             address currentAddress = troveManager.getTroveFromTroveOwnersArray(
                 _collateral,
                 arrayIndex
             );
-            uint currentNICR = troveManager.getNominalICR(
-                currentAddress,
-                _collateral
-            );
+            uint currentNICR = troveManager.getNominalICR(currentAddress, _collateral);
 
             // check if abs(current - CR) > abs(closest - CR), and update closest if current is closer
-            uint currentDiff = LiquityMath._getAbsoluteDifference(
-                currentNICR,
-                _CR
-            );
+            uint currentDiff = LiquityMath._getAbsoluteDifference(currentNICR, _CR);
 
             if (currentDiff < diff) {
                 diff = currentDiff;
@@ -271,9 +235,6 @@ contract HintHelpers is LiquityBase, Ownable, CheckContract {
     // --- 'require' functions ---
 
     function _requireValidCollateralAddress(address _collateral) internal view {
-        require(
-            collateralConfig.isCollateralAllowed(_collateral),
-            "Invalid collateral address"
-        );
+        require(collateralConfig.isCollateralAllowed(_collateral), "Invalid collateral address");
     }
 }

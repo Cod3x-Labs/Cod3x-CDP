@@ -24,15 +24,8 @@ contract BorrowerOperationsScript is CheckContract {
         address _upperHint,
         address _lowerHint
     ) external {
-        IERC20(_collateral).safeTransferFrom(
-            msg.sender,
-            address(this),
-            _collAmount
-        );
-        IERC20(_collateral).safeIncreaseAllowance(
-            address(borrowerOperations),
-            _collAmount
-        );
+        IERC20(_collateral).safeTransferFrom(msg.sender, address(this), _collAmount);
+        IERC20(_collateral).safeIncreaseAllowance(address(borrowerOperations), _collAmount);
         borrowerOperations.openTrove(
             _collateral,
             _collAmount,
@@ -49,21 +42,9 @@ contract BorrowerOperationsScript is CheckContract {
         address _upperHint,
         address _lowerHint
     ) external {
-        IERC20(_collateral).safeTransferFrom(
-            msg.sender,
-            address(this),
-            _collAmount
-        );
-        IERC20(_collateral).safeIncreaseAllowance(
-            address(borrowerOperations),
-            _collAmount
-        );
-        borrowerOperations.addColl(
-            _collateral,
-            _collAmount,
-            _upperHint,
-            _lowerHint
-        );
+        IERC20(_collateral).safeTransferFrom(msg.sender, address(this), _collAmount);
+        IERC20(_collateral).safeIncreaseAllowance(address(borrowerOperations), _collAmount);
+        borrowerOperations.addColl(_collateral, _collAmount, _upperHint, _lowerHint);
     }
 
     function withdrawColl(
@@ -72,12 +53,7 @@ contract BorrowerOperationsScript is CheckContract {
         address _upperHint,
         address _lowerHint
     ) external {
-        borrowerOperations.withdrawColl(
-            _collateral,
-            _amount,
-            _upperHint,
-            _lowerHint
-        );
+        borrowerOperations.withdrawColl(_collateral, _amount, _upperHint, _lowerHint);
     }
 
     function withdrawLUSD(
@@ -87,13 +63,7 @@ contract BorrowerOperationsScript is CheckContract {
         address _upperHint,
         address _lowerHint
     ) external {
-        borrowerOperations.withdrawLUSD(
-            _collateral,
-            _maxFee,
-            _amount,
-            _upperHint,
-            _lowerHint
-        );
+        borrowerOperations.withdrawLUSD(_collateral, _maxFee, _amount, _upperHint, _lowerHint);
     }
 
     function repayLUSD(
@@ -102,12 +72,7 @@ contract BorrowerOperationsScript is CheckContract {
         address _upperHint,
         address _lowerHint
     ) external {
-        borrowerOperations.repayLUSD(
-            _collateral,
-            _amount,
-            _upperHint,
-            _lowerHint
-        );
+        borrowerOperations.repayLUSD(_collateral, _amount, _upperHint, _lowerHint);
     }
 
     function closeTrove(address _collateral) external {
@@ -125,15 +90,8 @@ contract BorrowerOperationsScript is CheckContract {
         address _lowerHint
     ) external {
         if (_collTopUp != 0) {
-            IERC20(_collateral).safeTransferFrom(
-                msg.sender,
-                address(this),
-                _collTopUp
-            );
-            IERC20(_collateral).safeIncreaseAllowance(
-                address(borrowerOperations),
-                _collTopUp
-            );
+            IERC20(_collateral).safeTransferFrom(msg.sender, address(this), _collTopUp);
+            IERC20(_collateral).safeIncreaseAllowance(address(borrowerOperations), _collTopUp);
         }
         borrowerOperations.adjustTrove(
             _collateral,
