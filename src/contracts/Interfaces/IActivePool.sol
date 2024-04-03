@@ -11,6 +11,9 @@ interface IActivePool is IPool {
     event CollSurplusPoolAddressChanged(address _collSurplusPoolAddress);
     event ActivePoolLUSDDebtUpdated(address _collateral, uint _LUSDDebt);
     event ActivePoolCollateralBalanceUpdated(address _collateral, uint _amount);
+    event CollateralConfigAddressChanged(address _newCollateralConfigAddress);
+    event RedemptionHelperAddressChanged(address _redemptionHelperAddress);
+    event LiquidationHelperAddressChanged(address _liquidationHelperAddress);
 
     // --- Functions ---
     function sendCollateral(address _collateral, address _account, uint _amount) external;

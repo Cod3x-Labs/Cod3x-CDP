@@ -36,18 +36,7 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
     mapping(address => uint256) internal collAmount; // collateral => amount tracker
     mapping(address => uint256) internal LUSDDebt; // collateral => corresponding debt tracker
 
-    // --- Events ---
-
-    event CollateralConfigAddressChanged(address _newCollateralConfigAddress);
-    event RedemptionHelperAddressChanged(address _redemptionHelperAddress);
-    event LiquidationHelperAddressChanged(address _liquidationHelperAddress);
-    event TreasuryAddressChanged(address _treasuryAddress);
-    event YieldingPercentageUpdated(address _collateral, uint256 _bps);
-    event YieldingPercentageDriftUpdated(uint256 _driftBps);
-    event YieldClaimThresholdUpdated(address _collateral, uint256 _threshold);
-
     // --- Contract setters ---
-
     function setAddresses(
         address _collateralConfigAddress,
         address _borrowerOperationsAddress,
