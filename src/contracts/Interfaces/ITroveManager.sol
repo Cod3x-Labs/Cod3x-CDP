@@ -7,7 +7,6 @@ import "./IActivePool.sol";
 import "./IDefaultPool.sol";
 import "./IStabilityPool.sol";
 import "./ILUSDToken.sol";
-import "./ILQTYStaking.sol";
 import "./IRedemptionHelper.sol";
 import "./ILiquidationHelper.sol";
 import "../Dependencies/IERC20.sol";
@@ -34,7 +33,6 @@ interface ITroveManager is ILiquityBase {
     event CollSurplusPoolAddressChanged(address _collSurplusPoolAddress);
     event SortedTrovesAddressChanged(address _sortedTrovesAddress);
     event LQTYTokenAddressChanged(address _lqtyTokenAddress);
-    event LQTYStakingAddressChanged(address _lqtyStakingAddress);
     event RewarderManagerAddressChanged(address _rewarderManagerAddress);
 
     event Liquidation(
@@ -91,7 +89,6 @@ interface ITroveManager is ILiquityBase {
         address _lusdTokenAddress,
         address _sortedTrovesAddress,
         address _lqtyTokenAddress,
-        address _lqtyStakingAddress,
         address _rewarderManagerAddress,
         address _redemptionHelperAddress,
         address _liquidationHelperAddress
@@ -100,7 +97,6 @@ interface ITroveManager is ILiquityBase {
     function REDEMPTION_FEE_FLOOR() external pure returns (uint256);
     function lusdToken() external view returns (ILUSDToken);
     function lqtyToken() external view returns (IERC20);
-    function lqtyStaking() external view returns (ILQTYStaking);
 
     function getTroveOwnersCount(address _collateral) external view returns (uint);
 

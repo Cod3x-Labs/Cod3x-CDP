@@ -16,7 +16,6 @@ const BorrowerOperations = artifacts.require("./BorrowerOperations.sol");
 const HintHelpers = artifacts.require("./HintHelpers.sol");
 const Leverager = artifacts.require("./Leverager.sol");
 
-const LQTYStaking = artifacts.require("./LQTYStaking.sol");
 const CommunityIssuance = artifacts.require("./CommunityIssuance.sol");
 
 const ERC20 = artifacts.require("ERC20Mock.sol");
@@ -44,7 +43,6 @@ const BorrowerWrappersScript = artifacts.require("BorrowerWrappersScript");
 const TroveManagerScript = artifacts.require("TroveManagerScript");
 const StabilityPoolScript = artifacts.require("StabilityPoolScript");
 const TokenScript = artifacts.require("TokenScript");
-const LQTYStakingScript = artifacts.require("LQTYStakingScript");
 const {
   buildUserProxies,
   BorrowerOperationsProxy,
@@ -53,7 +51,6 @@ const {
   StabilityPoolProxy,
   SortedTrovesProxy,
   TokenProxy,
-  LQTYStakingProxy,
 } = require("../utils/proxyHelpers.js");
 const testHelpers = require("./testHelpers.js");
 const toBN = testHelpers.TestHelper.toBN;
@@ -65,7 +62,6 @@ LQTY contracts consist of only those contracts related to the LQTY Token:
 
 -the LQTY token
 -the Lockup factory and lockup contracts
--the LQTYStaking contract
 -the CommunityIssuance contract 
 */
 
@@ -187,10 +183,9 @@ class DeploymentHelper {
   }
 
   static async deployLQTYContractsHardhat(multisigAddress) {
-    const lqtyStaking = await LQTYStaking.new();
+    const lqtyStaking = await NonPayable.new();
     const communityIssuance = await CommunityIssuance.new();
 
-    LQTYStaking.setAsDeployed(lqtyStaking);
     CommunityIssuance.setAsDeployed(communityIssuance);
 
     const stakingToken = await ERC20.new(
@@ -220,10 +215,9 @@ class DeploymentHelper {
   }
 
   static async deployLQTYTesterContractsHardhat(multisigAddress) {
-    const lqtyStaking = await LQTYStaking.new();
+    const lqtyStaking = await NonPayable.new();
     const communityIssuance = await CommunityIssuanceTester.new();
 
-    LQTYStaking.setAsDeployed(lqtyStaking);
     CommunityIssuanceTester.setAsDeployed(communityIssuance);
 
     const stakingToken = await ERC20.new(
@@ -302,7 +296,6 @@ class DeploymentHelper {
       contracts.collateralConfig.address,
       contracts.troveManager.address,
       contracts.stabilityPool.address,
-      LQTYContracts.lqtyStaking.address,
     );
     contracts.borrowerWrappers = new BorrowerWrappersProxy(
       owner,
@@ -363,16 +356,6 @@ class DeploymentHelper {
       lqtyTokenScript.address,
       LQTYContracts.stakingToken,
     );
-
-    const lqtyStakingScript = await LQTYStakingScript.new(
-      LQTYContracts.lqtyStaking.address,
-    );
-    LQTYContracts.lqtyStaking = new LQTYStakingProxy(
-      owner,
-      proxies,
-      lqtyStakingScript.address,
-      LQTYContracts.lqtyStaking,
-    );
   }
 
   // Connect contracts to their dependencies
@@ -413,7 +396,6 @@ class DeploymentHelper {
       contracts.lusdToken.address,
       contracts.sortedTroves.address,
       LQTYContracts.stakingToken.address,
-      LQTYContracts.lqtyStaking.address,
       contracts.rewarderManager.address,
       contracts.redemptionHelper.address,
       contracts.liquidationHelper.address,
@@ -524,16 +506,6 @@ class DeploymentHelper {
   }
 
   static async connectLQTYContractsToCore(LQTYContracts, coreContracts) {
-    await LQTYContracts.lqtyStaking.setAddresses(
-      LQTYContracts.stakingToken.address,
-      coreContracts.lusdToken.address,
-      coreContracts.troveManager.address,
-      coreContracts.redemptionHelper.address,
-      coreContracts.borrowerOperations.address,
-      coreContracts.activePool.address,
-      coreContracts.collateralConfig.address,
-    );
-
     await LQTYContracts.communityIssuance.setAddresses(
       LQTYContracts.oathToken.address,
       coreContracts.stabilityPool.address,

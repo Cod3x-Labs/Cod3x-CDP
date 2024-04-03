@@ -7789,10 +7789,6 @@ contract("TroveManager", async (accounts) => {
       timeValues.SECONDS_IN_ONE_YEAR,
       web3.currentProvider,
     );
-    await stakingToken.approve(lqtyStaking.address, dec(1, 18), {
-      from: multisig,
-    });
-    await lqtyStaking.stake(dec(1, 18), { from: multisig });
 
     await openTrove({
       collateral: collaterals[0],
@@ -7972,10 +7968,6 @@ contract("TroveManager", async (accounts) => {
       timeValues.SECONDS_IN_ONE_YEAR,
       web3.currentProvider,
     );
-    await stakingToken.approve(lqtyStaking.address, dec(1, 18), {
-      from: multisig,
-    });
-    await lqtyStaking.stake(dec(1, 18), { from: multisig });
 
     await openTrove({
       collateral: collaterals[0],
@@ -8039,167 +8031,12 @@ contract("TroveManager", async (accounts) => {
     assert.isTrue(lqtyStakingBalance_After.gt(toBN("0")));
   });
 
-  it("redeemCollateral(): a redemption made at zero base increases the ETH-fees-per-LQTY-staked in LQTY Staking contract", async () => {
-    // time fast-forwards 1 year, and multisig stakes 1 LQTY
-    await th.fastForwardTime(
-      timeValues.SECONDS_IN_ONE_YEAR,
-      web3.currentProvider,
-    );
-    await stakingToken.approve(lqtyStaking.address, dec(1, 18), {
-      from: multisig,
-    });
-    await lqtyStaking.stake(dec(1, 18), { from: multisig });
-
-    await openTrove({
-      collateral: collaterals[0],
-      ICR: toBN(dec(20, 18)),
-      extraParams: { from: whale },
-    });
-
-    await openTrove({
-      collateral: collaterals[0],
-      ICR: toBN(dec(200, 16)),
-      extraLUSDAmount: dec(100, 18),
-      extraParams: { from: A },
-    });
-    await openTrove({
-      collateral: collaterals[0],
-      ICR: toBN(dec(190, 16)),
-      extraLUSDAmount: dec(100, 18),
-      extraParams: { from: B },
-    });
-    await openTrove({
-      collateral: collaterals[0],
-      ICR: toBN(dec(180, 16)),
-      extraLUSDAmount: dec(100, 18),
-      extraParams: { from: C },
-    });
-
-    // Check baseRate == 0
-    assert.equal(await troveManager.baseRate(), "0");
-
-    // Check LQTY Staking ETH-fees-per-LQTY-staked before is zero
-    const F_ETH_Before = await lqtyStaking.F_Collateral(collaterals[0].address);
-    assert.equal(F_ETH_Before, "0");
-
-    const A_balanceBefore = await lusdToken.balanceOf(A);
-
-    // A redeems 10 LUSD
-    await th.redeemCollateral(
-      A,
-      collaterals[0].address,
-      contracts,
-      dec(10, 18),
-      GAS_PRICE,
-    );
-
-    // Check A's balance has decreased by 10 LUSD
-    assert.equal(
-      await lusdToken.balanceOf(A),
-      A_balanceBefore.sub(toBN(dec(10, 18))).toString(),
-    );
-
-    // Check baseRate is now non-zero
-    const baseRate_1 = await troveManager.baseRate();
-    assert.isTrue(baseRate_1.gt(toBN("0")));
-
-    // Check LQTY Staking ETH-fees-per-LQTY-staked after is non-zero
-    const F_ETH_After = await lqtyStaking.F_Collateral(collaterals[0].address);
-    assert.isTrue(F_ETH_After.gt(toBN("0")));
-  });
-
-  it("redeemCollateral(): redemption fees keeps track of per-unit-staked error due to floor division", async () => {
-    // time fast-forwards 1 year, and multisig stakes 100k LQTY
-    await th.fastForwardTime(
-      timeValues.SECONDS_IN_ONE_YEAR,
-      web3.currentProvider,
-    );
-    await stakingToken.approve(lqtyStaking.address, dec(100_000, 18), {
-      from: multisig,
-    });
-    await lqtyStaking.stake(dec(100_000, 18), { from: multisig });
-
-    await openTrove({
-      collateral: collaterals[1],
-      ICR: toBN(dec(20, 18)),
-      extraParams: { from: whale },
-    });
-
-    await openTrove({
-      collateral: collaterals[1],
-      ICR: toBN(dec(200, 16)),
-      extraLUSDAmount: dec(100, 18),
-      extraParams: { from: A },
-    });
-    await openTrove({
-      collateral: collaterals[1],
-      ICR: toBN(dec(190, 16)),
-      extraLUSDAmount: dec(100, 18),
-      extraParams: { from: B },
-    });
-    await openTrove({
-      collateral: collaterals[1],
-      ICR: toBN(dec(180, 16)),
-      extraLUSDAmount: dec(100, 18),
-      extraParams: { from: C },
-    });
-
-    // Check LQTY Staking ETH-fees-per-LQTY-staked before is zero
-    const F_ETH_Before = await lqtyStaking.F_Collateral(collaterals[1].address);
-    assert.equal(F_ETH_Before, "0");
-
-    // A redeems 10 LUSD
-    await th.redeemCollateral(
-      A,
-      collaterals[1].address,
-      contracts,
-      dec(10, 18),
-      GAS_PRICE,
-    );
-
-    // Check LQTY Staking ETH-fees-per-LQTY-staked after is still zero (due to floor division)
-    const F_ETH_After1 = await lqtyStaking.F_Collateral(collaterals[1].address);
-    assert.isTrue(F_ETH_After1.eq(toBN("0")));
-
-    // However, check that ETH-fees-per-LQTY-staked error is non-zero
-    const F_ETH_Error1 = await lqtyStaking.lastF_CollateralError(
-      collaterals[1].address,
-    );
-    console.log(F_ETH_Error1.toString());
-    assert.isTrue(F_ETH_Error1.gt(toBN("0")));
-
-    // B redeems 10 LUSD
-    await th.redeemCollateral(
-      B,
-      collaterals[1].address,
-      contracts,
-      dec(10, 18),
-      GAS_PRICE,
-    );
-
-    // Check LQTY Staking ETH-fees-per-LQTY-staked after is no longer zero (due to added error from last time)
-    const F_ETH_After2 = await lqtyStaking.F_Collateral(collaterals[1].address);
-    console.log(F_ETH_After2.toString());
-    assert.isTrue(F_ETH_After2.gt(toBN("0")));
-
-    // ETH-fees-per-LQTY-staked error is still be non-zero
-    const F_ETH_Error2 = await lqtyStaking.lastF_CollateralError(
-      collaterals[1].address,
-    );
-    assert.isTrue(F_ETH_Error2.gt(toBN("0")));
-    console.log(F_ETH_Error2.toString());
-  });
-
   it("redeemCollateral(): a redemption made at a non-zero base rate send a non-zero ETHFee to LQTY staking contract", async () => {
     // time fast-forwards 1 year, and multisig stakes 1 LQTY
     await th.fastForwardTime(
       timeValues.SECONDS_IN_ONE_YEAR,
       web3.currentProvider,
     );
-    await stakingToken.approve(lqtyStaking.address, dec(1, 18), {
-      from: multisig,
-    });
-    await lqtyStaking.stake(dec(1, 18), { from: multisig });
 
     await openTrove({
       collateral: collaterals[0],
@@ -8278,101 +8115,12 @@ contract("TroveManager", async (accounts) => {
     assert.isTrue(lqtyStakingBalance_After.gt(lqtyStakingBalance_Before));
   });
 
-  it("redeemCollateral(): a redemption made at a non-zero base rate increases ETH-per-LQTY-staked in the staking contract", async () => {
-    // time fast-forwards 1 year, and multisig stakes 1 LQTY
-    await th.fastForwardTime(
-      timeValues.SECONDS_IN_ONE_YEAR,
-      web3.currentProvider,
-    );
-    await stakingToken.approve(lqtyStaking.address, dec(1, 18), {
-      from: multisig,
-    });
-    await lqtyStaking.stake(dec(1, 18), { from: multisig });
-
-    await openTrove({
-      collateral: collaterals[0],
-      ICR: toBN(dec(20, 18)),
-      extraParams: { from: whale },
-    });
-
-    await openTrove({
-      collateral: collaterals[0],
-      ICR: toBN(dec(200, 16)),
-      extraLUSDAmount: dec(100, 18),
-      extraParams: { from: A },
-    });
-    await openTrove({
-      collateral: collaterals[0],
-      ICR: toBN(dec(190, 16)),
-      extraLUSDAmount: dec(100, 18),
-      extraParams: { from: B },
-    });
-    await openTrove({
-      collateral: collaterals[0],
-      ICR: toBN(dec(180, 16)),
-      extraLUSDAmount: dec(100, 18),
-      extraParams: { from: C },
-    });
-
-    // Check baseRate == 0
-    assert.equal(await troveManager.baseRate(), "0");
-
-    const A_balanceBefore = await lusdToken.balanceOf(A);
-    const B_balanceBefore = await lusdToken.balanceOf(B);
-
-    // A redeems 10 LUSD
-    await th.redeemCollateral(
-      A,
-      collaterals[0].address,
-      contracts,
-      dec(10, 18),
-      GAS_PRICE,
-    );
-
-    // Check A's balance has decreased by 10 LUSD
-    assert.equal(
-      await lusdToken.balanceOf(A),
-      A_balanceBefore.sub(toBN(dec(10, 18))).toString(),
-    );
-
-    // Check baseRate is now non-zero
-    const baseRate_1 = await troveManager.baseRate();
-    assert.isTrue(baseRate_1.gt(toBN("0")));
-
-    // Check LQTY Staking ETH-fees-per-LQTY-staked before is zero
-    const F_ETH_Before = await lqtyStaking.F_Collateral(collaterals[0].address);
-
-    // B redeems 10 LUSD
-    await th.redeemCollateral(
-      B,
-      collaterals[0].address,
-      contracts,
-      dec(10, 18),
-      GAS_PRICE,
-    );
-
-    // Check B's balance has decreased by 10 LUSD
-    assert.equal(
-      await lusdToken.balanceOf(B),
-      B_balanceBefore.sub(toBN(dec(10, 18))).toString(),
-    );
-
-    const F_ETH_After = await lqtyStaking.F_Collateral(collaterals[0].address);
-
-    // check LQTY Staking balance has increased
-    assert.isTrue(F_ETH_After.gt(F_ETH_Before));
-  });
-
   it("redeemCollateral(): a redemption sends the ETH remainder (ETHDrawn - ETHFee) to the redeemer", async () => {
     // time fast-forwards 1 year, and multisig stakes 1 LQTY
     await th.fastForwardTime(
       timeValues.SECONDS_IN_ONE_YEAR,
       web3.currentProvider,
     );
-    await stakingToken.approve(lqtyStaking.address, dec(1, 18), {
-      from: multisig,
-    });
-    await lqtyStaking.stake(dec(1, 18), { from: multisig });
 
     const { totalDebt: W_totalDebt } = await openTrove({
       collateral: collaterals[0],
@@ -8458,10 +8206,6 @@ contract("TroveManager", async (accounts) => {
       timeValues.SECONDS_IN_ONE_YEAR,
       web3.currentProvider,
     );
-    await stakingToken.approve(lqtyStaking.address, dec(1, 18), {
-      from: multisig,
-    });
-    await lqtyStaking.stake(dec(1, 18), { from: multisig });
 
     const { netDebt: W_netDebt } = await openTrove({
       collateral: collaterals[0],
@@ -8526,10 +8270,6 @@ contract("TroveManager", async (accounts) => {
       timeValues.SECONDS_IN_ONE_YEAR,
       web3.currentProvider,
     );
-    await stakingToken.approve(lqtyStaking.address, dec(1, 18), {
-      from: multisig,
-    });
-    await lqtyStaking.stake(dec(1, 18), { from: multisig });
 
     const { netDebt: W_netDebt } = await openTrove({
       collateral: collaterals[0],

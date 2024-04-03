@@ -149,7 +149,7 @@ contract("All Liquity functions with onlyOwner modifier", async (accounts) => {
 
   describe("TroveManager", async (accounts) => {
     it("setAddresses(): reverts when called by non-owner, with wrong addresses, or twice", async () => {
-      await testSetAddresses(troveManager, 14);
+      await testSetAddresses(troveManager, 13);
     });
   });
 
@@ -221,12 +221,6 @@ contract("All Liquity functions with onlyOwner modifier", async (accounts) => {
       await th.assertRevert(
         communityIssuance.setAddresses(...params, { from: owner }),
       );
-    });
-  });
-
-  describe("LQTYStaking", async (accounts) => {
-    it("setAddresses(): reverts when called by non-owner, with wrong addresses, or twice", async () => {
-      await testSetAddresses(lqtyStaking, 7);
     });
   });
 });

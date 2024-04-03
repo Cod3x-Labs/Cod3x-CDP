@@ -6,7 +6,6 @@ import "./Interfaces/ITroveManager.sol";
 import "./Interfaces/ICollSurplusPool.sol";
 import "./Interfaces/ILUSDToken.sol";
 import "./Interfaces/ISortedTroves.sol";
-import "./Interfaces/ILQTYStaking.sol";
 import "./Interfaces/IRedemptionHelper.sol";
 import "./Interfaces/ILiquidationHelper.sol";
 import "./Interfaces/IRewarderManager.sol";
@@ -32,8 +31,6 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
     ILUSDToken public override lusdToken;
 
     IERC20 public override lqtyToken;
-
-    ILQTYStaking public override lqtyStaking;
 
     IRewarderManager public rewarderManager;
 
@@ -223,7 +220,6 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
         address _lusdTokenAddress,
         address _sortedTrovesAddress,
         address _lqtyTokenAddress,
-        address _lqtyStakingAddress,
         address _rewarderManagerAddress,
         address _redemptionHelperAddress,
         address _liquidationHelperAddress
@@ -240,7 +236,6 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
         checkContract(_lusdTokenAddress);
         checkContract(_sortedTrovesAddress);
         checkContract(_lqtyTokenAddress);
-        checkContract(_lqtyStakingAddress);
         checkContract(_rewarderManagerAddress);
         checkContract(_redemptionHelperAddress);
         checkContract(_liquidationHelperAddress);
@@ -255,7 +250,6 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
         lusdToken = ILUSDToken(_lusdTokenAddress);
         sortedTroves = ISortedTroves(_sortedTrovesAddress);
         lqtyToken = IERC20(_lqtyTokenAddress);
-        lqtyStaking = ILQTYStaking(_lqtyStakingAddress);
         rewarderManager = IRewarderManager(_rewarderManagerAddress);
         redemptionHelper = IRedemptionHelper(_redemptionHelperAddress);
         liquidationHelper = ILiquidationHelper(_liquidationHelperAddress);
@@ -270,7 +264,6 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
         emit LUSDTokenAddressChanged(_lusdTokenAddress);
         emit SortedTrovesAddressChanged(_sortedTrovesAddress);
         emit LQTYTokenAddressChanged(_lqtyTokenAddress);
-        emit LQTYStakingAddressChanged(_lqtyStakingAddress);
         emit RewarderManagerAddressChanged(_rewarderManagerAddress);
         emit RedemptionHelperAddressChanged(_redemptionHelperAddress);
         emit LiquidationHelperAddressChanged(_liquidationHelperAddress);

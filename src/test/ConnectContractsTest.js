@@ -127,14 +127,6 @@ contract(
       assert.equal(stabilityPoolAddress, recordedStabilityPoolAddresss);
     });
 
-    // LQTY Staking in TroveM
-    it("Sets the correct LQTYStaking address in TroveManager", async () => {
-      const lqtyStakingAddress = lqtyStaking.address;
-
-      const recordedLQTYStakingAddress = await troveManager.lqtyStaking();
-      assert.equal(lqtyStakingAddress, recordedLQTYStakingAddress);
-    });
-
     // Collateral Config in TroveM
     it("Sets the correct CollateralConfig address in TroveManager", async () => {
       const collateralConfigAddress = collateralConfig.address;
@@ -371,62 +363,6 @@ contract(
 
       const recordedCollateralConfigAddress =
         await borrowerOperations.collateralConfig();
-      assert.equal(collateralConfigAddress, recordedCollateralConfigAddress);
-    });
-
-    // --- LQTY Staking ---
-
-    // Sets StakingToken in LQTYStaking
-    it("Sets the correct LQTYToken address in LQTYStaking", async () => {
-      const lqtyTokenAddress = stakingToken.address;
-
-      const recordedLQTYTokenAddress = await lqtyStaking.lqtyToken();
-      assert.equal(lqtyTokenAddress, recordedLQTYTokenAddress);
-    });
-
-    // Sets ActivePool in LQTYStaking
-    it("Sets the correct ActivePool address in LQTYStaking", async () => {
-      const activePoolAddress = activePool.address;
-
-      const recordedActivePoolAddress = await lqtyStaking.activePoolAddress();
-      assert.equal(activePoolAddress, recordedActivePoolAddress);
-    });
-
-    // Sets LUSDToken in LQTYStaking
-    it("Sets the correct ActivePool address in LQTYStaking", async () => {
-      const lusdTokenAddress = lusdToken.address;
-
-      const recordedLUSDTokenAddress = await lqtyStaking.lusdToken();
-      assert.equal(lusdTokenAddress, recordedLUSDTokenAddress);
-    });
-
-    // Sets TroveManager in LQTYStaking
-    it("Sets the correct ActivePool address in LQTYStaking", async () => {
-      const troveManagerAddress = troveManager.address;
-
-      const recordedTroveManagerAddress =
-        await lqtyStaking.troveManagerAddress();
-      assert.equal(troveManagerAddress, recordedTroveManagerAddress);
-    });
-
-    // Sets BorrowerOperations in LQTYStaking
-    it("Sets the correct BorrowerOperations address in LQTYStaking", async () => {
-      const borrowerOperationsAddress = borrowerOperations.address;
-
-      const recordedBorrowerOperationsAddress =
-        await lqtyStaking.borrowerOperationsAddress();
-      assert.equal(
-        borrowerOperationsAddress,
-        recordedBorrowerOperationsAddress,
-      );
-    });
-
-    // Sets CollateralConfig in LQTYStaking
-    it("Sets the correct CollateralConfig address in LQTYStaking", async () => {
-      const collateralConfigAddress = collateralConfig.address;
-
-      const recordedCollateralConfigAddress =
-        await lqtyStaking.collateralConfig();
       assert.equal(collateralConfigAddress, recordedCollateralConfigAddress);
     });
 

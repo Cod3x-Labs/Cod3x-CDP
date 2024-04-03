@@ -3,7 +3,6 @@
 pragma solidity ^0.8.23;
 
 import "./Interfaces/ICollateralConfig.sol";
-import "./Interfaces/ILQTYStaking.sol";
 import "./Interfaces/ILUSDToken.sol";
 import "./Interfaces/IPriceFeed.sol";
 import "./Interfaces/ISortedTroves.sol";
@@ -23,7 +22,7 @@ contract RedemptionHelper is LiquityBase, Ownable, IRedemptionHelper {
     IERC20 public lqtyToken;
     ILUSDToken public lusdToken;
     ISortedTroves public sortedTroves;
-    ILQTYStaking public lqtyStaking;
+    address public lqtyStaking;
 
     struct RedemptionTotals {
         uint remainingLUSD;
@@ -62,7 +61,7 @@ contract RedemptionHelper is LiquityBase, Ownable, IRedemptionHelper {
         IPriceFeed _priceFeed,
         ILUSDToken _lusdToken,
         ISortedTroves _sortedTroves,
-        ILQTYStaking _lqtyStaking
+        address _lqtyStaking
     ) external onlyOwner {
         activePool = _activePool;
         defaultPool = _defaultPool;
@@ -211,7 +210,6 @@ contract RedemptionHelper is LiquityBase, Ownable, IRedemptionHelper {
 
         // Send the collateral fee to the LQTY staking contract
         activePool.sendCollateral(_collateral, address(lqtyStaking), totals.collateralFee);
-        lqtyStaking.increaseF_Collateral(_collateral, totals.collateralFee);
 
         totals.collateralToSendToRedeemer = totals.totalCollateralDrawn.sub(totals.collateralFee);
 

@@ -650,18 +650,6 @@ contract(
       });
     });
 
-    describe("LQTYStaking", async (accounts) => {
-      it("increaseF_LUSD(): reverts when caller is not RedemptionHelper", async () => {
-        try {
-          const txAlice = await lqtyStaking.increaseF_LUSD(dec(1, 18), {
-            from: alice,
-          });
-        } catch (err) {
-          assert.include(err.message, "revert");
-        }
-      });
-    });
-
     describe("CommunityIssuance", async (accounts) => {
       it("sendOath(): reverts when caller is not the StabilityPool", async () => {
         const tx1 = communityIssuance.sendOath(alice, dec(100, 18), {

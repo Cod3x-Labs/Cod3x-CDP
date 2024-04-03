@@ -258,14 +258,8 @@ class MainnetDeploymentHelper {
   }
 
   async deployLQTYContractsMainnet(deploymentState) {
-    const lqtyStakingFactory = await this.getFactory("LQTYStaking");
     const communityIssuanceFactory = await this.getFactory("CommunityIssuance");
 
-    const lqtyStaking = await this.loadOrDeploy(
-      lqtyStakingFactory,
-      "lqtyStaking",
-      deploymentState,
-    );
     const communityIssuance = await this.loadOrDeploy(
       communityIssuanceFactory,
       "communityIssuance",
@@ -276,12 +270,10 @@ class MainnetDeploymentHelper {
       if (!this.configParams.isTest)
         console.log("No Etherscan Url defined, skipping verification");
     } else {
-      await this.verifyContract("lqtyStaking", deploymentState);
       await this.verifyContract("communityIssuance", deploymentState);
     }
 
     const LQTYContracts = {
-      lqtyStaking,
       communityIssuance,
     };
     return LQTYContracts;
@@ -431,7 +423,6 @@ class MainnetDeploymentHelper {
           contracts.lusdToken.address,
           contracts.sortedTroves.address,
           oathAddress,
-          LQTYContracts.lqtyStaking.address,
           contracts.rewarderManager.address,
           contracts.redemptionHelper.address,
           contracts.liquidationHelper.address,
@@ -459,7 +450,7 @@ class MainnetDeploymentHelper {
           contracts.priceFeed.address,
           contracts.lusdToken.address,
           contracts.sortedTroves.address,
-          LQTYContracts.lqtyStaking.address,
+          treasuryAddress,
           { gasPrice },
         ),
       ));
@@ -493,7 +484,7 @@ class MainnetDeploymentHelper {
           contracts.priceFeed.address,
           contracts.sortedTroves.address,
           contracts.lusdToken.address,
-          LQTYContracts.lqtyStaking.address,
+          treasuryAddress,
           contracts.leverager.address,
           { gasPrice },
         ),
@@ -618,20 +609,6 @@ class MainnetDeploymentHelper {
     governanceAddress,
   ) {
     const gasPrice = this.configParams.GAS_PRICE;
-    (await this.isOwnershipRenounced(LQTYContracts.lqtyStaking)) ||
-      (await this.sendAndWaitForTransaction(
-        LQTYContracts.lqtyStaking.setAddresses(
-          stakingTokenAddress,
-          coreContracts.lusdToken.address,
-          coreContracts.troveManager.address,
-          coreContracts.redemptionHelper.address,
-          coreContracts.borrowerOperations.address,
-          coreContracts.activePool.address,
-          coreContracts.collateralConfig.address,
-          { gasPrice },
-        ),
-      ));
-
     // Initialize CommunityIssuance
     (await this.isInitialized(LQTYContracts.communityIssuance)) ||
       (await this.sendAndWaitForTransaction(
