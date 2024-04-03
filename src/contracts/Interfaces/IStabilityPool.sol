@@ -33,6 +33,7 @@ interface IStabilityPool {
     );
     event UserDepositChanged(address indexed _depositor, uint _newDeposit);
 
+    event CollateralConfigAddressChanged(address _newCollateralConfigAddress);
     event CollateralGainWithdrawn(address indexed _depositor, address _collateral, uint _collAmount);
     event LQTYPaidToDepositor(address indexed _depositor, uint _LQTY);
     event CollateralSent(address _collateral, address _to, uint _amount);

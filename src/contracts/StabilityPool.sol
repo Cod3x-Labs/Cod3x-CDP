@@ -230,10 +230,6 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
     mapping(address => uint) public lastCollateralError_Offset;
     uint public lastLUSDLossError_Offset;
 
-    // --- Events ---
-
-    event CollateralConfigAddressChanged(address _newCollateralConfigAddress);
-
     // --- Contract setters ---
 
     function setAddresses(
