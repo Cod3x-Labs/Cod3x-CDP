@@ -32,7 +32,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
 
     ICollSurplusPool internal collSurplusPool;
 
-    address public lqtyStakingAddress;
+    address public treasury;
 
     ILUSDToken public lusdToken;
 
@@ -121,7 +121,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
         address _priceFeedAddress,
         address _sortedTrovesAddress,
         address _lusdTokenAddress,
-        address _lqtyStakingAddress,
+        address _treasury,
         address _leveragerAddress
     ) external override onlyOwner {
         require(!initialized, "Can only initialize once");
@@ -138,7 +138,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
         checkContract(_priceFeedAddress);
         checkContract(_sortedTrovesAddress);
         checkContract(_lusdTokenAddress);
-        checkContract(_lqtyStakingAddress);
+        checkContract(_treasury);
         checkContract(_leveragerAddress);
 
         collateralConfig = ICollateralConfig(_collateralConfigAddress);
@@ -150,7 +150,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
         priceFeed = IPriceFeed(_priceFeedAddress);
         sortedTroves = ISortedTroves(_sortedTrovesAddress);
         lusdToken = ILUSDToken(_lusdTokenAddress);
-        lqtyStakingAddress = _lqtyStakingAddress;
+        treasury = _treasury;
         leveragerAddress = _leveragerAddress;
 
         emit CollateralConfigAddressChanged(_collateralConfigAddress);
@@ -162,7 +162,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
         emit PriceFeedAddressChanged(_priceFeedAddress);
         emit SortedTrovesAddressChanged(_sortedTrovesAddress);
         emit LUSDTokenAddressChanged(_lusdTokenAddress);
-        emit LQTYStakingAddressChanged(_lqtyStakingAddress);
+        emit TreasuryAddressChanged(_treasury);
         emit LeveragerAddressChanged(_leveragerAddress);
 
         initialized = true;
@@ -711,8 +711,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
 
         _requireUserAcceptsFee(LUSDFee, _LUSDAmount, _maxFeePercentage);
 
-        // Send fee to LQTY staking contract
-        _lusdToken.mint(lqtyStakingAddress, LUSDFee);
+        _lusdToken.mint(treasury, LUSDFee);
 
         return LUSDFee;
     }

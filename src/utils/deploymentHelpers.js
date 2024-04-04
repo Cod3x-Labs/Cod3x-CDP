@@ -183,7 +183,7 @@ class DeploymentHelper {
   }
 
   static async deployLQTYContractsHardhat(multisigAddress) {
-    const lqtyStaking = await NonPayable.new();
+    const treasury = await NonPayable.new();
     const communityIssuance = await CommunityIssuance.new();
 
     CommunityIssuance.setAsDeployed(communityIssuance);
@@ -206,7 +206,7 @@ class DeploymentHelper {
     ERC20.setAsDeployed(oathToken);
 
     const LQTYContracts = {
-      lqtyStaking,
+      treasury,
       communityIssuance,
       stakingToken,
       oathToken,
@@ -215,7 +215,7 @@ class DeploymentHelper {
   }
 
   static async deployLQTYTesterContractsHardhat(multisigAddress) {
-    const lqtyStaking = await NonPayable.new();
+    const treasury = await NonPayable.new();
     const communityIssuance = await CommunityIssuanceTester.new();
 
     CommunityIssuanceTester.setAsDeployed(communityIssuance);
@@ -238,7 +238,7 @@ class DeploymentHelper {
     ERC20.setAsDeployed(oathToken);
 
     const LQTYContracts = {
-      lqtyStaking,
+      treasury,
       communityIssuance,
       stakingToken,
       oathToken,
@@ -414,7 +414,7 @@ class DeploymentHelper {
       contracts.priceFeedTestnet.address,
       contracts.lusdToken.address,
       contracts.sortedTroves.address,
-      LQTYContracts.lqtyStaking.address,
+      LQTYContracts.treasury.address,
     );
 
     await contracts.liquidationHelper.setAddresses(
@@ -439,7 +439,7 @@ class DeploymentHelper {
       contracts.priceFeedTestnet.address,
       contracts.sortedTroves.address,
       contracts.lusdToken.address,
-      LQTYContracts.lqtyStaking.address,
+      LQTYContracts.treasury.address,
       contracts.leverager.address,
     );
 

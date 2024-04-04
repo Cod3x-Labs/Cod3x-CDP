@@ -23,7 +23,7 @@ contract("All Liquity functions with onlyOwner modifier", async (accounts) => {
   let borrowerOperations;
   let collaterals;
 
-  let lqtyStaking;
+  let treasury;
   let communityIssuance;
   let oathToken;
   let lockupContractFactory;
@@ -54,7 +54,7 @@ contract("All Liquity functions with onlyOwner modifier", async (accounts) => {
     borrowerOperations = contracts.borrowerOperations;
     collaterals = contracts.collaterals;
 
-    lqtyStaking = LQTYContracts.lqtyStaking;
+    treasury = LQTYContracts.treasury;
     communityIssuance = LQTYContracts.communityIssuance;
     oathToken = LQTYContracts.oathToken;
   });

@@ -39,7 +39,7 @@ contract("BorrowerOperations", async (accounts) => {
   let stabilityPool;
   let defaultPool;
   let borrowerOperations;
-  let lqtyStaking;
+  let treasury;
   let stakingToken;
   let hintHelpers;
   let communityIssuance;
@@ -110,7 +110,7 @@ contract("BorrowerOperations", async (accounts) => {
       hintHelpers = contracts.hintHelpers;
       collaterals = contracts.collaterals;
 
-      lqtyStaking = LQTYContracts.lqtyStaking;
+      treasury = LQTYContracts.treasury;
       stakingToken = LQTYContracts.stakingToken;
       communityIssuance = LQTYContracts.communityIssuance;
 
@@ -2303,7 +2303,7 @@ contract("BorrowerOperations", async (accounts) => {
       assert.isTrue(baseRate_2.lt(baseRate_1));
     });
 
-    it("withdrawLUSD(): borrowing at non-zero base rate sends LUSD fee to LQTY staking contract", async () => {
+    it("withdrawLUSD(): borrowing at non-zero base rate sends LUSD fee to Treasury contract", async () => {
       // time fast-forwards 1 year, and multisig stakes 1 LQTY
       await th.fastForwardTime(
         timeValues.SECONDS_IN_ONE_YEAR,
@@ -2311,10 +2311,10 @@ contract("BorrowerOperations", async (accounts) => {
       );
 
       // Check LQTY LUSD balance before == 0
-      const lqtyStaking_LUSDBalance_Before = await lusdToken.balanceOf(
-        lqtyStaking.address,
+      const tresury_LUSDBalance_Before = await lusdToken.balanceOf(
+        treasury.address,
       );
-      assert.equal(lqtyStaking_LUSDBalance_Before, "0");
+      assert.equal(tresury_LUSDBalance_Before, "0");
 
       await openTrove({
         collateral: collaterals[0],
@@ -2367,13 +2367,10 @@ contract("BorrowerOperations", async (accounts) => {
         { from: D },
       );
 
-      // Check LQTY LUSD balance after has increased
-      const lqtyStaking_LUSDBalance_After = await lusdToken.balanceOf(
-        lqtyStaking.address,
+      const treasury_LUSDBalance_After = await lusdToken.balanceOf(
+        treasury.address,
       );
-      assert.isTrue(
-        lqtyStaking_LUSDBalance_After.gt(lqtyStaking_LUSDBalance_Before),
-      );
+      assert.isTrue(treasury_LUSDBalance_After.gt(tresury_LUSDBalance_Before));
     });
 
     if (!withProxy) {
@@ -2466,11 +2463,10 @@ contract("BorrowerOperations", async (accounts) => {
         web3.currentProvider,
       );
 
-      // Check LQTY Staking contract balance before == 0
-      const lqtyStaking_LUSDBalance_Before = await lusdToken.balanceOf(
-        lqtyStaking.address,
+      const treasury_LUSDBalance_Before = await lusdToken.balanceOf(
+        treasury.address,
       );
-      assert.equal(lqtyStaking_LUSDBalance_Before, "0");
+      assert.equal(treasury_LUSDBalance_Before, "0");
 
       await openTrove({
         collateral: collaterals[0],
@@ -2526,13 +2522,10 @@ contract("BorrowerOperations", async (accounts) => {
         { from: D },
       );
 
-      // Check LQTY staking LUSD balance has increased
-      const lqtyStaking_LUSDBalance_After = await lusdToken.balanceOf(
-        lqtyStaking.address,
+      const treasury_LUSDBalance_After = await lusdToken.balanceOf(
+        treasury.address,
       );
-      assert.isTrue(
-        lqtyStaking_LUSDBalance_After.gt(lqtyStaking_LUSDBalance_Before),
-      );
+      assert.isTrue(treasury_LUSDBalance_After.gt(treasury_LUSDBalance_Before));
 
       // Check D's LUSD balance now equals their initial balance plus request LUSD
       const D_LUSDBalanceAfter = await lusdToken.balanceOf(D);
@@ -4238,18 +4231,17 @@ contract("BorrowerOperations", async (accounts) => {
       assert.isTrue(baseRate_2.lt(baseRate_1));
     });
 
-    it("adjustTrove(): borrowing at non-zero base rate sends LUSD fee to LQTY staking contract", async () => {
+    it("adjustTrove(): borrowing at non-zero base rate sends LUSD fee to Treasury contract", async () => {
       // time fast-forwards 1 year, and multisig stakes 1 LQTY
       await th.fastForwardTime(
         timeValues.SECONDS_IN_ONE_YEAR,
         web3.currentProvider,
       );
 
-      // Check LQTY LUSD balance before == 0
-      const lqtyStaking_LUSDBalance_Before = await lusdToken.balanceOf(
-        lqtyStaking.address,
+      const treasury_LUSDBalance_Before = await lusdToken.balanceOf(
+        treasury.address,
       );
-      assert.equal(lqtyStaking_LUSDBalance_Before, "0");
+      assert.equal(treasury_LUSDBalance_Before, "0");
 
       await openTrove({
         collateral: collaterals[0],
@@ -4294,13 +4286,10 @@ contract("BorrowerOperations", async (accounts) => {
         extraParams: { from: D },
       });
 
-      // Check LQTY LUSD balance after has increased
-      const lqtyStaking_LUSDBalance_After = await lusdToken.balanceOf(
-        lqtyStaking.address,
+      const treasury_LUSDBalance_After = await lusdToken.balanceOf(
+        treasury.address,
       );
-      assert.isTrue(
-        lqtyStaking_LUSDBalance_After.gt(lqtyStaking_LUSDBalance_Before),
-      );
+      assert.isTrue(treasury_LUSDBalance_After.gt(treasury_LUSDBalance_Before));
     });
 
     if (!withProxy) {
@@ -4395,11 +4384,10 @@ contract("BorrowerOperations", async (accounts) => {
         web3.currentProvider,
       );
 
-      // Check LQTY Staking contract balance before == 0
-      const lqtyStaking_LUSDBalance_Before = await lusdToken.balanceOf(
-        lqtyStaking.address,
+      const treasury_LUSDBalance_Before = await lusdToken.balanceOf(
+        treasury.address,
       );
-      assert.equal(lqtyStaking_LUSDBalance_Before, "0");
+      assert.equal(treasury_LUSDBalance_Before, "0");
 
       await openTrove({
         collateral: collaterals[0],
@@ -4458,13 +4446,10 @@ contract("BorrowerOperations", async (accounts) => {
         { from: D },
       );
 
-      // Check LQTY staking LUSD balance has increased
-      const lqtyStaking_LUSDBalance_After = await lusdToken.balanceOf(
-        lqtyStaking.address,
+      const treasury_LUSDBalance_After = await lusdToken.balanceOf(
+        treasury.address,
       );
-      assert.isTrue(
-        lqtyStaking_LUSDBalance_After.gt(lqtyStaking_LUSDBalance_Before),
-      );
+      assert.isTrue(treasury_LUSDBalance_After.gt(treasury_LUSDBalance_Before));
 
       // Check D's LUSD balance has increased by their requested LUSD
       const D_LUSDBalanceAfter = await lusdToken.balanceOf(D);
@@ -4473,7 +4458,7 @@ contract("BorrowerOperations", async (accounts) => {
       );
     });
 
-    it("adjustTrove(): Borrowing at zero base rate changes LUSD balance of LQTY staking contract", async () => {
+    it("adjustTrove(): Borrowing at zero base rate changes LUSD balance of Treasury contract", async () => {
       await openTrove({
         collateral: collaterals[0],
         ICR: toBN(dec(10, 18)),
@@ -4511,11 +4496,10 @@ contract("BorrowerOperations", async (accounts) => {
       // 2 hours pass
       th.fastForwardTime(7200, web3.currentProvider);
 
-      // Check staking LUSD balance before > 0
-      const lqtyStaking_LUSDBalance_Before = await lusdToken.balanceOf(
-        lqtyStaking.address,
+      const treasury_LUSDBalance_Before = await lusdToken.balanceOf(
+        treasury.address,
       );
-      assert.isTrue(lqtyStaking_LUSDBalance_Before.gt(toBN("0")));
+      assert.isTrue(treasury_LUSDBalance_Before.gt(toBN("0")));
 
       // D adjusts trove
       await borrowerOperations.adjustTrove(
@@ -4530,13 +4514,10 @@ contract("BorrowerOperations", async (accounts) => {
         { from: D },
       );
 
-      // Check staking LUSD balance after > staking balance before
-      const lqtyStaking_LUSDBalance_After = await lusdToken.balanceOf(
-        lqtyStaking.address,
+      const treasury_LUSDBalance_After = await lusdToken.balanceOf(
+        treasury.address,
       );
-      assert.isTrue(
-        lqtyStaking_LUSDBalance_After.gt(lqtyStaking_LUSDBalance_Before),
-      );
+      assert.isTrue(treasury_LUSDBalance_After.gt(treasury_LUSDBalance_Before));
     });
 
     it("adjustTrove(): Borrowing at zero base rate sends total requested LUSD to the user", async () => {
@@ -5196,13 +5177,12 @@ contract("BorrowerOperations", async (accounts) => {
         await th.checkRecoveryMode(contracts, collaterals[0].address),
       );
 
-      // B stakes LQTY
       await stakingToken.mint(bob, dec(100, 18));
 
-      const lqtyStakingLUSDBalanceBefore = await lusdToken.balanceOf(
-        lqtyStaking.address,
+      const treasuryLUSDBalanceBefore = await lusdToken.balanceOf(
+        treasury.address,
       );
-      assert.isTrue(lqtyStakingLUSDBalanceBefore.gt(toBN("0")));
+      assert.isTrue(treasuryLUSDBalanceBefore.gt(toBN("0")));
 
       const collDecimals =
         await contracts.collateralConfig.getCollateralDecimals(
@@ -5236,13 +5216,12 @@ contract("BorrowerOperations", async (accounts) => {
         await th.checkRecoveryMode(contracts, collaterals[0].address),
       );
 
-      // Check no fee was sent to staking contract
-      const lqtyStakingLUSDBalanceAfter = await lusdToken.balanceOf(
-        lqtyStaking.address,
+      const treasuryLUSDBalanceAfter = await lusdToken.balanceOf(
+        treasury.address,
       );
       assert.equal(
-        lqtyStakingLUSDBalanceAfter.toString(),
-        lqtyStakingLUSDBalanceBefore.toString(),
+        treasuryLUSDBalanceAfter.toString(),
+        treasuryLUSDBalanceBefore.toString(),
       );
     });
 
@@ -8312,18 +8291,17 @@ contract("BorrowerOperations", async (accounts) => {
       assert.isTrue(baseRate_2.lt(baseRate_1));
     });
 
-    it("openTrove(): borrowing at non-zero base rate sends LUSD fee to LQTY staking contract", async () => {
+    it("openTrove(): borrowing at non-zero base rate sends LUSD fee to Treasury contract", async () => {
       // time fast-forwards 1 year, and multisig stakes 1 LQTY
       await th.fastForwardTime(
         timeValues.SECONDS_IN_ONE_YEAR,
         web3.currentProvider,
       );
 
-      // Check LQTY LUSD balance before == 0
-      const lqtyStaking_LUSDBalance_Before = await lusdToken.balanceOf(
-        lqtyStaking.address,
+      const treasury_LUSDBalance_Before = await lusdToken.balanceOf(
+        treasury.address,
       );
-      assert.equal(lqtyStaking_LUSDBalance_Before, "0");
+      assert.equal(treasury_LUSDBalance_Before, "0");
 
       await openTrove({
         collateral: collaterals[0],
@@ -8369,13 +8347,10 @@ contract("BorrowerOperations", async (accounts) => {
         extraParams: { from: D },
       });
 
-      // Check LQTY LUSD balance after has increased
-      const lqtyStaking_LUSDBalance_After = await lusdToken.balanceOf(
-        lqtyStaking.address,
+      const treasury_LUSDBalance_After = await lusdToken.balanceOf(
+        treasury.address,
       );
-      assert.isTrue(
-        lqtyStaking_LUSDBalance_After.gt(lqtyStaking_LUSDBalance_Before),
-      );
+      assert.isTrue(treasury_LUSDBalance_After.gt(treasury_LUSDBalance_Before));
     });
 
     if (!withProxy) {
@@ -8470,11 +8445,10 @@ contract("BorrowerOperations", async (accounts) => {
         web3.currentProvider,
       );
 
-      // Check LQTY Staking contract balance before == 0
-      const lqtyStaking_LUSDBalance_Before = await lusdToken.balanceOf(
-        lqtyStaking.address,
+      const treasury_LUSDBalance_Before = await lusdToken.balanceOf(
+        treasury.address,
       );
-      assert.equal(lqtyStaking_LUSDBalance_Before, "0");
+      assert.equal(treasury_LUSDBalance_Before, "0");
 
       await openTrove({
         collateral: collaterals[0],
@@ -8533,13 +8507,10 @@ contract("BorrowerOperations", async (accounts) => {
         { from: D },
       );
 
-      // Check LQTY staking LUSD balance has increased
-      const lqtyStaking_LUSDBalance_After = await lusdToken.balanceOf(
-        lqtyStaking.address,
+      const treasury_LUSDBalance_After = await lusdToken.balanceOf(
+        treasury.address,
       );
-      assert.isTrue(
-        lqtyStaking_LUSDBalance_After.gt(lqtyStaking_LUSDBalance_Before),
-      );
+      assert.isTrue(treasury_LUSDBalance_After.gt(treasury_LUSDBalance_Before));
 
       // Check D's LUSD balance now equals their requested LUSD
       const LUSDBalance_D = await lusdToken.balanceOf(D);

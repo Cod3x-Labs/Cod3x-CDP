@@ -34,7 +34,7 @@ contract("TroveManager", async (accounts) => {
   let borrowerOperations;
   let hintHelpers;
   let collaterals;
-  let lqtyStaking;
+  let treasury;
   let lqtyToken;
   let communityIssuance;
   let lockupContractFactory;
@@ -93,7 +93,7 @@ contract("TroveManager", async (accounts) => {
     hintHelpers = contracts.hintHelpers;
     collaterals = contracts.collaterals;
 
-    lqtyStaking = LQTYContracts.lqtyStaking;
+    treasury = LQTYContracts.treasury;
     lqtyToken = LQTYContracts.lqtyToken;
     communityIssuance = LQTYContracts.communityIssuance;
     lockupContractFactory = LQTYContracts.lockupContractFactory;

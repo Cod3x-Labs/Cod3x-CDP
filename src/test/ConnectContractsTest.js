@@ -19,7 +19,7 @@ contract(
     let defaultPool;
     let functionCaller;
     let borrowerOperations;
-    let lqtyStaking;
+    let treasury;
     let stakingToken;
     let oathToken;
     let communityIssuance;
@@ -50,7 +50,7 @@ contract(
       redemptionHelper = coreContracts.redemptionHelper;
       liquidationHelper = coreContracts.liquidationHelper;
 
-      lqtyStaking = LQTYContracts.lqtyStaking;
+      treasury = LQTYContracts.treasury;
       stakingToken = LQTYContracts.stakingToken;
       communityIssuance = LQTYContracts.communityIssuance;
       oathToken = LQTYContracts.oathToken;
@@ -348,13 +348,12 @@ contract(
       assert.equal(defaultPoolAddress, recordedDefaultPoolAddress);
     });
 
-    // LQTY Staking in BO
-    it("Sets the correct LQTYStaking address in BorrowerOperations", async () => {
-      const lqtyStakingAddress = lqtyStaking.address;
+    // Treasury in BO
+    it("Sets the correct Treasury address in BorrowerOperations", async () => {
+      const treasuryAddress = treasury.address;
 
-      const recordedLQTYStakingAddress =
-        await borrowerOperations.lqtyStakingAddress();
-      assert.equal(lqtyStakingAddress, recordedLQTYStakingAddress);
+      const recordedTreasuryAddress = await borrowerOperations.treasury();
+      assert.equal(treasuryAddress, recordedTreasuryAddress);
     });
 
     // Collateral Config in BO

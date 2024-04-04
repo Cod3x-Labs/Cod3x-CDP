@@ -22,7 +22,7 @@ contract RedemptionHelper is LiquityBase, Ownable, IRedemptionHelper {
     IERC20 public lqtyToken;
     ILUSDToken public lusdToken;
     ISortedTroves public sortedTroves;
-    address public lqtyStaking;
+    address public treasury;
 
     struct RedemptionTotals {
         uint remainingLUSD;
@@ -61,7 +61,7 @@ contract RedemptionHelper is LiquityBase, Ownable, IRedemptionHelper {
         IPriceFeed _priceFeed,
         ILUSDToken _lusdToken,
         ISortedTroves _sortedTroves,
-        address _lqtyStaking
+        address _treasury
     ) external onlyOwner {
         activePool = _activePool;
         defaultPool = _defaultPool;
@@ -71,7 +71,7 @@ contract RedemptionHelper is LiquityBase, Ownable, IRedemptionHelper {
         priceFeed = _priceFeed;
         lusdToken = _lusdToken;
         sortedTroves = _sortedTroves;
-        lqtyStaking = _lqtyStaking;
+        treasury = _treasury;
 
         renounceOwnership();
     }
@@ -208,8 +208,7 @@ contract RedemptionHelper is LiquityBase, Ownable, IRedemptionHelper {
 
         _requireUserAcceptsFee(totals.collateralFee, totals.totalCollateralDrawn, _maxFeePercentage);
 
-        // Send the collateral fee to the LQTY staking contract
-        activePool.sendCollateral(_collateral, address(lqtyStaking), totals.collateralFee);
+        activePool.sendCollateral(_collateral, address(treasury), totals.collateralFee);
 
         totals.collateralToSendToRedeemer = totals.totalCollateralDrawn.sub(totals.collateralFee);
 

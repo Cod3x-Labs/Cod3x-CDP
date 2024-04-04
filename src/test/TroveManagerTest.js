@@ -59,7 +59,7 @@ contract("TroveManager", async (accounts) => {
   let borrowerOperations;
   let hintHelpers;
   let collaterals;
-  let lqtyStaking;
+  let treasury;
   let oathToken;
   let communityIssuance;
   let stakingToken;
@@ -112,7 +112,7 @@ contract("TroveManager", async (accounts) => {
     hintHelpers = contracts.hintHelpers;
     collaterals = contracts.collaterals;
 
-    lqtyStaking = LQTYContracts.lqtyStaking;
+    treasury = LQTYContracts.treasury;
     oathToken = LQTYContracts.oathToken;
     communityIssuance = LQTYContracts.communityIssuance;
     stakingToken = LQTYContracts.stakingToken;
@@ -7962,7 +7962,7 @@ contract("TroveManager", async (accounts) => {
     assert.isTrue(lastFeeOpTime_3.gt(lastFeeOpTime_1));
   });
 
-  it("redeemCollateral(): a redemption made at zero base rate send a non-zero ETHFee to LQTY staking contract", async () => {
+  it("redeemCollateral(): a redemption made at zero base rate send a non-zero ETHFee to Treasury contract", async () => {
     // time fast-forwards 1 year, and multisig stakes 1 LQTY
     await th.fastForwardTime(
       timeValues.SECONDS_IN_ONE_YEAR,
@@ -7997,11 +7997,10 @@ contract("TroveManager", async (accounts) => {
     // Check baseRate == 0
     assert.equal(await troveManager.baseRate(), "0");
 
-    // Check LQTY Staking contract balance before is zero
-    const lqtyStakingBalance_Before = await collaterals[0].balanceOf(
-      lqtyStaking.address,
+    const treasuryBalance_Before = await collaterals[0].balanceOf(
+      treasury.address,
     );
-    assert.equal(lqtyStakingBalance_Before, "0");
+    assert.equal(treasuryBalance_Before, "0");
 
     const A_balanceBefore = await lusdToken.balanceOf(A);
 
@@ -8024,14 +8023,13 @@ contract("TroveManager", async (accounts) => {
     const baseRate_1 = await troveManager.baseRate();
     assert.isTrue(baseRate_1.gt(toBN("0")));
 
-    // Check LQTY Staking contract balance after is non-zero
-    const lqtyStakingBalance_After = toBN(
-      await collaterals[0].balanceOf(lqtyStaking.address),
+    const treasuryBalance_After = toBN(
+      await collaterals[0].balanceOf(treasury.address),
     );
-    assert.isTrue(lqtyStakingBalance_After.gt(toBN("0")));
+    assert.isTrue(treasuryBalance_After.gt(toBN("0")));
   });
 
-  it("redeemCollateral(): a redemption made at a non-zero base rate send a non-zero ETHFee to LQTY staking contract", async () => {
+  it("redeemCollateral(): a redemption made at a non-zero base rate send a non-zero ETHFee to Treasury contract", async () => {
     // time fast-forwards 1 year, and multisig stakes 1 LQTY
     await th.fastForwardTime(
       timeValues.SECONDS_IN_ONE_YEAR,
@@ -8088,8 +8086,8 @@ contract("TroveManager", async (accounts) => {
     const baseRate_1 = await troveManager.baseRate();
     assert.isTrue(baseRate_1.gt(toBN("0")));
 
-    const lqtyStakingBalance_Before = toBN(
-      await collaterals[0].balanceOf(lqtyStaking.address),
+    const treasuryBalance_Before = toBN(
+      await collaterals[0].balanceOf(treasury.address),
     );
 
     // B redeems 10 LUSD
@@ -8107,12 +8105,11 @@ contract("TroveManager", async (accounts) => {
       B_balanceBefore.sub(toBN(dec(10, 18))).toString(),
     );
 
-    const lqtyStakingBalance_After = toBN(
-      await collaterals[0].balanceOf(lqtyStaking.address),
+    const treasuryBalance_After = toBN(
+      await collaterals[0].balanceOf(treasury.address),
     );
 
-    // check LQTY Staking balance has increased
-    assert.isTrue(lqtyStakingBalance_After.gt(lqtyStakingBalance_Before));
+    assert.isTrue(treasuryBalance_After.gt(treasuryBalance_Before));
   });
 
   it("redeemCollateral(): a redemption sends the ETH remainder (ETHDrawn - ETHFee) to the redeemer", async () => {

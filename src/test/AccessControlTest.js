@@ -37,7 +37,7 @@ contract(
     let governance;
     let guardian;
 
-    let lqtyStaking;
+    let treasury;
     let stakingToken;
     let oathToken;
     let communityIssuance;
@@ -68,7 +68,7 @@ contract(
       governance = coreContracts.governance;
       guardian = coreContracts.guardian;
 
-      lqtyStaking = LQTYContracts.lqtyStaking;
+      treasury = LQTYContracts.treasury;
       stakingToken = LQTYContracts.stakingToken;
       oathToken = LQTYContracts.oathToken;
       communityIssuance = LQTYContracts.communityIssuance;

@@ -9,7 +9,6 @@ const StabilityPool = artifacts.require("./StabilityPool.sol");
 const FunctionCaller = artifacts.require("./FunctionCaller.sol");
 const BorrowerOperations = artifacts.require("./BorrowerOperations.sol");
 
-const LQTYStaking = artifacts.require("./LQTY/LQTYStaking.sol");
 const LQTYToken = artifacts.require("./LQTY/LQTYToken.sol");
 const LockupContractFactory = artifacts.require(
   "./LQTY/LockupContractFactory.sol",
@@ -47,12 +46,7 @@ const coreContractABIs = [
   HintHelpers,
 ];
 
-const LQTYContractABIs = [
-  LQTYStaking,
-  LQTYToken,
-  LockupContractFactory,
-  CommunityIssuance,
-];
+const LQTYContractABIs = [LQTYToken, LockupContractFactory, CommunityIssuance];
 
 const TesterContractABIs = [
   CommunityIssuanceTester,
