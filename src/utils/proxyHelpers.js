@@ -453,24 +453,6 @@ class TokenProxy extends Proxy {
   }
 }
 
-class LQTYStakingProxy extends Proxy {
-  constructor(owner, proxies, tokenScriptAddress, token) {
-    super(owner, proxies, tokenScriptAddress, token);
-  }
-
-  async stake(...params) {
-    return this.forwardFunction(params, "stake(uint256)");
-  }
-
-  async stakes(user) {
-    return this.proxyFunctionWithUser("stakes", user);
-  }
-
-  async F_LUSD(user) {
-    return this.proxyFunctionWithUser("F_LUSD", user);
-  }
-}
-
 module.exports = {
   buildUserProxies,
   BorrowerOperationsProxy,
@@ -479,5 +461,4 @@ module.exports = {
   StabilityPoolProxy,
   SortedTrovesProxy,
   TokenProxy,
-  LQTYStakingProxy,
 };
