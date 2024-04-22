@@ -46,14 +46,6 @@ contract("StabilityPool - OATH Rewards", async (accounts) => {
   let communityIssuanceTester;
   let collaterals;
 
-  let communityLQTYSupply;
-  let issuance_M1;
-  let issuance_M2;
-  let issuance_M3;
-  let issuance_M4;
-  let issuance_M5;
-  let issuance_M6;
-
   const ZERO_ADDRESS = th.ZERO_ADDRESS;
 
   const getOpenTroveLUSDAmount = async (totalDebt) =>
