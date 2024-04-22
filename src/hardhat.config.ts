@@ -3,8 +3,7 @@ import "@nomicfoundation/hardhat-toolbox";
 import "@nomicfoundation/hardhat-verify";
 import "@nomiclabs/hardhat-truffle5";
 import "dotenv-defaults/config";
-
-import { accountsList } from "./utils/hardhatAccountsList2k.js";
+import { accountsList } from "./utils/accountsList.js";
 
 const config: HardhatUserConfig = {
   solidity: {

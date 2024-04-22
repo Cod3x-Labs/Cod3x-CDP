@@ -13,7 +13,6 @@ const randomHex = () => {
   for (i = 0; i < 64; i++) {
     hexCharArray.push(randomChar(hexChars));
   }
-  // console.log("hexarray is" + hexCharArray)
   return hexCharArray.join("");
 };
 
@@ -34,7 +33,6 @@ const makeHardhatAccountsList = (n) => {
   while (i < n) {
     console.log(i);
     account = makeAccount();
-    // console.log("account is" + account)
     if (Object.keys(accountsDict).includes(account)) {
       i += 1;
       continue;
@@ -55,7 +53,6 @@ const makeHardhatAccountsList = (n) => {
 // Construct accounts array data
 const arrayList = makeHardhatAccountsList(80000);
 
-// console.log(arrayList)
-fs.appendFile("../accountsList.js", arrayList, (err) => {
+fs.appendFile("./accountsList.js", arrayList, (err) => {
   if (err) console.log(err);
 });
