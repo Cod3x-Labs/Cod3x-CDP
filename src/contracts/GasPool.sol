@@ -14,5 +14,6 @@ pragma solidity ^0.8.23;
  */
 // solhint-disable-next-line no-empty-blocks
 contract GasPool {
+    string public constant NAME = "GasPool";
     // do nothing, as the core contracts have permission to send to and burn from this address
 }

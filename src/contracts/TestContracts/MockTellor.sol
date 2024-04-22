@@ -32,7 +32,7 @@ contract MockTellor {
     // --- Mock data reporting functions ---
 
     function getDataBefore(
-        bytes32 ,
+        bytes32,
         uint256 _timestamp
     ) external view returns (bool _ifRetrieve, bytes memory _value, uint256 _timestampRetrieved) {
         require(!revertRequest, "Tellor request reverted");
