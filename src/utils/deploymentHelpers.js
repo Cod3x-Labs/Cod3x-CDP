@@ -65,9 +65,6 @@ LQTY contracts consist of only those contracts related to the LQTY Token:
 -the CommunityIssuance contract 
 */
 
-const ZERO_ADDRESS = "0x" + "0".repeat(40);
-const maxBytes32 = "0x" + "f".repeat(64);
-
 class DeploymentHelper {
   static async deployLiquityCore() {
     return this.deployLiquityCoreHardhat();
@@ -509,19 +506,6 @@ class DeploymentHelper {
     await LQTYContracts.communityIssuance.setAddresses(
       LQTYContracts.oathToken.address,
       coreContracts.stabilityPool.address,
-    );
-  }
-
-  static async connectUnipool(
-    uniPool,
-    LQTYContracts,
-    uniswapPairAddr,
-    duration,
-  ) {
-    await uniPool.setParams(
-      LQTYContracts.lqtyToken.address,
-      uniswapPairAddr,
-      duration,
     );
   }
 }

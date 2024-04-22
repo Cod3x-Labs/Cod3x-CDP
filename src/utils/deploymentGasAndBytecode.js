@@ -28,8 +28,6 @@ const BorrowerOperationsTester = artifacts.require(
 const TroveManagerTester = artifacts.require("./TroveManagerTester.sol");
 const LUSDTokenTester = artifacts.require("./LUSDTokenTester.sol");
 
-const { TestHelper: th } = require("../utils/testHelpers.js");
-
 const dh = require("./deploymentHelpers.js");
 const ARBITRARY_ADDRESS = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"; // placeholder for the LPrewards bounty addresses
 
