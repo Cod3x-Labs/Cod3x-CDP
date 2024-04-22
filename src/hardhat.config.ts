@@ -1,5 +1,6 @@
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
+import "@nomicfoundation/hardhat-verify";
 import "@nomiclabs/hardhat-truffle5";
 import "dotenv-defaults/config";
 
@@ -22,6 +23,9 @@ const config: HardhatUserConfig = {
       accounts: accountsList,
       initialBaseFeePerGas: 0, //this setting is needed for some of tests to work
     },
+  },
+  etherscan: {
+    apiKey: process.env.ETHERSCAN_API_KEY,
   },
 };
 
