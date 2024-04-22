@@ -6,7 +6,7 @@
     "compiler-version": ["error", "^0.8.23"],
     "func-visibility": ["warn", { "ignoreConstructors": true }],
     "explicit-types": ["off", "explicit"],
-    "custom-errors": "off",
+    "gas-custom-errors": "off",
     "reason-string": ["off"],
     "var-name-mixedcase": "off",
     "func-name-mixedcase": "off",
