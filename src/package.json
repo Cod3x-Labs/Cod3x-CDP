@@ -9,7 +9,7 @@
     "deploy": "hardhat run .\\scripts\\deploy.ts --network hardhat",
     "initialize": "hardhat run .\\scripts\\initialize.ts",
     "compile": "hardhat compile --force",
-    "test": "hardhat test --config hardhat.config.test.ts --parallel --bail",
+    "test": "hardhat test --config hardhat.config.test.ts",
     "node": "hardhat node"
   },
   "author": "",
