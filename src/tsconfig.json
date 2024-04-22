@@ -12,5 +12,5 @@
     "pretty": true
   },
   "include": ["./scripts", "./test", "./typechain-types", "./utils"],
-  "files": ["./hardhat.config.ts"]
+  "files": ["hardhat.config.test.ts", "hardhat.config.ts"]
 }
