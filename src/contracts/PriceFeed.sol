@@ -26,7 +26,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     bool public initialized = false;
 
     mapping(address => AggregatorV3Interface) public priceAggregator; // collateral => Mainnet Chainlink aggregator for collateral's(Vault) underlying
-    ITellorCaller internal tellorCaller; // Wrapper contract that calls the Tellor system
+    ITellorCaller public tellorCaller; // Wrapper contract that calls the Tellor system
     mapping(address => bytes32) public tellorQueryId; // collateral => Tellor query ID
 
     // Core Liquity contracts
