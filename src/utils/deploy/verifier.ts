@@ -3,6 +3,7 @@ import { isNullOrWhitespace } from "../string";
 
 const verificationDisabledNetworks: ReadonlySet<string> = new Set<string>([
   "hardhat",
+  "local",
 ]);
 
 export class Verifier {
