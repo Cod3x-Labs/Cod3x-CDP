@@ -19,6 +19,13 @@ async function main() {
     `state is loaded. Number of items in the state: ${contractTransactions.size}`,
   );
 
+  if (contractTransactions.size != configurationParameters.contracts.length) {
+    throw new Error(
+      `all contracts must be deployed before initialization. 
+      Number of contracts: ${configurationParameters.contracts.length}.
+      Number of deployed contracts: ${contractTransactions.size}`,
+    );
+  }
   const initializer: Initializer = new Initializer(
     configurationParameters.gasPriceWei,
     configurationParameters.txConfirmations,
