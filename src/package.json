@@ -6,11 +6,11 @@
     "clean": "hardhat clean",
     "lint": "solhint list-rules && solhint contracts/**/*.sol test/**/*.sol",
     "format": "prettier --write contracts/**/*.sol test/**/*.js utils/**/*.{ts,js} scripts/**/*.{ts,js}",
-    "deploy": "hardhat run .\\scripts\\deploy.ts --network hardhat",
+    "deploy": "hardhat run .\\scripts\\deploy.ts --network local",
     "initialize": "hardhat run .\\scripts\\initialize.ts",
     "compile": "hardhat compile --force",
     "test": "hardhat test --config hardhat.config.test.ts",
-    "node": "hardhat node"
+    "node": "hardhat node --fork REPLACE_WITH_URL"
   },
   "author": "",
   "license": "BUSL-1.1",
