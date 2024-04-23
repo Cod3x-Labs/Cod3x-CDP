@@ -26,11 +26,12 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
     // --- Connected contract declarations ---
 
     ICollateralConfig public collateralConfig;
+
     ITroveManager public troveManager;
 
-    address internal gasPoolAddress;
+    address public gasPoolAddress;
 
-    ICollSurplusPool internal collSurplusPool;
+    ICollSurplusPool public collSurplusPool;
 
     address public treasury;
 
