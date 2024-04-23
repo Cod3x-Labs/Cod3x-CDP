@@ -193,7 +193,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         // Get current and previous price data from Chainlink, and current price data from Tellor
         ChainlinkResponse memory chainlinkResponse = _getCurrentChainlinkResponse(_collateral);
 
-        uint _lastGoodSharePrice = _convertToShareToUSDPrice(
+        uint _lastGoodSharePrice = _calculateVaultShareUSDPrice(
             _collateral,
             lastGoodPrice[_collateral]
         );
@@ -222,7 +222,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
                 _changeStatus(_collateral, Status.usingTellorChainlinkUntrusted);
 
                 uint storedTellorPrice = _storeTellorPrice(_collateral, tellorResponse);
-                return _convertToShareToUSDPrice(_collateral, storedTellorPrice);
+                return _calculateVaultShareUSDPrice(_collateral, storedTellorPrice);
             }
 
             // If Chainlink is frozen, try Tellor
@@ -242,7 +242,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
 
                 // If Tellor is working, use it
                 uint storedTellorPrice = _storeTellorPrice(_collateral, tellorResponse);
-                return _convertToShareToUSDPrice(_collateral, storedTellorPrice);
+                return _calculateVaultShareUSDPrice(_collateral, storedTellorPrice);
             }
 
             // If Chainlink price has changed by > 50% between two consecutive rounds, compare it to Tellor's price
@@ -265,7 +265,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
                  */
                 if (_bothOraclesSimilarPrice(chainlinkResponse, tellorResponse)) {
                     uint storedChainlinkPrice = _storeChainlinkPrice(_collateral, chainlinkResponse);
-                    return _convertToShareToUSDPrice(_collateral, storedChainlinkPrice);
+                    return _calculateVaultShareUSDPrice(_collateral, storedChainlinkPrice);
                 }
 
                 // If Tellor is live but the oracles differ too much in price, conclude that Chainlink's initial price deviation was
@@ -273,7 +273,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
                 _changeStatus(_collateral, Status.usingTellorChainlinkUntrusted);
 
                 uint storedTellorPrice = _storeTellorPrice(_collateral, tellorResponse);
-                return _convertToShareToUSDPrice(_collateral, storedTellorPrice);
+                return _calculateVaultShareUSDPrice(_collateral, storedTellorPrice);
             }
 
             // If Chainlink is working and Tellor is broken, remember Tellor is broken
@@ -283,7 +283,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
 
             // If Chainlink is working, return Chainlink current price (no status change)
             uint storedChainlinkPrice = _storeChainlinkPrice(_collateral, chainlinkResponse);
-            return _convertToShareToUSDPrice(_collateral, storedChainlinkPrice);
+            return _calculateVaultShareUSDPrice(_collateral, storedChainlinkPrice);
         }
 
         // --- CASE 2: The system fetched last price from Tellor ---
@@ -298,7 +298,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
             ) {
                 _changeStatus(_collateral, Status.chainlinkWorking);
                 uint storedChainlinkPrice = _storeChainlinkPrice(_collateral, chainlinkResponse);
-                return _convertToShareToUSDPrice(_collateral, storedChainlinkPrice);
+                return _calculateVaultShareUSDPrice(_collateral, storedChainlinkPrice);
             }
 
             if (_tellorIsBroken(tellorResponse)) {
@@ -316,7 +316,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
 
             // Otherwise, use Tellor price
             uint storedTellorPrice = _storeTellorPrice(_collateral, tellorResponse);
-            return _convertToShareToUSDPrice(_collateral, storedTellorPrice);
+            return _calculateVaultShareUSDPrice(_collateral, storedTellorPrice);
         }
 
         // --- CASE 3: Both oracles were untrusted at the last price fetch ---
@@ -334,7 +334,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
             ) {
                 _changeStatus(_collateral, Status.chainlinkWorking);
                 uint storedChainlinkPrice = _storeChainlinkPrice(_collateral, chainlinkResponse);
-                return _convertToShareToUSDPrice(_collateral, storedChainlinkPrice);
+                return _calculateVaultShareUSDPrice(_collateral, storedChainlinkPrice);
             }
 
             // Otherwise, return the last good price - both oracles are still untrusted (no status change)
@@ -359,7 +359,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
 
                 // If Tellor is working, return Tellor current price
                 uint storedTellorPrice = _storeTellorPrice(_collateral, tellorResponse);
-                return _convertToShareToUSDPrice(_collateral, storedTellorPrice);
+                return _calculateVaultShareUSDPrice(_collateral, storedTellorPrice);
             }
 
             if (_chainlinkIsFrozen(chainlinkResponse, _collateral)) {
@@ -376,14 +376,14 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
 
                 // if Chainlink is frozen and Tellor is working, keep using Tellor (no status change)
                 uint storedTellorPrice = _storeTellorPrice(_collateral, tellorResponse);
-                return _convertToShareToUSDPrice(_collateral, storedTellorPrice);
+                return _calculateVaultShareUSDPrice(_collateral, storedTellorPrice);
             }
 
             // if Chainlink is live and Tellor is broken, remember Tellor broke, and return Chainlink price
             if (_tellorIsBroken(tellorResponse)) {
                 _changeStatus(_collateral, Status.usingChainlinkTellorUntrusted);
                 uint storedChainlinkPrice = _storeChainlinkPrice(_collateral, chainlinkResponse);
-                return _convertToShareToUSDPrice(_collateral, storedChainlinkPrice);
+                return _calculateVaultShareUSDPrice(_collateral, storedChainlinkPrice);
             }
 
             // If Chainlink is live and Tellor is frozen, just use last good price (no status change) since we have no basis for comparison
@@ -396,13 +396,13 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
             if (_bothOraclesSimilarPrice(chainlinkResponse, tellorResponse)) {
                 _changeStatus(_collateral, Status.chainlinkWorking);
                 uint storedChainlinkPrice = _storeChainlinkPrice(_collateral, chainlinkResponse);
-                return _convertToShareToUSDPrice(_collateral, storedChainlinkPrice);
+                return _calculateVaultShareUSDPrice(_collateral, storedChainlinkPrice);
             }
 
             // Otherwise if Chainlink is live but price not within 5% of Tellor, distrust Chainlink, and return Tellor price
             _changeStatus(_collateral, Status.usingTellorChainlinkUntrusted);
             uint storedTellorPrice = _storeTellorPrice(_collateral, tellorResponse);
-            return _convertToShareToUSDPrice(_collateral, storedTellorPrice);
+            return _calculateVaultShareUSDPrice(_collateral, storedTellorPrice);
         }
 
         // --- CASE 5: Using Chainlink, Tellor is untrusted ---
@@ -428,7 +428,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
             ) {
                 _changeStatus(_collateral, Status.chainlinkWorking);
                 uint storedChainlinkPrice = _storeChainlinkPrice(_collateral, chainlinkResponse);
-                return _convertToShareToUSDPrice(_collateral, storedChainlinkPrice);
+                return _calculateVaultShareUSDPrice(_collateral, storedChainlinkPrice);
             }
 
             // If Chainlink is live but deviated >50% from it's previous price and Tellor is still untrusted, switch
@@ -441,13 +441,13 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
             // Otherwise if Chainlink is live and deviated <50% from it's previous price and Tellor is still untrusted,
             // return Chainlink price (no status change)
             uint storedChainlinkPrice = _storeChainlinkPrice(_collateral, chainlinkResponse);
-            return _convertToShareToUSDPrice(_collateral, storedChainlinkPrice);
+            return _calculateVaultShareUSDPrice(_collateral, storedChainlinkPrice);
         }
     }
 
     // --- Helper functions ---
 
-    function _convertToShareToUSDPrice(
+    function _calculateVaultShareUSDPrice(
         address _collateral,
         uint _vaultAssetUnitPrice
     ) internal view returns (uint) {
