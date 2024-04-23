@@ -39,7 +39,7 @@ contract CommunityIssuance is ICommunityIssuance, Ownable, CheckContract, BaseMa
 
     // --- Functions ---
 
-    constructor() public {
+    constructor() {
         distributionPeriod = 14 days;
     }
 
