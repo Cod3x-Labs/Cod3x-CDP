@@ -28,14 +28,7 @@ contract CommunityIssuance is ICommunityIssuance, Ownable, CheckContract, BaseMa
     uint256 public lastDistributionTime;
     uint256 public distributionPeriod;
     uint256 internal _rewardPerSecond;
-
     uint256 public lastIssuanceTimestamp;
-
-    // --- Events ---
-
-    event OathTokenAddressSet(address _oathTokenAddress);
-    event LogRewardPerSecond(uint256 _rewardPerSecond);
-    event TotalOATHIssuedUpdated(IERC20 indexed _oathTokenAddress, uint256 _totalOATHIssued);
 
     // --- Functions ---
 
@@ -87,7 +80,7 @@ contract CommunityIssuance is ICommunityIssuance, Ownable, CheckContract, BaseMa
 
             _totalOATHIssued = _totalOATHIssued.add(issuance);
             totalOATHIssued[_oathToken] = _totalOATHIssued;
-            emit TotalOATHIssuedUpdated(_oathToken, _totalOATHIssued);
+            emit TotalOATHIssuedUpdated(address(_oathToken), _totalOATHIssued);
         }
 
         lastIssuanceTimestamp = block.timestamp;

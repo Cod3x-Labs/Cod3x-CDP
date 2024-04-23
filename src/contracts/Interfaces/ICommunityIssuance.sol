@@ -8,6 +8,9 @@ interface ICommunityIssuance {
     event OATHTokenAddressSet(address _lqtyTokenAddress);
     event StabilityPoolAddressSet(address _stabilityPoolAddress);
     event TotalOathIssuedUpdated(uint _totalLQTYIssued);
+    event OathTokenAddressSet(address _oathTokenAddress);
+    event LogRewardPerSecond(uint256 _rewardPerSecond);
+    event TotalOATHIssuedUpdated(address indexed _oathTokenAddress, uint256 _totalOATHIssued);
 
     // --- Functions ---
 
