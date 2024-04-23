@@ -47,68 +47,11 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
     Used to hold, return and assign variables inside a function, in order to avoid the error:
     "CompilerError: Stack too deep". */
 
-    struct LocalVariables_adjustTrove {
-        uint256 collCCR;
-        uint256 collMCR;
-        uint256 collDecimals;
-        uint price;
-        uint collChange;
-        uint netDebtChange;
-        bool isCollIncrease;
-        uint debt;
-        uint coll;
-        uint oldICR;
-        uint newICR;
-        uint newTCR;
-        uint LUSDFee;
-        uint newDebt;
-        uint newColl;
-        uint stake;
-        address newUpperHint;
-        address newLowerHint;
-    }
-
-    struct LocalVariables_openTrove {
-        uint256 collCCR;
-        uint256 collMCR;
-        uint256 collDecimals;
-        uint price;
-        uint LUSDFee;
-        uint netDebt;
-        uint compositeDebt;
-        uint ICR;
-        uint NICR;
-        uint stake;
-        uint arrayIndex;
-        address newUpperHint;
-        address newLowerHint;
-    }
-
     struct ContractsCache {
         ITroveManager troveManager;
         IActivePool activePool;
         ILUSDToken lusdToken;
     }
-
-    enum BorrowerOperation {
-        openTrove,
-        closeTrove,
-        adjustTrove
-    }
-
-    event CollateralConfigAddressChanged(address _newCollateralConfigAddress);
-    event LeveragerAddressChanged(address _leverager);
-
-    event SetFeeExemption(address _borrower, bool _isExempt);
-
-    event TroveUpdated(
-        address indexed _borrower,
-        address _collateral,
-        uint _debt,
-        uint _coll,
-        uint stake,
-        BorrowerOperation operation
-    );
 
     // --- Dependency setters ---
 

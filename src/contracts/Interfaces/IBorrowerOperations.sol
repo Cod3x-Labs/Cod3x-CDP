@@ -22,6 +22,49 @@ interface IBorrowerOperations {
         address _lowerHint;
     }
 
+    struct LocalVariables_adjustTrove {
+        uint256 collCCR;
+        uint256 collMCR;
+        uint256 collDecimals;
+        uint price;
+        uint collChange;
+        uint netDebtChange;
+        bool isCollIncrease;
+        uint debt;
+        uint coll;
+        uint oldICR;
+        uint newICR;
+        uint newTCR;
+        uint LUSDFee;
+        uint newDebt;
+        uint newColl;
+        uint stake;
+        address newUpperHint;
+        address newLowerHint;
+    }
+
+    struct LocalVariables_openTrove {
+        uint256 collCCR;
+        uint256 collMCR;
+        uint256 collDecimals;
+        uint price;
+        uint LUSDFee;
+        uint netDebt;
+        uint compositeDebt;
+        uint ICR;
+        uint NICR;
+        uint stake;
+        uint arrayIndex;
+        address newUpperHint;
+        address newLowerHint;
+    }
+
+    enum BorrowerOperation {
+        openTrove,
+        closeTrove,
+        adjustTrove
+    }
+
     // --- Events ---
 
     event TroveManagerAddressChanged(address _newTroveManagerAddress);
@@ -33,7 +76,9 @@ interface IBorrowerOperations {
     event SortedTrovesAddressChanged(address _sortedTrovesAddress);
     event LUSDTokenAddressChanged(address _lusdTokenAddress);
     event TreasuryAddressChanged(address _treasuryAddress);
-
+    event CollateralConfigAddressChanged(address _newCollateralConfigAddress);
+    event LeveragerAddressChanged(address _leverager);
+    event SetFeeExemption(address _borrower, bool _isExempt);
     event TroveCreated(address indexed _borrower, address _collateral, uint arrayIndex);
     event TroveUpdated(
         address indexed _borrower,
@@ -41,7 +86,7 @@ interface IBorrowerOperations {
         uint _debt,
         uint _coll,
         uint stake,
-        uint8 operation
+        BorrowerOperation operation
     );
     event LUSDBorrowingFeePaid(address indexed _borrower, address _collateral, uint _LUSDFee);
 
