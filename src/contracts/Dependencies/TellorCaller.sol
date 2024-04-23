@@ -23,7 +23,7 @@ contract TellorCaller is UsingTellor, ITellorCaller {
     mapping(bytes32 => uint256) public lastStoredTimestamps;
     mapping(bytes32 => uint256) public lastStoredPrices;
 
-    constructor(address payable _tellorMasterAddress) public UsingTellor(_tellorMasterAddress) {}
+    constructor(address payable _tellorMasterAddress) UsingTellor(_tellorMasterAddress) {}
 
     /*
      * getTellorCurrentValue(): identical to getCurrentValue() in UsingTellor.sol
