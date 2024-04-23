@@ -53,6 +53,43 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
         ILUSDToken lusdToken;
     }
 
+    struct LocalVariables_adjustTrove {
+        uint256 collCCR;
+        uint256 collMCR;
+        uint256 collDecimals;
+        uint price;
+        uint collChange;
+        uint netDebtChange;
+        bool isCollIncrease;
+        uint debt;
+        uint coll;
+        uint oldICR;
+        uint newICR;
+        uint newTCR;
+        uint LUSDFee;
+        uint newDebt;
+        uint newColl;
+        uint stake;
+        address newUpperHint;
+        address newLowerHint;
+    }
+
+    struct LocalVariables_openTrove {
+        uint256 collCCR;
+        uint256 collMCR;
+        uint256 collDecimals;
+        uint price;
+        uint LUSDFee;
+        uint netDebt;
+        uint compositeDebt;
+        uint ICR;
+        uint NICR;
+        uint stake;
+        uint arrayIndex;
+        address newUpperHint;
+        address newLowerHint;
+    }
+
     // --- Dependency setters ---
 
     function setAddresses(
