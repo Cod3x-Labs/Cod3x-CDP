@@ -116,7 +116,7 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ERC20TransferScript
         if (_collDecimals > LiquityMath.CR_CALCULATION_DECIMALS) {
             scaledColl = scaledColl / (10 ** (_collDecimals - LiquityMath.CR_CALCULATION_DECIMALS));
         } else if (_collDecimals < LiquityMath.CR_CALCULATION_DECIMALS) {
-            scaledColl = scaledColl / (10 ** (LiquityMath.CR_CALCULATION_DECIMALS - _collDecimals));
+            scaledColl = scaledColl * (10 ** (LiquityMath.CR_CALCULATION_DECIMALS - _collDecimals));
         }
     }
 }
