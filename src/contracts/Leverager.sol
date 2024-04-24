@@ -445,7 +445,7 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
         // x = (collAmountInTrove * collPrice / 1 ether) - (debtAfterRepayment * targetCR)
         // We then divide by price to get actual collAmountWithdrawn (not denominated in dollars)
         collAmountWithdrawn =
-            (troveCollValue - (debtAfterRepayment + LUSD_GAS_COMPENSATION * params.targetCR)) /
+            (troveCollValue - ((debtAfterRepayment + LUSD_GAS_COMPENSATION) * params.targetCR)) /
             params.price;
         collAmountWithdrawn = _getUnscaledCollAmount(collAmountWithdrawn, params.collDecimals);
 
