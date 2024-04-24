@@ -4,7 +4,6 @@ pragma solidity ^0.8.23;
 
 import "./Interfaces/ILUSDToken.sol";
 import "./Interfaces/ITroveManager.sol";
-import "./Dependencies/SafeMath.sol";
 import "./Dependencies/CheckContract.sol";
 
 /*
@@ -26,8 +25,6 @@ import "./Dependencies/CheckContract.sol";
  */
 
 contract LUSDToken is CheckContract, ILUSDToken {
-    using SafeMath for uint256;
-
     uint256 private _totalSupply;
     string internal constant _NAME = "Pluc USD";
     string internal constant _SYMBOL = "plUSD";
@@ -239,11 +236,11 @@ contract LUSDToken is CheckContract, ILUSDToken {
     ) external override returns (bool) {
         _requireValidRecipient(recipient);
         _transfer(sender, recipient, amount);
-        _approve(
-            sender,
-            msg.sender,
-            _allowances[sender][msg.sender].sub(amount, "ERC20: transfer amount exceeds allowance")
-        );
+        uint256 senderAllowance = _allowances[sender][msg.sender];
+        require(amount <= senderAllowance, "ERC20: transfer amount exceeds allowance");
+
+        _approve(sender, msg.sender, senderAllowance - amount);
+
         return true;
     }
 
@@ -251,7 +248,7 @@ contract LUSDToken is CheckContract, ILUSDToken {
         address spender,
         uint256 addedValue
     ) external override returns (bool) {
-        _approve(msg.sender, spender, _allowances[msg.sender][spender].add(addedValue));
+        _approve(msg.sender, spender, _allowances[msg.sender][spender] + addedValue);
         return true;
     }
 
@@ -259,14 +256,10 @@ contract LUSDToken is CheckContract, ILUSDToken {
         address spender,
         uint256 subtractedValue
     ) external override returns (bool) {
-        _approve(
-            msg.sender,
-            spender,
-            _allowances[msg.sender][spender].sub(
-                subtractedValue,
-                "ERC20: decreased allowance below zero"
-            )
-        );
+        uint256 senderAllowance = _allowances[msg.sender][spender];
+        require(subtractedValue <= senderAllowance, "ERC20: decreased allowance below zero");
+
+        _approve(msg.sender, spender, senderAllowance - subtractedValue);
         return true;
     }
 
@@ -341,24 +334,28 @@ contract LUSDToken is CheckContract, ILUSDToken {
         assert(sender != address(0));
         assert(recipient != address(0));
 
-        _balances[sender] = _balances[sender].sub(amount, "ERC20: transfer amount exceeds balance");
-        _balances[recipient] = _balances[recipient].add(amount);
+        require(amount <= _balances[sender], "ERC20: transfer amount exceeds balance");
+
+        _balances[sender] = _balances[sender] - amount;
+        _balances[recipient] = _balances[recipient] + amount;
         emit Transfer(sender, recipient, amount);
     }
 
     function _mint(address account, uint256 amount) internal {
         assert(account != address(0));
 
-        _totalSupply = _totalSupply.add(amount);
-        _balances[account] = _balances[account].add(amount);
+        _totalSupply = _totalSupply + amount;
+        _balances[account] = _balances[account] + amount;
         emit Transfer(address(0), account, amount);
     }
 
     function _burn(address account, uint256 amount) internal {
         assert(account != address(0));
 
-        _balances[account] = _balances[account].sub(amount, "ERC20: burn amount exceeds balance");
-        _totalSupply = _totalSupply.sub(amount);
+        require(amount <= _balances[account], "ERC20: burn amount exceeds balance");
+
+        _balances[account] = _balances[account] - amount;
+        _totalSupply = _totalSupply - amount;
         emit Transfer(account, address(0), amount);
     }
 
