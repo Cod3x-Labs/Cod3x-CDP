@@ -4,13 +4,11 @@ pragma solidity ^0.8.23;
 
 import "./Interfaces/ICollateralConfig.sol";
 import "./Interfaces/ICollSurplusPool.sol";
-import "./Dependencies/SafeMath.sol";
 import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
 import "./Dependencies/SafeERC20.sol";
 
 contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
-    using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
     string public constant NAME = "CollSurplusPool";
@@ -82,7 +80,7 @@ contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
         _requireValidCollateralAddress(_collateral);
         _requireCallerIsTroveManagerOrLiquidationHelper();
 
-        uint newAmount = balances[_account][_collateral].add(_amount);
+        uint newAmount = balances[_account][_collateral] + _amount;
         balances[_account][_collateral] = newAmount;
 
         emit CollBalanceUpdated(_account, _collateral, newAmount);
@@ -97,7 +95,7 @@ contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
         balances[_account][_collateral] = 0;
         emit CollBalanceUpdated(_account, _collateral, 0);
 
-        collAmount[_collateral] = collAmount[_collateral].sub(claimableColl);
+        collAmount[_collateral] = collAmount[_collateral] - claimableColl;
         emit CollateralSent(_collateral, _account, claimableColl);
 
         IERC20(_collateral).safeTransfer(_account, claimableColl);
@@ -106,7 +104,7 @@ contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
     function pullCollateralFromActivePool(address _collateral, uint _amount) external override {
         _requireValidCollateralAddress(_collateral);
         _requireCallerIsActivePool();
-        collAmount[_collateral] = collAmount[_collateral].add(_amount);
+        collAmount[_collateral] = collAmount[_collateral] + _amount;
 
         IERC20(_collateral).safeTransferFrom(activePoolAddress, address(this), _amount);
     }

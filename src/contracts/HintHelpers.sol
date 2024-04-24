@@ -10,8 +10,6 @@ import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
 
 contract HintHelpers is LiquityBase, Ownable, CheckContract {
-    using SafeMath for uint;
-
     string public constant NAME = "HintHelpers";
 
     ICollateralConfig public collateralConfig;
@@ -118,30 +116,26 @@ contract HintHelpers is LiquityBase, Ownable, CheckContract {
 
         while (vars.currentTroveuser != address(0) && vars.remainingLUSD > 0 && _maxIterations > 0) {
             _maxIterations--;
-            vars.netLUSDDebt = _getNetDebt(
-                troveManager.getTroveDebt(vars.currentTroveuser, _collateral)
-            ).add(troveManager.getPendingLUSDDebtReward(vars.currentTroveuser, _collateral));
+            vars.netLUSDDebt =
+                _getNetDebt(troveManager.getTroveDebt(vars.currentTroveuser, _collateral)) +
+                troveManager.getPendingLUSDDebtReward(vars.currentTroveuser, _collateral);
 
             if (vars.netLUSDDebt > vars.remainingLUSD) {
                 if (vars.netLUSDDebt > MIN_NET_DEBT) {
                     vars.maxRedeemableLUSD = LiquityMath._min(
                         vars.remainingLUSD,
-                        vars.netLUSDDebt.sub(MIN_NET_DEBT)
+                        vars.netLUSDDebt - MIN_NET_DEBT
                     );
 
-                    vars.collAmount = troveManager
-                        .getTroveColl(vars.currentTroveuser, _collateral)
-                        .add(
-                            troveManager.getPendingCollateralReward(
-                                vars.currentTroveuser,
-                                _collateral
-                            )
-                        );
+                    vars.collAmount =
+                        troveManager.getTroveColl(vars.currentTroveuser, _collateral) +
+                        troveManager.getPendingCollateralReward(vars.currentTroveuser, _collateral);
 
-                    vars.newColl = vars.collAmount.sub(
-                        vars.maxRedeemableLUSD.mul(10 ** vars.collDecimals).div(_price)
-                    );
-                    vars.newDebt = vars.netLUSDDebt.sub(vars.maxRedeemableLUSD);
+                    vars.newColl =
+                        vars.collAmount -
+                        (vars.maxRedeemableLUSD * (10 ** vars.collDecimals)) /
+                        _price;
+                    vars.newDebt = vars.netLUSDDebt - vars.maxRedeemableLUSD;
 
                     vars.compositeDebt = _getCompositeDebt(vars.newDebt);
                     partialRedemptionHintNICR = LiquityMath._computeNominalCR(
@@ -150,17 +144,17 @@ contract HintHelpers is LiquityBase, Ownable, CheckContract {
                         vars.collDecimals
                     );
 
-                    vars.remainingLUSD = vars.remainingLUSD.sub(vars.maxRedeemableLUSD);
+                    vars.remainingLUSD = vars.remainingLUSD - vars.maxRedeemableLUSD;
                 }
                 break;
             } else {
-                vars.remainingLUSD = vars.remainingLUSD.sub(vars.netLUSDDebt);
+                vars.remainingLUSD = vars.remainingLUSD - vars.netLUSDDebt;
             }
 
             vars.currentTroveuser = vars.sortedTroves.getPrev(_collateral, vars.currentTroveuser);
         }
 
-        truncatedLUSDamount = _LUSDamount.sub(vars.remainingLUSD);
+        truncatedLUSDamount = _LUSDamount - vars.remainingLUSD;
     }
 
     /* getApproxHint() - return address of a Trove that is, on average, (length / numTrials) positions away in the 

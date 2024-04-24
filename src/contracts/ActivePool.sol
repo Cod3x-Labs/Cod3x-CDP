@@ -6,7 +6,6 @@ import "./Interfaces/ICollateralConfig.sol";
 import "./Interfaces/IDefaultPool.sol";
 import "./Interfaces/ICollSurplusPool.sol";
 import "./Interfaces/ITroveManager.sol";
-import "./Dependencies/SafeMath.sol";
 import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
 import "./Dependencies/SafeERC20.sol";
@@ -19,7 +18,6 @@ import "./Dependencies/SafeERC20.sol";
  *
  */
 contract ActivePool is Ownable, CheckContract, IActivePool {
-    using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
     string public constant NAME = "ActivePool";
@@ -101,7 +99,7 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
     function sendCollateral(address _collateral, address _account, uint _amount) external override {
         _requireValidCollateralAddress(_collateral);
         _requireCallerIsBOorTroveMorSPorLH();
-        collAmount[_collateral] = collAmount[_collateral].sub(_amount);
+        collAmount[_collateral] = collAmount[_collateral] - _amount;
         emit ActivePoolCollateralBalanceUpdated(_collateral, collAmount[_collateral]);
         emit CollateralSent(_collateral, _account, _amount);
 
@@ -122,14 +120,14 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
     function increaseLUSDDebt(address _collateral, uint _amount) external override {
         _requireValidCollateralAddress(_collateral);
         _requireCallerIsBOorTroveM();
-        LUSDDebt[_collateral] = LUSDDebt[_collateral].add(_amount);
+        LUSDDebt[_collateral] = LUSDDebt[_collateral] + _amount;
         emit ActivePoolLUSDDebtUpdated(_collateral, LUSDDebt[_collateral]);
     }
 
     function decreaseLUSDDebt(address _collateral, uint _amount) external override {
         _requireValidCollateralAddress(_collateral);
         _requireCallerIsBOorTroveMorSPorRH();
-        LUSDDebt[_collateral] = LUSDDebt[_collateral].sub(_amount);
+        LUSDDebt[_collateral] = LUSDDebt[_collateral] - _amount;
         emit ActivePoolLUSDDebtUpdated(_collateral, LUSDDebt[_collateral]);
     }
 
@@ -139,7 +137,7 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
     ) external override {
         _requireValidCollateralAddress(_collateral);
         _requireCallerIsBorrowerOperationsOrDefaultPool();
-        collAmount[_collateral] = collAmount[_collateral].add(_amount);
+        collAmount[_collateral] = collAmount[_collateral] + _amount;
         emit ActivePoolCollateralBalanceUpdated(_collateral, collAmount[_collateral]);
 
         IERC20(_collateral).safeTransferFrom(msg.sender, address(this), _amount);

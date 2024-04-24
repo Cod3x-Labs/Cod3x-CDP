@@ -13,8 +13,6 @@ import "./Dependencies/Ownable.sol";
 import "./Dependencies/IERC20.sol";
 
 contract RedemptionHelper is LiquityBase, Ownable, IRedemptionHelper {
-    using SafeMath for uint256;
-
     uint public constant BOOTSTRAP_PERIOD = 14 days;
 
     ITroveManager public troveManager;
@@ -183,10 +181,10 @@ contract RedemptionHelper is LiquityBase, Ownable, IRedemptionHelper {
 
             if (singleRedemption.cancelledPartial) break; // Partial redemption was cancelled (out-of-date hint, or new net debt < minimum), therefore we could not redeem from the last Trove
 
-            totals.totalLUSDToRedeem = totals.totalLUSDToRedeem.add(singleRedemption.LUSDLot);
-            totals.totalCollateralDrawn = totals.totalCollateralDrawn.add(singleRedemption.collLot);
+            totals.totalLUSDToRedeem = totals.totalLUSDToRedeem + singleRedemption.LUSDLot;
+            totals.totalCollateralDrawn = totals.totalCollateralDrawn + singleRedemption.collLot;
 
-            totals.remainingLUSD = totals.remainingLUSD.sub(singleRedemption.LUSDLot);
+            totals.remainingLUSD = totals.remainingLUSD - singleRedemption.LUSDLot;
             totals.currentBorrower = nextUserToCheck;
         }
         require(
@@ -210,7 +208,7 @@ contract RedemptionHelper is LiquityBase, Ownable, IRedemptionHelper {
 
         activePool.sendCollateral(_collateral, address(treasury), totals.collateralFee);
 
-        totals.collateralToSendToRedeemer = totals.totalCollateralDrawn.sub(totals.collateralFee);
+        totals.collateralToSendToRedeemer = totals.totalCollateralDrawn - totals.collateralFee;
 
         // Burn the total LUSD that is cancelled with debt, and send the redeemed collateral to _redeemer
         troveManager.burnLUSDAndEmitRedemptionEvent(
@@ -262,22 +260,18 @@ contract RedemptionHelper is LiquityBase, Ownable, IRedemptionHelper {
         // Determine the remaining amount (lot) to be redeemed, capped by the entire debt of the Trove minus the liquidation reserve
         singleRedemption.LUSDLot = LiquityMath._min(
             _maxLUSDamount,
-            troveManager.getTroveDebt(_borrower, _collateral).sub(LUSD_GAS_COMPENSATION)
+            troveManager.getTroveDebt(_borrower, _collateral) - LUSD_GAS_COMPENSATION
         );
 
         LocalVariables_redeemCollateralFromTrove memory vars;
         vars.collDecimals = _collateralConfig.getCollateralDecimals(_collateral);
 
         // Get the collLot of equivalent value in USD
-        singleRedemption.collLot = singleRedemption.LUSDLot.mul(10 ** vars.collDecimals).div(_price);
+        singleRedemption.collLot = (singleRedemption.LUSDLot * 10 ** vars.collDecimals) / _price;
 
         // Decrease the debt and collateral of the current Trove according to the LUSD lot and corresponding collateral to send
-        vars.newDebt = troveManager.getTroveDebt(_borrower, _collateral).sub(
-            singleRedemption.LUSDLot
-        );
-        vars.newColl = troveManager.getTroveColl(_borrower, _collateral).sub(
-            singleRedemption.collLot
-        );
+        vars.newDebt = troveManager.getTroveDebt(_borrower, _collateral) - singleRedemption.LUSDLot;
+        vars.newColl = troveManager.getTroveColl(_borrower, _collateral) - singleRedemption.collLot;
 
         if (vars.newDebt == LUSD_GAS_COMPENSATION) {
             // No debt left in the Trove (except for the liquidation reserve), therefore the trove gets closed
@@ -347,7 +341,7 @@ contract RedemptionHelper is LiquityBase, Ownable, IRedemptionHelper {
     function _requireAfterBootstrapPeriod() internal view {
         uint systemDeploymentTime = lusdToken.getDeploymentStartTime();
         require(
-            block.timestamp >= systemDeploymentTime.add(BOOTSTRAP_PERIOD),
+            block.timestamp >= systemDeploymentTime + BOOTSTRAP_PERIOD,
             "RedemptionHelper: Bootstrap period has not passed"
         );
     }

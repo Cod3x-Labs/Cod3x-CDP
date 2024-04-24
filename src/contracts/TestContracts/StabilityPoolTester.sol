@@ -5,11 +5,10 @@ pragma solidity ^0.8.23;
 import "../StabilityPool.sol";
 
 contract StabilityPoolTester is StabilityPool {
-    using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
     function unprotectedPullCollateral(address _collateral, uint _amount) external {
-        collAmounts[_collateral] = collAmounts[_collateral].add(_amount);
+        collAmounts[_collateral] = collAmounts[_collateral] + _amount;
         IERC20(_collateral).safeTransferFrom(msg.sender, address(this), _amount);
     }
 

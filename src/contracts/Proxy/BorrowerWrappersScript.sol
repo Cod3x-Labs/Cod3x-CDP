@@ -2,7 +2,6 @@
 
 pragma solidity ^0.8.23;
 
-import "../Dependencies/SafeMath.sol";
 import "../Dependencies/LiquityMath.sol";
 import "../Dependencies/IERC20.sol";
 import "../Interfaces/IBorrowerOperations.sol";
@@ -15,7 +14,6 @@ import "./ERC20TransferScript.sol";
 import "../Dependencies/SafeERC20.sol";
 
 contract BorrowerWrappersScript is BorrowerOperationsScript, ERC20TransferScript {
-    using SafeMath for uint;
     using SafeERC20 for IERC20;
 
     string public constant NAME = "BorrowerWrappersScript";
@@ -75,7 +73,7 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ERC20TransferScript
         // already checked in CollSurplusPool
         assert(balanceAfter > balanceBefore);
 
-        uint totalCollateral = balanceAfter.sub(balanceBefore).add(_collAmount);
+        uint totalCollateral = balanceAfter - balanceBefore + _collAmount;
 
         // Open trove with obtained collateral, plus collateral sent by user
         IERC20(_collateral).safeTransferFrom(msg.sender, address(this), _collAmount);
@@ -95,11 +93,10 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ERC20TransferScript
         uint ICR = troveManager.getCurrentICR(address(this), _collateral, price);
 
         uint collDecimals = collateralConfig.getCollateralDecimals(_collateral);
-        uint LUSDAmount = _getScaledCollAmount(_collAmount, collDecimals).mul(price).div(ICR);
+        uint LUSDAmount = (_getScaledCollAmount(_collAmount, collDecimals) * price) / ICR;
         uint borrowingRate = troveManager.getBorrowingRateWithDecay();
-        uint netDebt = LUSDAmount.mul(LiquityMath.DECIMAL_PRECISION).div(
-            LiquityMath.DECIMAL_PRECISION.add(borrowingRate)
-        );
+        uint netDebt = (LUSDAmount * LiquityMath.DECIMAL_PRECISION) /
+            (LiquityMath.DECIMAL_PRECISION + borrowingRate);
 
         return netDebt;
     }
@@ -117,9 +114,9 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ERC20TransferScript
     ) internal pure returns (uint256 scaledColl) {
         scaledColl = _collAmount;
         if (_collDecimals > LiquityMath.CR_CALCULATION_DECIMALS) {
-            scaledColl = scaledColl.div(10 ** (_collDecimals - LiquityMath.CR_CALCULATION_DECIMALS));
+            scaledColl = scaledColl / (10 ** (_collDecimals - LiquityMath.CR_CALCULATION_DECIMALS));
         } else if (_collDecimals < LiquityMath.CR_CALCULATION_DECIMALS) {
-            scaledColl = scaledColl.mul(10 ** (LiquityMath.CR_CALCULATION_DECIMALS - _collDecimals));
+            scaledColl = scaledColl / (10 ** (LiquityMath.CR_CALCULATION_DECIMALS - _collDecimals));
         }
     }
 }

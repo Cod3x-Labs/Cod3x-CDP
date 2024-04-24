@@ -10,14 +10,12 @@ import "./Interfaces/IPriceFeed.sol";
 import "./Interfaces/ITroveManager.sol";
 import "./Dependencies/ISwapper.sol";
 import "./Dependencies/LiquityBase.sol";
-import "./Dependencies/SafeMath.sol";
 import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
 import "./Dependencies/SafeERC20.sol";
 
 contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
     using SafeERC20 for IERC20;
-    using SafeMath for uint;
 
     bool public initialized = false;
 
@@ -255,7 +253,7 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
                     vars.lusdAmount,
                     minAmountOut
                 );
-                vars.totalColl = vars.totalColl.add(_collAmount);
+                vars.totalColl = vars.totalColl + _collAmount;
             }
         }
 
@@ -367,11 +365,11 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
         // CR * debt = dollar value of coll
         // CR * debt = coll amount * coll price
         // (coll amount * coll price) / CR = dollar value of debt
-        uint newDebt = scaledCollAmount.mul(params.price).div(params.targetCR);
+        uint newDebt = (scaledCollAmount * params.price) / params.targetCR;
         if (params.shouldOpenTrove) {
-            newDebt = newDebt.sub(LUSD_GAS_COMPENSATION);
+            newDebt = newDebt - LUSD_GAS_COMPENSATION;
         }
-        uint newDebtMinusFee = newDebt.sub(troveManager.getBorrowingFeeWithDecay(newDebt));
+        uint newDebtMinusFee = newDebt - troveManager.getBorrowingFeeWithDecay(newDebt);
 
         IERC20(params.collateral).safeIncreaseAllowance(
             address(borrowerOperations),
@@ -439,16 +437,16 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
         }
 
         uint troveCollValue = troveManager.getTroveColl(msg.sender, params.collateral);
-        troveCollValue = LiquityMath._getScaledCollAmount(troveCollValue, params.collDecimals).mul(
-            params.price
-        );
+        troveCollValue =
+            LiquityMath._getScaledCollAmount(troveCollValue, params.collDecimals) *
+            params.price;
         // To find x (dollar value of collAmountWithdrawn)
         // (collAmountInTrove * collPrice / 1 ether) - x = debtAfterRepayment * targetCR
         // x = (collAmountInTrove * collPrice / 1 ether) - (debtAfterRepayment * targetCR)
         // We then divide by price to get actual collAmountWithdrawn (not denominated in dollars)
-        collAmountWithdrawn = troveCollValue
-            .sub(debtAfterRepayment.add(LUSD_GAS_COMPENSATION).mul(params.targetCR))
-            .div(params.price);
+        collAmountWithdrawn =
+            (troveCollValue - (debtAfterRepayment + LUSD_GAS_COMPENSATION * params.targetCR)) /
+            params.price;
         collAmountWithdrawn = _getUnscaledCollAmount(collAmountWithdrawn, params.collDecimals);
 
         (newUpperHint, newLowerHint) = borrowerOperations.adjustTroveFor(
@@ -515,10 +513,7 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
         // ^ (dollar value in)    ^ (account for slippage and fees)        ^ (dollar value out)
         // solving for _amountOut
         // _amountOut = _amountIn * _priceIn * (_minPercentOut / DECIMAL_PRECISION) / _priceOut
-        return
-            _amountIn.mul(_priceIn).mul(_minPercentOut).div(_priceOut).div(
-                LiquityMath.DECIMAL_PRECISION
-            );
+        return (_amountIn * _priceIn * _minPercentOut) / _priceOut / LiquityMath.DECIMAL_PRECISION;
     }
 
     function _requireERNPriceAndSwapPercentInRange(
@@ -539,13 +534,13 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
     ) internal pure returns (uint unscaledColl) {
         unscaledColl = _collAmount;
         if (_collDecimals > LiquityMath.CR_CALCULATION_DECIMALS) {
-            unscaledColl = unscaledColl.mul(
-                10 ** (_collDecimals - LiquityMath.CR_CALCULATION_DECIMALS)
-            );
+            unscaledColl =
+                unscaledColl *
+                10 ** (_collDecimals - LiquityMath.CR_CALCULATION_DECIMALS);
         } else if (_collDecimals < LiquityMath.CR_CALCULATION_DECIMALS) {
-            unscaledColl = unscaledColl.div(
-                10 ** (LiquityMath.CR_CALCULATION_DECIMALS - _collDecimals)
-            );
+            unscaledColl =
+                unscaledColl /
+                10 ** (LiquityMath.CR_CALCULATION_DECIMALS - _collDecimals);
         }
     }
 }

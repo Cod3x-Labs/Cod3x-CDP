@@ -5,7 +5,6 @@ pragma experimental ABIEncoderV2;
 
 import "../Interfaces/ITellorCaller.sol";
 import "./ITellor.sol";
-import "./SafeMath.sol";
 import "./UsingTellor.sol";
 /*
  * This contract has a single external function that calls Tellor: getTellorCurrentValue().
@@ -18,8 +17,6 @@ import "./UsingTellor.sol";
  *
  */
 contract TellorCaller is UsingTellor, ITellorCaller {
-    using SafeMath for uint256;
-
     mapping(bytes32 => uint256) public lastStoredTimestamps;
     mapping(bytes32 => uint256) public lastStoredPrices;
 

@@ -4,7 +4,6 @@ pragma solidity ^0.8.23;
 import "./Interfaces/ISortedTroves.sol";
 import "./Interfaces/ITroveManager.sol";
 import "./Interfaces/IBorrowerOperations.sol";
-import "./Dependencies/SafeMath.sol";
 import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
 
@@ -42,8 +41,6 @@ import "./Dependencies/CheckContract.sol";
  * - Public functions with parameters have been made internal to save gas, and given an external wrapper function for external access
  */
 contract SortedTroves is Ownable, CheckContract, ISortedTroves {
-    using SafeMath for uint256;
-
     string public constant NAME = "SortedTroves";
 
     event TroveManagerAddressChanged(address _troveManagerAddress);
@@ -164,7 +161,7 @@ contract SortedTroves is Ownable, CheckContract, ISortedTroves {
             data[_collateral].nodes[nextId].prevId = _id;
         }
 
-        data[_collateral].size = data[_collateral].size.add(1);
+        data[_collateral].size = data[_collateral].size + 1;
         emit NodeAdded(_collateral, _id, _NICR);
         return (data[_collateral].nodes[_id].prevId, data[_collateral].nodes[_id].nextId);
     }
@@ -216,7 +213,7 @@ contract SortedTroves is Ownable, CheckContract, ISortedTroves {
         }
 
         delete data[_collateral].nodes[_id];
-        data[_collateral].size = data[_collateral].size.sub(1);
+        data[_collateral].size = data[_collateral].size - 1;
         emit NodeRemoved(_collateral, _id);
     }
 

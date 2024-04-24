@@ -14,8 +14,6 @@ import "./Dependencies/CheckContract.sol";
 import "./Dependencies/IERC20.sol";
 
 contract TroveManager is LiquityBase, CheckContract, ITroveManager {
-    using SafeMath for uint256;
-
     address public owner;
 
     // --- Connected contract declarations ---
@@ -457,8 +455,8 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
         _requireCallerIsRedemptionHelper();
         uint256 oldDebt = Troves[_borrower][_collateral].debt;
         uint256 oldColl = Troves[_borrower][_collateral].coll;
-        rewarderManager.onDebtDecrease(_borrower, _collateral, oldDebt.sub(_newDebt));
-        rewarderManager.onCollDecrease(_borrower, _collateral, oldColl.sub(_newColl));
+        rewarderManager.onDebtDecrease(_borrower, _collateral, oldDebt - _newDebt);
+        rewarderManager.onCollDecrease(_borrower, _collateral, oldColl - _newColl);
         Troves[_borrower][_collateral].debt = _newDebt;
         Troves[_borrower][_collateral].coll = _newColl;
         _updateStakeAndTotalStakes(_borrower, _collateral);
@@ -570,8 +568,8 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
         uint pendingCollateralReward = getPendingCollateralReward(_borrower, _collateral);
         uint pendingLUSDDebtReward = getPendingLUSDDebtReward(_borrower, _collateral);
 
-        uint currentCollateral = Troves[_borrower][_collateral].coll.add(pendingCollateralReward);
-        uint currentLUSDDebt = Troves[_borrower][_collateral].debt.add(pendingLUSDDebtReward);
+        uint currentCollateral = Troves[_borrower][_collateral].coll + pendingCollateralReward;
+        uint currentLUSDDebt = Troves[_borrower][_collateral].debt + pendingLUSDDebtReward;
 
         return (currentCollateral, currentLUSDDebt);
     }
@@ -600,12 +598,12 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
             rewarderManager.onDebtIncrease(_borrower, _collateral, pendingLUSDDebtReward);
 
             // Apply pending rewards to trove's state
-            Troves[_borrower][_collateral].coll = Troves[_borrower][_collateral].coll.add(
-                pendingCollateralReward
-            );
-            Troves[_borrower][_collateral].debt = Troves[_borrower][_collateral].debt.add(
-                pendingLUSDDebtReward
-            );
+            Troves[_borrower][_collateral].coll =
+                Troves[_borrower][_collateral].coll +
+                pendingCollateralReward;
+            Troves[_borrower][_collateral].debt =
+                Troves[_borrower][_collateral].debt +
+                pendingLUSDDebtReward;
 
             _updateTroveRewardSnapshots(_borrower, _collateral);
 
@@ -647,7 +645,7 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
         address _collateral
     ) public view override returns (uint) {
         uint snapshotCollateral = rewardSnapshots[_borrower][_collateral].collAmount;
-        uint rewardPerUnitStaked = L_Collateral[_collateral].sub(snapshotCollateral);
+        uint rewardPerUnitStaked = L_Collateral[_collateral] - snapshotCollateral;
 
         if (
             rewardPerUnitStaked == 0 || Troves[_borrower][_collateral].status != TroveStatus.active
@@ -658,7 +656,7 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
         uint stake = Troves[_borrower][_collateral].stake;
 
         uint256 collDecimals = collateralConfig.getCollateralDecimals(_collateral);
-        uint pendingCollateralReward = stake.mul(rewardPerUnitStaked).div(10 ** collDecimals);
+        uint pendingCollateralReward = (stake * rewardPerUnitStaked) / 10 ** collDecimals;
 
         return pendingCollateralReward;
     }
@@ -669,7 +667,7 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
         address _collateral
     ) public view override returns (uint) {
         uint snapshotLUSDDebt = rewardSnapshots[_borrower][_collateral].LUSDDebt;
-        uint rewardPerUnitStaked = L_LUSDDebt[_collateral].sub(snapshotLUSDDebt);
+        uint rewardPerUnitStaked = L_LUSDDebt[_collateral] - snapshotLUSDDebt;
 
         if (
             rewardPerUnitStaked == 0 || Troves[_borrower][_collateral].status != TroveStatus.active
@@ -680,7 +678,7 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
         uint stake = Troves[_borrower][_collateral].stake;
 
         uint256 collDecimals = collateralConfig.getCollateralDecimals(_collateral);
-        uint pendingLUSDDebtReward = stake.mul(rewardPerUnitStaked).div(10 ** collDecimals);
+        uint pendingLUSDDebtReward = (stake * rewardPerUnitStaked) / 10 ** collDecimals;
 
         return pendingLUSDDebtReward;
     }
@@ -717,8 +715,8 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
         pendingLUSDDebtReward = getPendingLUSDDebtReward(_borrower, _collateral);
         pendingCollateralReward = getPendingCollateralReward(_borrower, _collateral);
 
-        debt = debt.add(pendingLUSDDebtReward);
-        coll = coll.add(pendingCollateralReward);
+        debt = debt + pendingLUSDDebtReward;
+        coll = coll + pendingCollateralReward;
     }
 
     function removeStake(address _borrower, address _collateral) external override {
@@ -729,7 +727,7 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
     // Remove borrower's stake from the totalStakes sum, and set their stake to 0
     function _removeStake(address _borrower, address _collateral) internal {
         uint stake = Troves[_borrower][_collateral].stake;
-        totalStakes[_collateral] = totalStakes[_collateral].sub(stake);
+        totalStakes[_collateral] = totalStakes[_collateral] - stake;
         Troves[_borrower][_collateral].stake = 0;
     }
 
@@ -750,7 +748,7 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
         uint oldStake = Troves[_borrower][_collateral].stake;
         Troves[_borrower][_collateral].stake = newStake;
 
-        totalStakes[_collateral] = totalStakes[_collateral].sub(oldStake).add(newStake);
+        totalStakes[_collateral] = totalStakes[_collateral] - oldStake + newStake;
         emit TotalStakesUpdated(_collateral, totalStakes[_collateral]);
 
         return newStake;
@@ -769,9 +767,9 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
              * rewards would’ve been emptied and totalCollateralSnapshot would be zero too.
              */
             assert(totalStakesSnapshot[_collateral] > 0);
-            stake = _coll.mul(totalStakesSnapshot[_collateral]).div(
-                totalCollateralSnapshot[_collateral]
-            );
+            stake =
+                (_coll * totalStakesSnapshot[_collateral]) /
+                totalCollateralSnapshot[_collateral];
         }
         return stake;
     }
@@ -818,27 +816,29 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
          * 4) Store these errors for use in the next correction when this function is called.
          * 5) Note: static analysis tools complain about this "division before multiplication", however, it is intended.
          */
-        uint collateralNumerator = _coll.mul(10 ** _collDecimals).add(
-            lastCollateralError_Redistribution[_collateral]
-        );
-        uint LUSDDebtNumerator = _debt.mul(10 ** _collDecimals).add(
-            lastLUSDDebtError_Redistribution[_collateral]
-        );
+        uint collateralNumerator = _coll *
+            10 ** _collDecimals +
+            lastCollateralError_Redistribution[_collateral];
+        uint LUSDDebtNumerator = _debt *
+            10 ** _collDecimals +
+            lastLUSDDebtError_Redistribution[_collateral];
 
         // Get the per-unit-staked terms
-        uint collateralRewardPerUnitStaked = collateralNumerator.div(totalStakes[_collateral]);
-        uint LUSDDebtRewardPerUnitStaked = LUSDDebtNumerator.div(totalStakes[_collateral]);
+        uint collateralRewardPerUnitStaked = collateralNumerator / totalStakes[_collateral];
+        uint LUSDDebtRewardPerUnitStaked = LUSDDebtNumerator / totalStakes[_collateral];
 
-        lastCollateralError_Redistribution[_collateral] = collateralNumerator.sub(
-            collateralRewardPerUnitStaked.mul(totalStakes[_collateral])
-        );
-        lastLUSDDebtError_Redistribution[_collateral] = LUSDDebtNumerator.sub(
-            LUSDDebtRewardPerUnitStaked.mul(totalStakes[_collateral])
-        );
+        lastCollateralError_Redistribution[_collateral] =
+            collateralNumerator -
+            collateralRewardPerUnitStaked *
+            totalStakes[_collateral];
+        lastLUSDDebtError_Redistribution[_collateral] =
+            LUSDDebtNumerator -
+            LUSDDebtRewardPerUnitStaked *
+            totalStakes[_collateral];
 
         // Add per-unit-staked terms to the running totals
-        L_Collateral[_collateral] = L_Collateral[_collateral].add(collateralRewardPerUnitStaked);
-        L_LUSDDebt[_collateral] = L_LUSDDebt[_collateral].add(LUSDDebtRewardPerUnitStaked);
+        L_Collateral[_collateral] = L_Collateral[_collateral] + collateralRewardPerUnitStaked;
+        L_LUSDDebt[_collateral] = L_LUSDDebt[_collateral] + LUSDDebtRewardPerUnitStaked;
 
         emit LTermsUpdated(_collateral, L_Collateral[_collateral], L_LUSDDebt[_collateral]);
 
@@ -904,7 +904,7 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
 
         uint activeColl = _activePool.getCollateral(_collateral);
         uint liquidatedColl = defaultPool.getCollateral(_collateral);
-        totalCollateralSnapshot[_collateral] = activeColl.sub(_collRemainder).add(liquidatedColl);
+        totalCollateralSnapshot[_collateral] = activeColl - _collRemainder + liquidatedColl;
 
         emit SystemSnapshotsUpdated(
             _collateral,
@@ -933,7 +933,7 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
         TroveOwners[_collateral].push(_borrower);
 
         // Record the index of the new Troveowner on their Trove struct
-        index = uint128(TroveOwners[_collateral].length.sub(1));
+        index = uint128(TroveOwners[_collateral].length - 1);
         Troves[_borrower][_collateral].arrayIndex = index;
 
         return index;
@@ -954,7 +954,7 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
 
         uint128 index = Troves[_borrower][_collateral].arrayIndex;
         uint length = TroveOwnersArrayLength;
-        uint idxLast = length.sub(1);
+        uint idxLast = length - 1;
 
         assert(index <= idxLast);
 
@@ -1002,12 +1002,12 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
 
         /* Convert the drawn collateral back to LUSD at face value rate (1 LUSD:1 USD), in order to get
          * the fraction of total supply that was redeemed at face value. */
-        uint redeemedLUSDFraction = LiquityMath
-            ._getScaledCollAmount(_collateralDrawn, _collDecimals)
-            .mul(_price)
-            .div(_collDebt);
+        uint redeemedLUSDFraction = (LiquityMath._getScaledCollAmount(
+            _collateralDrawn,
+            _collDecimals
+        ) * _price) / _collDebt;
 
-        uint newBaseRate = decayedBaseRate.add(redeemedLUSDFraction.div(BETA));
+        uint newBaseRate = decayedBaseRate + redeemedLUSDFraction / BETA;
         newBaseRate = LiquityMath._min(newBaseRate, DECIMAL_PRECISION); // cap baseRate at a maximum of 100%
         //assert(newBaseRate <= DECIMAL_PRECISION); // This is already enforced in the line above
         assert(newBaseRate > 0); // Base rate is always non-zero after redemption
@@ -1032,7 +1032,7 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
     function _calcRedemptionRate(uint _baseRate) internal pure returns (uint) {
         return
             LiquityMath._min(
-                REDEMPTION_FEE_FLOOR.add(_baseRate),
+                REDEMPTION_FEE_FLOOR + _baseRate,
                 DECIMAL_PRECISION // cap at a maximum of 100%
             );
     }
@@ -1049,7 +1049,7 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
         uint _redemptionRate,
         uint _collateralDrawn
     ) internal pure returns (uint) {
-        uint redemptionFee = _redemptionRate.mul(_collateralDrawn).div(DECIMAL_PRECISION);
+        uint redemptionFee = (_redemptionRate * _collateralDrawn) / DECIMAL_PRECISION;
         require(redemptionFee < _collateralDrawn);
         return redemptionFee;
     }
@@ -1065,7 +1065,7 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
     }
 
     function _calcBorrowingRate(uint _baseRate) internal pure returns (uint) {
-        return LiquityMath._min(BORROWING_FEE_FLOOR.add(_baseRate), MAX_BORROWING_FEE);
+        return LiquityMath._min(BORROWING_FEE_FLOOR + _baseRate, MAX_BORROWING_FEE);
     }
 
     function getBorrowingFee(uint _LUSDDebt) external view override returns (uint) {
@@ -1077,7 +1077,7 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
     }
 
     function _calcBorrowingFee(uint _borrowingRate, uint _LUSDDebt) internal pure returns (uint) {
-        return _borrowingRate.mul(_LUSDDebt).div(DECIMAL_PRECISION);
+        return (_borrowingRate * _LUSDDebt) / DECIMAL_PRECISION;
     }
 
     // Updates the baseRate state variable based on time elapsed since the last redemption or LUSD borrowing operation.
@@ -1097,7 +1097,7 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
 
     // Update the last fee operation time only if time passed >= decay interval. This prevents base rate griefing.
     function _updateLastFeeOpTime() internal {
-        uint timePassed = block.timestamp.sub(lastFeeOperationTime);
+        uint timePassed = block.timestamp - lastFeeOperationTime;
 
         if (timePassed >= SECONDS_IN_ONE_MINUTE) {
             lastFeeOperationTime = block.timestamp;
@@ -1109,11 +1109,11 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
         uint minutesPassed = _minutesPassedSinceLastFeeOp();
         uint decayFactor = LiquityMath._decPow(MINUTE_DECAY_FACTOR, minutesPassed);
 
-        return baseRate.mul(decayFactor).div(DECIMAL_PRECISION);
+        return (baseRate * decayFactor) / DECIMAL_PRECISION;
     }
 
     function _minutesPassedSinceLastFeeOp() internal view returns (uint) {
-        return (block.timestamp.sub(lastFeeOperationTime)).div(SECONDS_IN_ONE_MINUTE);
+        return (block.timestamp - lastFeeOperationTime) / SECONDS_IN_ONE_MINUTE;
     }
 
     // --- 'require' wrapper functions ---
@@ -1225,7 +1225,7 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
 
         rewarderManager.onCollIncrease(_borrower, _collateral, _collIncrease);
 
-        uint newColl = Troves[_borrower][_collateral].coll.add(_collIncrease);
+        uint newColl = Troves[_borrower][_collateral].coll + _collIncrease;
         Troves[_borrower][_collateral].coll = newColl;
         return newColl;
     }
@@ -1237,7 +1237,7 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
     ) external override returns (uint) {
         _requireCallerIsBorrowerOperations();
         rewarderManager.onCollDecrease(_borrower, _collateral, _collDecrease);
-        uint newColl = Troves[_borrower][_collateral].coll.sub(_collDecrease);
+        uint newColl = Troves[_borrower][_collateral].coll - _collDecrease;
         Troves[_borrower][_collateral].coll = newColl;
         return newColl;
     }
@@ -1250,11 +1250,11 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
         _requireCallerIsBorrowerOperations();
         require(
             collateralConfig.getCollateralDebtLimit(_collateral) >=
-                getEntireSystemDebt(_collateral).add(_debtIncrease),
+                getEntireSystemDebt(_collateral) + _debtIncrease,
             "TroveManager: Debt increase exceeds limit"
         );
         rewarderManager.onDebtIncrease(_borrower, _collateral, _debtIncrease);
-        uint newDebt = Troves[_borrower][_collateral].debt.add(_debtIncrease);
+        uint newDebt = Troves[_borrower][_collateral].debt + _debtIncrease;
         Troves[_borrower][_collateral].debt = newDebt;
         return newDebt;
     }
@@ -1266,7 +1266,7 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
     ) external override returns (uint) {
         _requireCallerIsBorrowerOperations();
         rewarderManager.onDebtDecrease(_borrower, _collateral, _debtDecrease);
-        uint newDebt = Troves[_borrower][_collateral].debt.sub(_debtDecrease);
+        uint newDebt = Troves[_borrower][_collateral].debt - _debtDecrease;
         Troves[_borrower][_collateral].debt = newDebt;
         return newDebt;
     }

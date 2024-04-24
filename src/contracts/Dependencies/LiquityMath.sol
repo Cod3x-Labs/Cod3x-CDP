@@ -2,11 +2,7 @@
 
 pragma solidity ^0.8.23;
 
-import "./SafeMath.sol";
-
 library LiquityMath {
-    using SafeMath for uint;
-
     // Collateral decimals used for calculating collateralization ratios (CRs).
     // If collateral has > 18 decimals, its value is scaled down for CR calculation purposes.
     // If collateral has < 18 decimals, its value is scaled up for CR calculation purposes.
@@ -41,9 +37,9 @@ library LiquityMath {
      * Used only inside the exponentiation, _decPow().
      */
     function decMul(uint x, uint y) internal pure returns (uint decProd) {
-        uint prod_xy = x.mul(y);
+        uint prod_xy = x * y;
 
-        decProd = prod_xy.add(DECIMAL_PRECISION / 2).div(DECIMAL_PRECISION);
+        decProd = (prod_xy + DECIMAL_PRECISION / 2) / DECIMAL_PRECISION;
     }
 
     /*
@@ -81,12 +77,12 @@ library LiquityMath {
         while (n > 1) {
             if (n % 2 == 0) {
                 x = decMul(x, x);
-                n = n.div(2);
+                n = n / 2;
             } else {
                 // if (n % 2 != 0)
                 y = decMul(x, y);
                 x = decMul(x, x);
-                n = (n.sub(1)).div(2);
+                n = (n - 1) / 2;
             }
         }
 
@@ -94,7 +90,7 @@ library LiquityMath {
     }
 
     function _getAbsoluteDifference(uint _a, uint _b) internal pure returns (uint) {
-        return (_a >= _b) ? _a.sub(_b) : _b.sub(_a);
+        return (_a >= _b) ? _a - _b : _b - _a;
     }
 
     function _computeNominalCR(
@@ -104,7 +100,7 @@ library LiquityMath {
     ) internal pure returns (uint) {
         if (_debt > 0) {
             uint256 scaledColl = _getScaledCollAmount(_coll, _collDecimals);
-            return scaledColl.mul(NICR_PRECISION).div(_debt);
+            return (scaledColl * NICR_PRECISION) / _debt;
         }
         // Return the maximal value for uint256 if the Trove has a debt of 0. Represents "infinite" CR.
         else {
@@ -121,7 +117,7 @@ library LiquityMath {
     ) internal pure returns (uint) {
         if (_debt > 0) {
             uint256 scaledColl = _getScaledCollAmount(_coll, _collDecimals);
-            uint newCollRatio = scaledColl.mul(_price).div(_debt);
+            uint newCollRatio = (scaledColl * _price) / _debt;
 
             return newCollRatio;
         }
@@ -138,9 +134,9 @@ library LiquityMath {
     ) internal pure returns (uint256 scaledColl) {
         scaledColl = _collAmount;
         if (_collDecimals > CR_CALCULATION_DECIMALS) {
-            scaledColl = scaledColl.div(10 ** (_collDecimals - CR_CALCULATION_DECIMALS));
+            scaledColl = scaledColl / (10 ** (_collDecimals - CR_CALCULATION_DECIMALS));
         } else if (_collDecimals < CR_CALCULATION_DECIMALS) {
-            scaledColl = scaledColl.mul(10 ** (CR_CALCULATION_DECIMALS - _collDecimals));
+            scaledColl = scaledColl * (10 ** (CR_CALCULATION_DECIMALS - _collDecimals));
         }
     }
 }

@@ -5,7 +5,6 @@ pragma solidity ^0.8.23;
 import "./Interfaces/IActivePool.sol";
 import "./Interfaces/ICollateralConfig.sol";
 import "./Interfaces/IDefaultPool.sol";
-import "./Dependencies/SafeMath.sol";
 import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
 import "./Dependencies/SafeERC20.sol";
@@ -18,7 +17,6 @@ import "./Dependencies/SafeERC20.sol";
  * from the Default Pool to the Active Pool.
  */
 contract DefaultPool is Ownable, CheckContract, IDefaultPool {
-    using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
     string public constant NAME = "DefaultPool";
@@ -76,7 +74,7 @@ contract DefaultPool is Ownable, CheckContract, IDefaultPool {
         _requireValidCollateralAddress(_collateral);
         _requireCallerIsTroveManager();
         address activePool = activePoolAddress; // cache to save an SLOAD
-        collAmount[_collateral] = collAmount[_collateral].sub(_amount);
+        collAmount[_collateral] = collAmount[_collateral] - _amount;
         emit DefaultPoolCollateralBalanceUpdated(_collateral, collAmount[_collateral]);
         emit CollateralSent(_collateral, activePool, _amount);
 
@@ -90,21 +88,21 @@ contract DefaultPool is Ownable, CheckContract, IDefaultPool {
     function increaseLUSDDebt(address _collateral, uint _amount) external override {
         _requireValidCollateralAddress(_collateral);
         _requireCallerIsTroveManager();
-        LUSDDebt[_collateral] = LUSDDebt[_collateral].add(_amount);
+        LUSDDebt[_collateral] = LUSDDebt[_collateral] + _amount;
         emit DefaultPoolLUSDDebtUpdated(_collateral, LUSDDebt[_collateral]);
     }
 
     function decreaseLUSDDebt(address _collateral, uint _amount) external override {
         _requireValidCollateralAddress(_collateral);
         _requireCallerIsTroveManager();
-        LUSDDebt[_collateral] = LUSDDebt[_collateral].sub(_amount);
+        LUSDDebt[_collateral] = LUSDDebt[_collateral] - _amount;
         emit DefaultPoolLUSDDebtUpdated(_collateral, LUSDDebt[_collateral]);
     }
 
     function pullCollateralFromActivePool(address _collateral, uint _amount) external override {
         _requireValidCollateralAddress(_collateral);
         _requireCallerIsActivePool();
-        collAmount[_collateral] = collAmount[_collateral].add(_amount);
+        collAmount[_collateral] = collAmount[_collateral] + _amount;
         emit DefaultPoolCollateralBalanceUpdated(_collateral, collAmount[_collateral]);
 
         IERC20(_collateral).safeTransferFrom(activePoolAddress, address(this), _amount);

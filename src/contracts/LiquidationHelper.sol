@@ -12,8 +12,6 @@ import "./Dependencies/LiquityBase.sol";
 import "./Dependencies/Ownable.sol";
 
 contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
-    using SafeMath for uint256;
-
     ITroveManager public troveManager;
     ICollateralConfig public collateralConfig;
     IStabilityPool public stabilityPool;
@@ -148,9 +146,8 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
             singleLiquidation.entireTroveColl
         );
         singleLiquidation.LUSDGasCompensation = LUSD_GAS_COMPENSATION;
-        uint collToLiquidate = singleLiquidation.entireTroveColl.sub(
-            singleLiquidation.collGasCompensation
-        );
+        uint collToLiquidate = singleLiquidation.entireTroveColl -
+            singleLiquidation.collGasCompensation;
 
         (
             singleLiquidation.debtToOffset,
@@ -201,9 +198,9 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
             singleLiquidation.entireTroveColl
         );
         singleLiquidation.LUSDGasCompensation = LUSD_GAS_COMPENSATION;
-        vars.collToLiquidate = singleLiquidation.entireTroveColl.sub(
-            singleLiquidation.collGasCompensation
-        );
+        vars.collToLiquidate =
+            singleLiquidation.entireTroveColl -
+            singleLiquidation.collGasCompensation;
 
         // If ICR <= 100%, purely redistribute the Trove across all active Troves
         if (_ICR <= _100pct) {
@@ -342,9 +339,9 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
              *
              */
             debtToOffset = LiquityMath._min(_debt, _LUSDInStabPool);
-            collToSendToSP = _coll.mul(debtToOffset).div(_debt);
-            debtToRedistribute = _debt.sub(debtToOffset);
-            collToRedistribute = _coll.sub(collToSendToSP);
+            collToSendToSP = (_coll * debtToOffset) / _debt;
+            debtToRedistribute = _debt - debtToOffset;
+            collToRedistribute = _coll - collToSendToSP;
         } else {
             debtToOffset = 0;
             collToSendToSP = 0;
@@ -365,25 +362,23 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
     ) internal pure returns (LiquidationValues memory singleLiquidation) {
         singleLiquidation.entireTroveDebt = _entireTroveDebt;
         singleLiquidation.entireTroveColl = _entireTroveColl;
-        uint cappedCollPortion = _entireTroveDebt.mul(_MCR).div(_price);
+        uint cappedCollPortion = (_entireTroveDebt * _MCR) / _price;
         if (_collDecimals < LiquityMath.CR_CALCULATION_DECIMALS) {
-            cappedCollPortion = cappedCollPortion.div(
-                10 ** (LiquityMath.CR_CALCULATION_DECIMALS - _collDecimals)
-            );
+            cappedCollPortion =
+                cappedCollPortion /
+                (10 ** (LiquityMath.CR_CALCULATION_DECIMALS - _collDecimals));
         } else if (_collDecimals > LiquityMath.CR_CALCULATION_DECIMALS) {
-            cappedCollPortion = cappedCollPortion.mul(
-                10 ** (_collDecimals - LiquityMath.CR_CALCULATION_DECIMALS)
-            );
+            cappedCollPortion =
+                cappedCollPortion *
+                (10 ** (_collDecimals - LiquityMath.CR_CALCULATION_DECIMALS));
         }
 
         singleLiquidation.collGasCompensation = _getCollGasCompensation(cappedCollPortion);
         singleLiquidation.LUSDGasCompensation = LUSD_GAS_COMPENSATION;
 
         singleLiquidation.debtToOffset = _entireTroveDebt;
-        singleLiquidation.collToSendToSP = cappedCollPortion.sub(
-            singleLiquidation.collGasCompensation
-        );
-        singleLiquidation.collSurplus = _entireTroveColl.sub(cappedCollPortion);
+        singleLiquidation.collToSendToSP = cappedCollPortion - singleLiquidation.collGasCompensation;
+        singleLiquidation.collSurplus = _entireTroveColl - cappedCollPortion;
         singleLiquidation.debtToRedistribute = 0;
         singleLiquidation.collToRedistribute = 0;
     }
@@ -473,9 +468,10 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
         );
 
         vars.liquidatedDebt = totals.totalDebtInSequence;
-        vars.liquidatedColl = totals.totalCollInSequence.sub(totals.totalCollGasCompensation).sub(
-            totals.totalCollSurplus
-        );
+        vars.liquidatedColl =
+            totals.totalCollInSequence -
+            totals.totalCollGasCompensation -
+            totals.totalCollSurplus;
         troveManager.emitLiquidationEvent(
             _collateral,
             vars.liquidatedDebt,
@@ -552,15 +548,15 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
                 );
 
                 // Update aggregate trackers
-                vars.remainingLUSDInStabPool = vars.remainingLUSDInStabPool.sub(
-                    singleLiquidation.debtToOffset
-                );
-                vars.entireSystemDebt = vars.entireSystemDebt.sub(singleLiquidation.debtToOffset);
-                vars.entireSystemColl = vars
-                    .entireSystemColl
-                    .sub(singleLiquidation.collToSendToSP)
-                    .sub(singleLiquidation.collGasCompensation)
-                    .sub(singleLiquidation.collSurplus);
+                vars.remainingLUSDInStabPool =
+                    vars.remainingLUSDInStabPool -
+                    singleLiquidation.debtToOffset;
+                vars.entireSystemDebt = vars.entireSystemDebt - singleLiquidation.debtToOffset;
+                vars.entireSystemColl =
+                    vars.entireSystemColl -
+                    singleLiquidation.collToSendToSP -
+                    singleLiquidation.collGasCompensation -
+                    singleLiquidation.collSurplus;
 
                 // Add liquidation values to their respective running totals
                 totals = _addLiquidationValuesToTotals(totals, singleLiquidation);
@@ -581,9 +577,9 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
                     vars.remainingLUSDInStabPool
                 );
 
-                vars.remainingLUSDInStabPool = vars.remainingLUSDInStabPool.sub(
-                    singleLiquidation.debtToOffset
-                );
+                vars.remainingLUSDInStabPool =
+                    vars.remainingLUSDInStabPool -
+                    singleLiquidation.debtToOffset;
 
                 // Add liquidation values to their respective running totals
                 totals = _addLiquidationValuesToTotals(totals, singleLiquidation);
@@ -621,9 +617,9 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
                     vars.remainingLUSDInStabPool
                 );
 
-                vars.remainingLUSDInStabPool = vars.remainingLUSDInStabPool.sub(
-                    singleLiquidation.debtToOffset
-                );
+                vars.remainingLUSDInStabPool =
+                    vars.remainingLUSDInStabPool -
+                    singleLiquidation.debtToOffset;
 
                 // Add liquidation values to their respective running totals
                 totals = _addLiquidationValuesToTotals(totals, singleLiquidation);
@@ -719,9 +715,10 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
         );
 
         vars.liquidatedDebt = totals.totalDebtInSequence;
-        vars.liquidatedColl = totals.totalCollInSequence.sub(totals.totalCollGasCompensation).sub(
-            totals.totalCollSurplus
-        );
+        vars.liquidatedColl =
+            totals.totalCollInSequence -
+            totals.totalCollGasCompensation -
+            totals.totalCollSurplus;
         troveManager.emitLiquidationEvent(
             _collateral,
             vars.liquidatedDebt,
@@ -797,15 +794,15 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
                 );
 
                 // Update aggregate trackers
-                vars.remainingLUSDInStabPool = vars.remainingLUSDInStabPool.sub(
-                    singleLiquidation.debtToOffset
-                );
-                vars.entireSystemDebt = vars.entireSystemDebt.sub(singleLiquidation.debtToOffset);
-                vars.entireSystemColl = vars
-                    .entireSystemColl
-                    .sub(singleLiquidation.collToSendToSP)
-                    .sub(singleLiquidation.collGasCompensation)
-                    .sub(singleLiquidation.collSurplus);
+                vars.remainingLUSDInStabPool =
+                    vars.remainingLUSDInStabPool -
+                    singleLiquidation.debtToOffset;
+                vars.entireSystemDebt = vars.entireSystemDebt - singleLiquidation.debtToOffset;
+                vars.entireSystemColl =
+                    vars.entireSystemColl -
+                    singleLiquidation.collToSendToSP -
+                    singleLiquidation.collGasCompensation -
+                    singleLiquidation.collSurplus;
 
                 // Add liquidation values to their respective running totals
                 totals = _addLiquidationValuesToTotals(totals, singleLiquidation);
@@ -825,9 +822,9 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
                     vars.user,
                     vars.remainingLUSDInStabPool
                 );
-                vars.remainingLUSDInStabPool = vars.remainingLUSDInStabPool.sub(
-                    singleLiquidation.debtToOffset
-                );
+                vars.remainingLUSDInStabPool =
+                    vars.remainingLUSDInStabPool -
+                    singleLiquidation.debtToOffset;
 
                 // Add liquidation values to their respective running totals
                 totals = _addLiquidationValuesToTotals(totals, singleLiquidation);
@@ -861,9 +858,9 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
                     vars.user,
                     vars.remainingLUSDInStabPool
                 );
-                vars.remainingLUSDInStabPool = vars.remainingLUSDInStabPool.sub(
-                    singleLiquidation.debtToOffset
-                );
+                vars.remainingLUSDInStabPool =
+                    vars.remainingLUSDInStabPool -
+                    singleLiquidation.debtToOffset;
 
                 // Add liquidation values to their respective running totals
                 totals = _addLiquidationValuesToTotals(totals, singleLiquidation);
@@ -878,31 +875,37 @@ contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
         LiquidationValues memory singleLiquidation
     ) internal pure returns (LiquidationTotals memory newTotals) {
         // Tally all the values with their respective running totals
-        newTotals.totalCollGasCompensation = oldTotals.totalCollGasCompensation.add(
-            singleLiquidation.collGasCompensation
-        );
-        newTotals.totalLUSDGasCompensation = oldTotals.totalLUSDGasCompensation.add(
-            singleLiquidation.LUSDGasCompensation
-        );
-        newTotals.totalDebtInSequence = oldTotals.totalDebtInSequence.add(
-            singleLiquidation.entireTroveDebt
-        );
-        newTotals.totalCollInSequence = oldTotals.totalCollInSequence.add(
-            singleLiquidation.entireTroveColl
-        );
-        newTotals.totalDebtToOffset = oldTotals.totalDebtToOffset.add(
-            singleLiquidation.debtToOffset
-        );
-        newTotals.totalCollToSendToSP = oldTotals.totalCollToSendToSP.add(
-            singleLiquidation.collToSendToSP
-        );
-        newTotals.totalDebtToRedistribute = oldTotals.totalDebtToRedistribute.add(
-            singleLiquidation.debtToRedistribute
-        );
-        newTotals.totalCollToRedistribute = oldTotals.totalCollToRedistribute.add(
-            singleLiquidation.collToRedistribute
-        );
-        newTotals.totalCollSurplus = oldTotals.totalCollSurplus.add(singleLiquidation.collSurplus);
+        newTotals.totalCollGasCompensation =
+            oldTotals.totalCollGasCompensation +
+            singleLiquidation.collGasCompensation;
+
+        newTotals.totalLUSDGasCompensation =
+            oldTotals.totalLUSDGasCompensation +
+            singleLiquidation.LUSDGasCompensation;
+
+        newTotals.totalDebtInSequence =
+            oldTotals.totalDebtInSequence +
+            singleLiquidation.entireTroveDebt;
+
+        newTotals.totalCollInSequence =
+            oldTotals.totalCollInSequence +
+            singleLiquidation.entireTroveColl;
+
+        newTotals.totalDebtToOffset = oldTotals.totalDebtToOffset + singleLiquidation.debtToOffset;
+
+        newTotals.totalCollToSendToSP =
+            oldTotals.totalCollToSendToSP +
+            singleLiquidation.collToSendToSP;
+
+        newTotals.totalDebtToRedistribute =
+            oldTotals.totalDebtToRedistribute +
+            singleLiquidation.debtToRedistribute;
+
+        newTotals.totalCollToRedistribute =
+            oldTotals.totalCollToRedistribute +
+            singleLiquidation.collToRedistribute;
+
+        newTotals.totalCollSurplus = oldTotals.totalCollSurplus + singleLiquidation.collSurplus;
 
         return newTotals;
     }

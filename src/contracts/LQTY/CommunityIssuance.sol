@@ -8,11 +8,9 @@ import "../Dependencies/BaseMath.sol";
 import "../Dependencies/LiquityMath.sol";
 import "../Dependencies/Ownable.sol";
 import "../Dependencies/CheckContract.sol";
-import "../Dependencies/SafeMath.sol";
 
 contract CommunityIssuance is ICommunityIssuance, Ownable, CheckContract, BaseMath {
     using SafeERC20 for IERC20;
-    using SafeMath for uint;
 
     // --- Data ---
 
@@ -75,10 +73,10 @@ contract CommunityIssuance is ICommunityIssuance, Ownable, CheckContract, BaseMa
             uint256 endTimestamp = block.timestamp > _lastDistributionTime
                 ? _lastDistributionTime
                 : block.timestamp;
-            uint256 timePassed = endTimestamp.sub(_lastIssuanceTimestamp);
+            uint256 timePassed = endTimestamp - _lastIssuanceTimestamp;
             issuance = getRewardAmount(timePassed);
 
-            _totalOATHIssued = _totalOATHIssued.add(issuance);
+            _totalOATHIssued = _totalOATHIssued + issuance;
             totalOATHIssued[_oathToken] = _totalOATHIssued;
             emit TotalOATHIssuedUpdated(address(_oathToken), _totalOATHIssued);
         }
@@ -98,14 +96,14 @@ contract CommunityIssuance is ICommunityIssuance, Ownable, CheckContract, BaseMa
         uint256 _lastDistributionTime = lastDistributionTime;
         uint256 _amount = amount;
         if (_lastIssuanceTimestamp < _lastDistributionTime) {
-            uint256 timeLeft = _lastDistributionTime.sub(_lastIssuanceTimestamp);
+            uint256 timeLeft = _lastDistributionTime - _lastIssuanceTimestamp;
             uint256 notIssued = getRewardAmount(timeLeft);
-            amount = amount.add(notIssued);
+            amount = amount + notIssued;
         }
 
         uint256 _distributionPeriod = distributionPeriod;
-        _rewardPerSecond = amount.mul(DECIMAL_PRECISION).div(_distributionPeriod);
-        lastDistributionTime = block.timestamp.add(_distributionPeriod);
+        _rewardPerSecond = (amount * DECIMAL_PRECISION) / _distributionPeriod;
+        lastDistributionTime = block.timestamp + _distributionPeriod;
         lastIssuanceTimestamp = block.timestamp;
 
         oathToken.safeTransferFrom(msg.sender, address(this), _amount);
@@ -124,11 +122,11 @@ contract CommunityIssuance is ICommunityIssuance, Ownable, CheckContract, BaseMa
     }
 
     function rewardPerSecond() public view returns (uint) {
-        return _rewardPerSecond.div(DECIMAL_PRECISION);
+        return _rewardPerSecond / DECIMAL_PRECISION;
     }
 
     function getRewardAmount(uint seconds_) public view returns (uint) {
-        return _rewardPerSecond.mul(seconds_).div(DECIMAL_PRECISION);
+        return (_rewardPerSecond * seconds_) / DECIMAL_PRECISION;
     }
 
     // --- 'require' functions ---

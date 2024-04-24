@@ -14,7 +14,6 @@ import "./Dependencies/CheckContract.sol";
 import "./Dependencies/SafeERC20.sol";
 
 contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOperations {
-    using SafeMath for uint;
     using SafeERC20 for IERC20;
 
     string public constant NAME = "BorrowerOperations";
@@ -239,7 +238,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
                 _LUSDAmount,
                 _maxFeePercentage
             );
-            vars.netDebt = vars.netDebt.add(vars.LUSDFee);
+            vars.netDebt = vars.netDebt + vars.LUSDFee;
         }
         _requireAtLeastMinNetDebt(vars.netDebt);
 
@@ -514,7 +513,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
                 params._LUSDChange,
                 params._maxFeePercentage
             );
-            vars.netDebtChange = vars.netDebtChange.add(vars.LUSDFee); // The raw debt change includes the fee
+            vars.netDebtChange = vars.netDebtChange + vars.LUSDFee; // The raw debt change includes the fee
         }
 
         vars.debt = contractsCache.troveManager.getTroveDebt(params._borrower, params._collateral);
@@ -545,7 +544,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
 
         // When the adjustment is a debt repayment, check it's a valid amount and that the caller has enough LUSD
         if (!params._isDebtIncrease && params._LUSDChange > 0) {
-            _requireAtLeastMinNetDebt(_getNetDebt(vars.debt).sub(vars.netDebtChange));
+            _requireAtLeastMinNetDebt(_getNetDebt(vars.debt) - vars.netDebtChange);
             _requireValidLUSDRepayment(vars.debt, vars.netDebtChange);
             _requireSufficientLUSDBalance(contractsCache.lusdToken, msg.sender, vars.netDebtChange);
         }
@@ -633,7 +632,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
         uint coll = troveManagerCached.getTroveColl(_borrower, _collateral);
         uint debt = troveManagerCached.getTroveDebt(_borrower, _collateral);
 
-        _requireSufficientLUSDBalance(lusdTokenCached, msg.sender, debt.sub(LUSD_GAS_COMPENSATION));
+        _requireSufficientLUSDBalance(lusdTokenCached, msg.sender, debt - LUSD_GAS_COMPENSATION);
 
         uint newTCR = _getNewTCRFromTroveChange(
             _collateral,
@@ -657,7 +656,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
             lusdTokenCached,
             _collateral,
             msg.sender,
-            debt.sub(LUSD_GAS_COMPENSATION)
+            debt - LUSD_GAS_COMPENSATION
         );
         _repayLUSD(
             activePoolCached,
@@ -702,7 +701,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
         uint _price,
         uint256 _collDecimals
     ) internal pure returns (uint) {
-        uint usdValue = _price.mul(_coll).div(10 ** _collDecimals);
+        uint usdValue = (_price * _coll) / (10 ** _collDecimals);
 
         return usdValue;
     }
@@ -968,7 +967,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
 
     function _requireValidLUSDRepayment(uint _currentDebt, uint _debtRepayment) internal pure {
         require(
-            _debtRepayment <= _currentDebt.sub(LUSD_GAS_COMPENSATION),
+            _debtRepayment <= _currentDebt - LUSD_GAS_COMPENSATION,
             "BorrowerOps: Amount repaid must not be larger than the Trove's debt"
         );
     }
@@ -1066,8 +1065,8 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
         uint newColl = _coll;
         uint newDebt = _debt;
 
-        newColl = _isCollIncrease ? _coll.add(_collChange) : _coll.sub(_collChange);
-        newDebt = _isDebtIncrease ? _debt.add(_debtChange) : _debt.sub(_debtChange);
+        newColl = _isCollIncrease ? _coll + _collChange : _coll - _collChange;
+        newDebt = _isDebtIncrease ? _debt + _debtChange : _debt - _debtChange;
 
         return (newColl, newDebt);
     }
@@ -1084,8 +1083,8 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
         uint totalColl = getEntireSystemColl(_collateral);
         uint totalDebt = getEntireSystemDebt(_collateral);
 
-        totalColl = _isCollIncrease ? totalColl.add(_collChange) : totalColl.sub(_collChange);
-        totalDebt = _isDebtIncrease ? totalDebt.add(_debtChange) : totalDebt.sub(_debtChange);
+        totalColl = _isCollIncrease ? totalColl + _collChange : totalColl - _collChange;
+        totalDebt = _isDebtIncrease ? totalDebt + _debtChange : totalDebt - _debtChange;
 
         uint newTCR = LiquityMath._computeCR(totalColl, totalDebt, _price, _collateralDecimals);
         return newTCR;

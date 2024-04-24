@@ -7,7 +7,6 @@ import {ICollateralConfig} from "./Interfaces/ICollateralConfig.sol";
 import {IPriceFeed} from "./Interfaces/IPriceFeed.sol";
 import {ITellorCaller} from "./Interfaces/ITellorCaller.sol";
 import {AggregatorV3Interface} from "./Dependencies/AggregatorV3Interface.sol";
-import {SafeMath} from "./Dependencies/SafeMath.sol";
 import {Ownable} from "./Dependencies/Ownable.sol";
 import {CheckContract} from "./Dependencies/CheckContract.sol";
 import {BaseMath} from "./Dependencies/BaseMath.sol";
@@ -19,8 +18,6 @@ import {LiquityMath} from "./Dependencies/LiquityMath.sol";
  * Chainlink oracle.
  */
 contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
-    using SafeMath for uint256;
-
     string public constant NAME = "PriceFeed";
 
     bool public initialized = false;
@@ -497,7 +494,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         address _collateral
     ) internal view returns (bool) {
         return
-            block.timestamp.sub(_response.timestamp) >
+            block.timestamp - _response.timestamp >
             collateralConfig.getCollateralChainlinkTimeout(_collateral);
     }
 
@@ -518,7 +515,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
          * - If price decreased, the percentage deviation is in relation to the the previous price.
          * - If price increased, the percentage deviation is in relation to the current price.
          */
-        uint percentDeviation = maxPrice.sub(minPrice).mul(DECIMAL_PRECISION).div(maxPrice);
+        uint percentDeviation = ((maxPrice - minPrice) * DECIMAL_PRECISION) / maxPrice;
 
         // Return true if price has more than doubled, or more than halved.
         return percentDeviation > MAX_PRICE_DEVIATION_FROM_PREVIOUS_ROUND;
@@ -546,7 +543,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         address _collateral
     ) internal view returns (bool) {
         return
-            block.timestamp.sub(_tellorResponse.timestamp) >
+            block.timestamp - _tellorResponse.timestamp >
             collateralConfig.getCollateralTellorTimeout(_collateral);
     }
 
@@ -581,7 +578,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         // Get the relative price difference between the oracles. Use the lower price as the denominator, i.e. the reference for the calculation.
         uint minPrice = LiquityMath._min(scaledTellorPrice, scaledChainlinkPrice);
         uint maxPrice = LiquityMath._max(scaledTellorPrice, scaledChainlinkPrice);
-        uint percentPriceDifference = maxPrice.sub(minPrice).mul(DECIMAL_PRECISION).div(minPrice);
+        uint percentPriceDifference = ((maxPrice - minPrice) * DECIMAL_PRECISION) / minPrice;
 
         /*
          * Return true if the relative price difference is <= 5%: if so, we assume both oracles are probably reporting
@@ -603,10 +600,10 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         uint price;
         if (_answerDigits >= TARGET_DIGITS) {
             // Scale the returned price value down to Liquity's target precision
-            price = _price.div(10 ** (_answerDigits - TARGET_DIGITS));
+            price = _price / (10 ** (_answerDigits - TARGET_DIGITS));
         } else if (_answerDigits < TARGET_DIGITS) {
             // Scale the returned price value up to Liquity's target precision
-            price = _price.mul(10 ** (TARGET_DIGITS - _answerDigits));
+            price = _price * (10 ** (TARGET_DIGITS - _answerDigits));
         }
         return price;
     }
@@ -614,9 +611,9 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     function _scaleTellorPriceByDigits(uint _price) internal pure returns (uint) {
         uint256 price = _price;
         if (TARGET_DIGITS > TELLOR_DIGITS) {
-            price = price.mul(10 ** (TARGET_DIGITS - TELLOR_DIGITS));
+            price = price * (10 ** (TARGET_DIGITS - TELLOR_DIGITS));
         } else if (TARGET_DIGITS < TELLOR_DIGITS) {
-            price = price.div(10 ** (TELLOR_DIGITS - TARGET_DIGITS));
+            price = price / (10 ** (TELLOR_DIGITS - TARGET_DIGITS));
         }
         return price;
     }

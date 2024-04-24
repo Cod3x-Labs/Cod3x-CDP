@@ -11,8 +11,6 @@ import "./Interfaces/ILUSDToken.sol";
 import "./Interfaces/ISortedTroves.sol";
 import "./Interfaces/ICommunityIssuance.sol";
 import "./Dependencies/LiquityBase.sol";
-import "./Dependencies/SafeMath.sol";
-import "./Dependencies/LiquitySafeMath128.sol";
 import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
 import "./Dependencies/SafeERC20.sol";
@@ -143,9 +141,7 @@ import "./Dependencies/SafeERC20.sol";
  *
  */
 contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
-    using LiquitySafeMath128 for uint128;
     using SafeERC20 for IERC20;
-    using SafeMath for uint256;
 
     string public constant NAME = "StabilityPool";
 
@@ -309,7 +305,7 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
 
         _sendLUSDtoStabilityPool(msg.sender, _amount);
 
-        uint newDeposit = compoundedLUSDDeposit.add(_amount);
+        uint newDeposit = compoundedLUSDDeposit + _amount;
         _updateDepositAndSnapshots(msg.sender, newDeposit);
         emit UserDepositChanged(msg.sender, newDeposit);
 
@@ -351,7 +347,7 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         _sendLUSDToDepositor(msg.sender, LUSDtoWithdraw);
 
         // Update deposit
-        uint newDeposit = compoundedLUSDDeposit.sub(LUSDtoWithdraw);
+        uint newDeposit = compoundedLUSDDeposit - LUSDtoWithdraw;
         _updateDepositAndSnapshots(msg.sender, newDeposit);
         emit UserDepositChanged(msg.sender, newDeposit);
 
@@ -397,9 +393,10 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         uint LQTYPerUnitStaked;
         LQTYPerUnitStaked = _computeLQTYPerUnitStaked(_LQTYIssuance, totalLUSD);
 
-        uint marginalLQTYGain = LQTYPerUnitStaked.mul(P);
-        epochToScaleToG[currentEpoch][currentScale] = epochToScaleToG[currentEpoch][currentScale]
-            .add(marginalLQTYGain);
+        uint marginalLQTYGain = LQTYPerUnitStaked * P;
+        epochToScaleToG[currentEpoch][currentScale] =
+            epochToScaleToG[currentEpoch][currentScale] +
+            marginalLQTYGain;
 
         emit G_Updated(epochToScaleToG[currentEpoch][currentScale], currentEpoch, currentScale);
     }
@@ -419,10 +416,10 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
          * 4) Store this error for use in the next correction when this function is called.
          * 5) Note: static analysis tools complain about this "division before multiplication", however, it is intended.
          */
-        uint LQTYNumerator = _LQTYIssuance.mul(DECIMAL_PRECISION).add(lastLQTYError);
+        uint LQTYNumerator = _LQTYIssuance * DECIMAL_PRECISION + lastLQTYError;
 
-        uint LQTYPerUnitStaked = LQTYNumerator.div(_totalLUSDDeposits);
-        lastLQTYError = LQTYNumerator.sub(LQTYPerUnitStaked.mul(_totalLUSDDeposits));
+        uint LQTYPerUnitStaked = LQTYNumerator / _totalLUSDDeposits;
+        lastLQTYError = LQTYNumerator - LQTYPerUnitStaked * _totalLUSDDeposits;
 
         return LQTYPerUnitStaked;
     }
@@ -474,32 +471,31 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
          * 4) Store these errors for use in the next correction when this function is called.
          * 5) Note: static analysis tools complain about this "division before multiplication", however, it is intended.
          */
-        uint collNumerator = _collToAdd.mul(DECIMAL_PRECISION).add(
-            lastCollateralError_Offset[_collateral]
-        );
+        uint collNumerator = _collToAdd *
+            DECIMAL_PRECISION +
+            lastCollateralError_Offset[_collateral];
 
         assert(_debtToOffset <= _totalLUSDDeposits);
         if (_debtToOffset == _totalLUSDDeposits) {
             LUSDLossPerUnitStaked = DECIMAL_PRECISION; // When the Pool depletes to 0, so does each deposit
             lastLUSDLossError_Offset = 0;
         } else {
-            uint LUSDLossNumerator = _debtToOffset.mul(DECIMAL_PRECISION).sub(
-                lastLUSDLossError_Offset
-            );
+            uint LUSDLossNumerator = _debtToOffset * DECIMAL_PRECISION - lastLUSDLossError_Offset;
             /*
              * Add 1 to make error in quotient positive. We want "slightly too much" LUSD loss,
              * which ensures the error in any given compoundedLUSDDeposit favors the Stability Pool.
              */
-            LUSDLossPerUnitStaked = (LUSDLossNumerator.div(_totalLUSDDeposits)).add(1);
-            lastLUSDLossError_Offset = (LUSDLossPerUnitStaked.mul(_totalLUSDDeposits)).sub(
-                LUSDLossNumerator
-            );
+            LUSDLossPerUnitStaked = (LUSDLossNumerator / _totalLUSDDeposits) + 1;
+            lastLUSDLossError_Offset =
+                (LUSDLossPerUnitStaked * _totalLUSDDeposits) -
+                LUSDLossNumerator;
         }
 
-        collGainPerUnitStaked = collNumerator.div(_totalLUSDDeposits);
-        lastCollateralError_Offset[_collateral] = collNumerator.sub(
-            collGainPerUnitStaked.mul(_totalLUSDDeposits)
-        );
+        collGainPerUnitStaked = collNumerator / _totalLUSDDeposits;
+        lastCollateralError_Offset[_collateral] =
+            collNumerator -
+            collGainPerUnitStaked *
+            _totalLUSDDeposits;
 
         return (collGainPerUnitStaked, LUSDLossPerUnitStaked);
     }
@@ -518,7 +514,7 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
          * The newProductFactor is the factor by which to change all deposits, due to the depletion of Stability Pool LUSD in the liquidation.
          * We make the product factor 0 if there was a pool-emptying. Otherwise, it is (1 - LUSDLossPerUnitStaked)
          */
-        uint newProductFactor = uint(DECIMAL_PRECISION).sub(_LUSDLossPerUnitStaked);
+        uint newProductFactor = uint(DECIMAL_PRECISION) - _LUSDLossPerUnitStaked;
 
         uint128 currentScaleCached = currentScale;
         uint128 currentEpochCached = currentEpoch;
@@ -531,26 +527,26 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
          *
          * Since S corresponds to collateral gain, and P to deposit loss, we update S first.
          */
-        uint marginalCollGain = _collGainPerUnitStaked.mul(currentP);
-        uint newS = currentS.add(marginalCollGain);
+        uint marginalCollGain = _collGainPerUnitStaked * currentP;
+        uint newS = currentS + marginalCollGain;
         epochToScaleToSum[currentEpochCached][currentScaleCached][_collateral] = newS;
         emit S_Updated(_collateral, newS, currentEpochCached, currentScaleCached);
 
         // If the Stability Pool was emptied, increment the epoch, and reset the scale and product P
         if (newProductFactor == 0) {
-            currentEpoch = currentEpochCached.add(1);
+            currentEpoch = currentEpochCached + 1;
             emit EpochUpdated(currentEpoch);
             currentScale = 0;
             emit ScaleUpdated(currentScale);
             newP = DECIMAL_PRECISION;
 
             // If multiplying P by a non-zero product factor would reduce P below the scale boundary, increment the scale
-        } else if (currentP.mul(newProductFactor).div(DECIMAL_PRECISION) < SCALE_FACTOR) {
-            newP = currentP.mul(newProductFactor).mul(SCALE_FACTOR).div(DECIMAL_PRECISION);
-            currentScale = currentScaleCached.add(1);
+        } else if ((currentP * newProductFactor) / DECIMAL_PRECISION < SCALE_FACTOR) {
+            newP = (currentP * newProductFactor * SCALE_FACTOR) / DECIMAL_PRECISION;
+            currentScale = currentScaleCached + 1;
             emit ScaleUpdated(currentScale);
         } else {
-            newP = currentP.mul(newProductFactor).div(DECIMAL_PRECISION);
+            newP = (currentP * newProductFactor) / DECIMAL_PRECISION;
         }
 
         assert(newP > 0);
@@ -574,13 +570,13 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         lusdToken.burn(address(this), _debtToOffset);
 
         activePoolCached.sendCollateral(_collateral, address(this), _collToAdd);
-        uint sum = collAmounts[_collateral].add(_collToAdd);
+        uint sum = collAmounts[_collateral] + _collToAdd;
         collAmounts[_collateral] = sum;
         emit StabilityPoolCollateralBalanceUpdated(_collateral, sum);
     }
 
     function _decreaseLUSD(uint _amount) internal {
-        uint newTotalLUSDDeposits = totalLUSDDeposits.sub(_amount);
+        uint newTotalLUSDDeposits = totalLUSDDeposits - _amount;
         totalLUSDDeposits = newTotalLUSDDeposits;
         emit StabilityPoolLUSDBalanceUpdated(newTotalLUSDDeposits);
     }
@@ -644,16 +640,17 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         vars.P_Snapshot = _snapshots.P;
         vars.S_Snapshot = _snapshots.S[_collateral];
 
-        vars.firstPortion = epochToScaleToSum[vars.epochSnapshot][vars.scaleSnapshot][_collateral]
-            .sub(vars.S_Snapshot);
-        vars.secondPortion = epochToScaleToSum[vars.epochSnapshot][vars.scaleSnapshot.add(1)][
-            _collateral
-        ].div(SCALE_FACTOR);
+        vars.firstPortion =
+            epochToScaleToSum[vars.epochSnapshot][vars.scaleSnapshot][_collateral] -
+            vars.S_Snapshot;
+        vars.secondPortion =
+            epochToScaleToSum[vars.epochSnapshot][vars.scaleSnapshot + 1][_collateral] /
+            SCALE_FACTOR;
 
-        vars.gain = _initialDeposit
-            .mul(vars.firstPortion.add(vars.secondPortion))
-            .div(vars.P_Snapshot)
-            .div(DECIMAL_PRECISION);
+        vars.gain =
+            (_initialDeposit * (vars.firstPortion + vars.secondPortion)) /
+            vars.P_Snapshot /
+            DECIMAL_PRECISION;
         return vars.gain;
     }
 
@@ -689,12 +686,12 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         uint G_Snapshot = snapshots.G;
         uint P_Snapshot = snapshots.P;
 
-        uint firstPortion = epochToScaleToG[epochSnapshot][scaleSnapshot].sub(G_Snapshot);
-        uint secondPortion = epochToScaleToG[epochSnapshot][scaleSnapshot.add(1)].div(SCALE_FACTOR);
+        uint firstPortion = epochToScaleToG[epochSnapshot][scaleSnapshot] - G_Snapshot;
+        uint secondPortion = epochToScaleToG[epochSnapshot][scaleSnapshot + 1] / SCALE_FACTOR;
 
-        uint LQTYGain = initialDeposit.mul(firstPortion.add(secondPortion)).div(P_Snapshot).div(
-            DECIMAL_PRECISION
-        );
+        uint LQTYGain = (initialDeposit * (firstPortion + secondPortion)) /
+            P_Snapshot /
+            DECIMAL_PRECISION;
 
         return LQTYGain;
     }
@@ -732,16 +729,16 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         }
 
         uint compoundedDeposit;
-        uint128 scaleDiff = currentScale.sub(scaleSnapshot);
+        uint128 scaleDiff = currentScale - scaleSnapshot;
 
         /* Compute the compounded deposit. If a scale change in P was made during the deposit's lifetime,
          * account for it. If more than one scale change was made, then the deposit has decreased by a factor of
          * at least 1e-9 -- so return 0.
          */
         if (scaleDiff == 0) {
-            compoundedDeposit = initialDeposit.mul(P).div(snapshot_P);
+            compoundedDeposit = (initialDeposit * P) / snapshot_P;
         } else if (scaleDiff == 1) {
-            compoundedDeposit = initialDeposit.mul(P).div(snapshot_P).div(SCALE_FACTOR);
+            compoundedDeposit = (initialDeposit * P) / snapshot_P / SCALE_FACTOR;
         } else {
             // if scaleDiff >= 2
             compoundedDeposit = 0;
@@ -756,7 +753,7 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
          *
          * Thus it's unclear whether this line is still really needed.
          */
-        if (compoundedDeposit < initialDeposit.div(1e9)) {
+        if (compoundedDeposit < initialDeposit / 1e9) {
             return 0;
         }
 
@@ -768,7 +765,7 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
     // Transfer the LUSD tokens from the user to the Stability Pool's address, and update its recorded LUSD
     function _sendLUSDtoStabilityPool(address _address, uint _amount) internal {
         lusdToken.sendToPool(_address, address(this), _amount);
-        uint newTotalLUSDDeposits = totalLUSDDeposits.add(_amount);
+        uint newTotalLUSDDeposits = totalLUSDDeposits + _amount;
         totalLUSDDeposits = newTotalLUSDDeposits;
         emit StabilityPoolLUSDBalanceUpdated(newTotalLUSDDeposits);
     }
@@ -777,7 +774,7 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         if (_amount == 0) {
             return;
         }
-        uint newCollAmount = collAmounts[_collateral].sub(_amount);
+        uint newCollAmount = collAmounts[_collateral] - _amount;
         collAmounts[_collateral] = newCollAmount;
         emit StabilityPoolCollateralBalanceUpdated(_collateral, newCollAmount);
         emit CollateralSent(_collateral, msg.sender, _amount);
