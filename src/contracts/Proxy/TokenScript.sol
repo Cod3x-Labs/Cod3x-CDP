@@ -9,8 +9,7 @@ contract TokenScript is CheckContract {
     using SafeERC20 for IERC20;
 
     string public constant NAME = "TokenScript";
-
-    IERC20 immutable token;
+    IERC20 public immutable token;
 
     constructor(address _tokenAddress) {
         checkContract(_tokenAddress);
@@ -38,10 +37,10 @@ contract TokenScript is CheckContract {
     }
 
     function increaseAllowance(address spender, uint256 addedValue) external {
-        return token.safeIncreaseAllowance(spender, addedValue);
+        token.safeIncreaseAllowance(spender, addedValue);
     }
 
     function decreaseAllowance(address spender, uint256 subtractedValue) external {
-        return token.safeDecreaseAllowance(spender, subtractedValue);
+        token.safeDecreaseAllowance(spender, subtractedValue);
     }
 }
