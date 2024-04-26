@@ -7,7 +7,7 @@ async function main() {
 
   console.log(
     `starting the deployment script, will deploy contracts to the network: '${network.name}', 
-     with owner set to: '${signer.address}'`
+     with owner set to: '${signer.address}'`,
   );
 
   await deploy<Sample>("Sample");

@@ -5,7 +5,7 @@
   "scripts": {
     "clean": "hardhat clean",
     "lint": "solhint list-rules && solhint contracts/**/*.sol test/**/*.sol",
-    "format": "prettier --write contracts/**/*.sol test/**/*.js utils/**/*.js scripts/**/*.js mainnetDeployment/**/*.js",
+    "format": "prettier --write contracts/**/*.sol test/**/*.js utils/**/*.js scripts/**/*.ts mainnetDeployment/**/*.js",
     "deploy": "hardhat run .\\scripts\\main.ts",
     "compile": "hardhat compile --force",
     "test": "hardhat test --parallel --bail",
