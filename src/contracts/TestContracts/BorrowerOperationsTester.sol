@@ -3,7 +3,7 @@
 pragma solidity ^0.8.23;
 pragma experimental ABIEncoderV2;
 
-import "../BorrowerOperations.sol";
+import {BorrowerOperations} from "../BorrowerOperations.sol";
 
 /* Tester contract inherits from BorrowerOperations, and provides external functions 
 for testing the parent's internal functions. */

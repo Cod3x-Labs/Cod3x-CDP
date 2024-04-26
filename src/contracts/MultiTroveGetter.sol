@@ -3,9 +3,9 @@
 pragma solidity ^0.8.23;
 pragma experimental ABIEncoderV2;
 
-import "./Interfaces/ICollateralConfig.sol";
-import "./TroveManager.sol";
-import "./SortedTroves.sol";
+import {ICollateralConfig} from "./Interfaces/ICollateralConfig.sol";
+import {TroveManager} from "./TroveManager.sol";
+import {ISortedTroves} from "./Interfaces/ISortedTroves.sol";
 
 /*  Helper contract for grabbing Trove data for the front end. Not part of the core Liquity system. */
 contract MultiTroveGetter {
@@ -26,7 +26,7 @@ contract MultiTroveGetter {
         ICollateralConfig _collateralConfig,
         TroveManager _troveManager,
         ISortedTroves _sortedTroves
-    ) public {
+    ) {
         collateralConfig = _collateralConfig;
         troveManager = _troveManager;
         sortedTroves = _sortedTroves;

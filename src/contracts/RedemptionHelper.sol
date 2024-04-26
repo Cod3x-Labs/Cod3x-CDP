@@ -2,15 +2,14 @@
 
 pragma solidity ^0.8.23;
 
-import "./Interfaces/ICollateralConfig.sol";
-import "./Interfaces/ILUSDToken.sol";
-import "./Interfaces/IPriceFeed.sol";
-import "./Interfaces/ISortedTroves.sol";
-import "./Interfaces/ITroveManager.sol";
-import "./Interfaces/IRedemptionHelper.sol";
-import "./Dependencies/LiquityBase.sol";
-import "./Dependencies/Ownable.sol";
-import "./Dependencies/IERC20.sol";
+import {ICollateralConfig} from "./Interfaces/ICollateralConfig.sol";
+import {ILUSDToken} from "./Interfaces/ILUSDToken.sol";
+import {ISortedTroves} from "./Interfaces/ISortedTroves.sol";
+import {ITroveManager, TroveStatus} from "./Interfaces/ITroveManager.sol";
+import {IRedemptionHelper} from "./Interfaces/IRedemptionHelper.sol";
+import {LiquityBase, IActivePool, IDefaultPool, IPriceFeed, LiquityMath} from "./Dependencies/LiquityBase.sol";
+import {Ownable} from "./Dependencies/Ownable.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract RedemptionHelper is LiquityBase, Ownable, IRedemptionHelper {
     uint public constant BOOTSTRAP_PERIOD = 14 days;

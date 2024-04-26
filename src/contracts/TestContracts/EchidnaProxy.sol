@@ -2,11 +2,11 @@
 
 pragma solidity ^0.8.23;
 
-import "../TroveManager.sol";
-import "../BorrowerOperations.sol";
-import "../StabilityPool.sol";
-import "../LUSDToken.sol";
-import "../Dependencies/SafeERC20.sol";
+import {TroveManager} from "../TroveManager.sol";
+import {BorrowerOperations} from "../BorrowerOperations.sol";
+import {StabilityPool} from "../StabilityPool.sol";
+import {LUSDToken} from "../LUSDToken.sol";
+import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract EchidnaProxy {
     using SafeERC20 for IERC20;

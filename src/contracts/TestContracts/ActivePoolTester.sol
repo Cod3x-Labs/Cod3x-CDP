@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.23;
 
-import "../ActivePool.sol";
+import {ActivePool, SafeERC20, IERC20} from "../ActivePool.sol";
 
 contract ActivePoolTester is ActivePool {
     using SafeERC20 for IERC20;

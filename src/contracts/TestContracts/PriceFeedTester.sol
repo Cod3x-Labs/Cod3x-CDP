@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.23;
 
-import "../PriceFeed.sol";
+import {PriceFeed} from "../PriceFeed.sol";
 
 contract PriceFeedTester is PriceFeed {
     function setLastGoodPrice(address _collateral, uint _lastGoodPrice) external {

@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.23;
 
-import "../DefaultPool.sol";
+import {DefaultPool, SafeERC20, IERC20} from "../DefaultPool.sol";
 
 contract DefaultPoolTester is DefaultPool {
     using SafeERC20 for IERC20;

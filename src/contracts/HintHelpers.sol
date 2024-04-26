@@ -2,12 +2,12 @@
 
 pragma solidity ^0.8.23;
 
-import "./Interfaces/ICollateralConfig.sol";
-import "./Interfaces/ITroveManager.sol";
-import "./Interfaces/ISortedTroves.sol";
-import "./Dependencies/LiquityBase.sol";
-import "./Dependencies/Ownable.sol";
-import "./Dependencies/CheckContract.sol";
+import {ICollateralConfig} from "./Interfaces/ICollateralConfig.sol";
+import {ITroveManager} from "./Interfaces/ITroveManager.sol";
+import {ISortedTroves} from "./Interfaces/ISortedTroves.sol";
+import {LiquityBase, LiquityMath} from "./Dependencies/LiquityBase.sol";
+import {Ownable} from "./Dependencies/Ownable.sol";
+import {CheckContract} from "./Dependencies/CheckContract.sol";
 
 contract HintHelpers is LiquityBase, Ownable, CheckContract {
     string public constant NAME = "HintHelpers";

@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.23;
 
-import "./IPool.sol";
+import {IPool} from "./IPool.sol";
 
 interface IActivePool is IPool {
     // --- Events ---

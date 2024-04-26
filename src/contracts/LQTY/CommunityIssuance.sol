@@ -2,12 +2,12 @@
 
 pragma solidity ^0.8.23;
 
-import "../Dependencies/SafeERC20.sol";
-import "../Interfaces/ICommunityIssuance.sol";
-import "../Dependencies/BaseMath.sol";
-import "../Dependencies/LiquityMath.sol";
-import "../Dependencies/Ownable.sol";
-import "../Dependencies/CheckContract.sol";
+import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {ICommunityIssuance} from "../Interfaces/ICommunityIssuance.sol";
+import {BaseMath} from "../Dependencies/BaseMath.sol";
+import {LiquityMath} from "../Dependencies/LiquityMath.sol";
+import {Ownable} from "../Dependencies/Ownable.sol";
+import {CheckContract} from "../Dependencies/CheckContract.sol";
 
 contract CommunityIssuance is ICommunityIssuance, Ownable, CheckContract, BaseMath {
     using SafeERC20 for IERC20;

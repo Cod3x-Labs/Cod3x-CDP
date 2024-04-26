@@ -2,14 +2,14 @@
 
 pragma solidity ^0.8.23;
 
-import "./Interfaces/ICollateralConfig.sol";
-import "./Interfaces/IStabilityPool.sol";
-import "./Interfaces/ICollSurplusPool.sol";
-import "./Interfaces/ISortedTroves.sol";
-import "./Interfaces/ITroveManager.sol";
-import "./Interfaces/ILiquidationHelper.sol";
-import "./Dependencies/LiquityBase.sol";
-import "./Dependencies/Ownable.sol";
+import {ICollateralConfig} from "./Interfaces/ICollateralConfig.sol";
+import {IStabilityPool} from "./Interfaces/IStabilityPool.sol";
+import {ICollSurplusPool} from "./Interfaces/ICollSurplusPool.sol";
+import {ISortedTroves} from "./Interfaces/ISortedTroves.sol";
+import {ITroveManager, TroveStatus} from "./Interfaces/ITroveManager.sol";
+import {ILiquidationHelper} from "./Interfaces/ILiquidationHelper.sol";
+import {LiquityBase, IActivePool, IDefaultPool, IPriceFeed, LiquityMath} from "./Dependencies/LiquityBase.sol";
+import {Ownable} from "./Dependencies/Ownable.sol";
 
 contract LiquidationHelper is LiquityBase, Ownable, ILiquidationHelper {
     ITroveManager public troveManager;

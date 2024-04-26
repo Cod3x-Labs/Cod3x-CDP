@@ -2,16 +2,16 @@
 pragma solidity ^0.8.23;
 pragma experimental ABIEncoderV2;
 
-import "./Interfaces/IBorrowerOperations.sol";
-import "./Interfaces/ICollateralConfig.sol";
-import "./Interfaces/ITroveManager.sol";
-import "./Interfaces/ILUSDToken.sol";
-import "./Interfaces/ICollSurplusPool.sol";
-import "./Interfaces/ISortedTroves.sol";
-import "./Dependencies/LiquityBase.sol";
-import "./Dependencies/Ownable.sol";
-import "./Dependencies/CheckContract.sol";
-import "./Dependencies/SafeERC20.sol";
+import {IBorrowerOperations} from "./Interfaces/IBorrowerOperations.sol";
+import {ICollateralConfig} from "./Interfaces/ICollateralConfig.sol";
+import {ITroveManager, TroveStatus} from "./Interfaces/ITroveManager.sol";
+import {ILUSDToken} from "./Interfaces/ILUSDToken.sol";
+import {ICollSurplusPool} from "./Interfaces/ICollSurplusPool.sol";
+import {ISortedTroves} from "./Interfaces/ISortedTroves.sol";
+import {LiquityBase, LiquityMath, IDefaultPool, IPriceFeed, IActivePool} from "./Dependencies/LiquityBase.sol";
+import {Ownable} from "./Dependencies/Ownable.sol";
+import {CheckContract} from "./Dependencies/CheckContract.sol";
+import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOperations {
     using SafeERC20 for IERC20;

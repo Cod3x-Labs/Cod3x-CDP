@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.23;
 
-import "./Interfaces/ISortedTroves.sol";
-import "./Interfaces/ITroveManager.sol";
-import "./Interfaces/IBorrowerOperations.sol";
-import "./Dependencies/Ownable.sol";
-import "./Dependencies/CheckContract.sol";
+import {ISortedTroves} from "./Interfaces/ISortedTroves.sol";
+import {ITroveManager} from "./Interfaces/ITroveManager.sol";
+import {IBorrowerOperations} from "./Interfaces/IBorrowerOperations.sol";
+import {Ownable} from "./Dependencies/Ownable.sol";
+import {CheckContract} from "./Dependencies/CheckContract.sol";
 
 /*
  * A sorted doubly linked list with nodes sorted in descending order.

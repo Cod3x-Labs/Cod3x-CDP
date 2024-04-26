@@ -2,8 +2,8 @@
 
 pragma solidity ^0.8.23;
 
-import "../Dependencies/CheckContract.sol";
-import "../Interfaces/ITroveManager.sol";
+import {CheckContract} from "../Dependencies/CheckContract.sol";
+import {ITroveManager} from "../Interfaces/ITroveManager.sol";
 
 contract TroveManagerScript is CheckContract {
     string public constant NAME = "TroveManagerScript";

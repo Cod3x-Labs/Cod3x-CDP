@@ -2,14 +2,11 @@
 
 pragma solidity ^0.8.23;
 
-import "./ILiquityBase.sol";
-import "./IActivePool.sol";
-import "./IDefaultPool.sol";
-import "./IStabilityPool.sol";
-import "./ILUSDToken.sol";
-import "./IRedemptionHelper.sol";
-import "./ILiquidationHelper.sol";
-import "../Dependencies/IERC20.sol";
+import {ILiquityBase} from "./ILiquityBase.sol";
+import {IActivePool} from "./IActivePool.sol";
+import {IDefaultPool} from "./IDefaultPool.sol";
+import {ILUSDToken} from "./ILUSDToken.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 enum TroveStatus {
     nonExistent,

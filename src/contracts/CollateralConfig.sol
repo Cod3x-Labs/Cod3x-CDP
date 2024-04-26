@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.23;
 
-import "./Dependencies/CheckContract.sol";
-import "./Dependencies/Ownable.sol";
-import "./Dependencies/SafeERC20.sol";
-import "./Interfaces/ICollateralConfig.sol";
-import "./Interfaces/IPriceFeed.sol";
+import {CheckContract} from "./Dependencies/CheckContract.sol";
+import {Ownable} from "./Dependencies/Ownable.sol";
+import {ICollateralConfig} from "./Interfaces/ICollateralConfig.sol";
+import {IPriceFeed} from "./Interfaces/IPriceFeed.sol";
+import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 /**
  * Houses whitelist of allowed collaterals (ERC20s) for the entire system. Also provides access to collateral-specific
@@ -137,7 +138,7 @@ contract CollateralConfig is ICollateralConfig, CheckContract, Ownable {
         config.debtLimit = _debtLimit;
         config.MCR = _MCR;
         config.CCR = _CCR;
-        uint256 decimals = IERC20(_collateral).decimals();
+        uint256 decimals = IERC20Metadata(_collateral).decimals();
         config.decimals = decimals;
         config.chainlinkTimeout = _chainlinkTimeout;
         config.tellorTimeout = _tellorTimeout;

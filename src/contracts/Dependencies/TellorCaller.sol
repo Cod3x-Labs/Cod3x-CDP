@@ -3,9 +3,9 @@
 pragma solidity ^0.8.23;
 pragma experimental ABIEncoderV2;
 
-import "../Interfaces/ITellorCaller.sol";
-import "./ITellor.sol";
-import "./UsingTellor.sol";
+import {ITellorCaller} from "../Interfaces/ITellorCaller.sol";
+import {UsingTellor} from "./UsingTellor.sol";
+
 /*
  * This contract has a single external function that calls Tellor: getTellorCurrentValue().
  *

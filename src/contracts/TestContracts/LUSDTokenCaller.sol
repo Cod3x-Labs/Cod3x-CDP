@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.23;
 
-import "../Interfaces/ILUSDToken.sol";
+import {ILUSDToken} from "../Interfaces/ILUSDToken.sol";
 
 contract LUSDTokenCaller {
     ILUSDToken LUSD;

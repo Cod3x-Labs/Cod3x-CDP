@@ -3,7 +3,7 @@
 pragma solidity ^0.8.23;
 pragma experimental ABIEncoderV2;
 
-import "./IVeloRouter.sol";
+import {IVeloRouter} from "./IVeloRouter.sol";
 
 enum MinAmountOutKind {
     Absolute,

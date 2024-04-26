@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.23;
 
-import "../StabilityPool.sol";
+import {StabilityPool, SafeERC20, IERC20} from "../StabilityPool.sol";
 
 contract StabilityPoolTester is StabilityPool {
     using SafeERC20 for IERC20;

@@ -2,16 +2,14 @@
 
 pragma solidity ^0.8.23;
 
-import "../Dependencies/LiquityMath.sol";
-import "../Dependencies/IERC20.sol";
-import "../Interfaces/IBorrowerOperations.sol";
-import "../Interfaces/ICollateralConfig.sol";
-import "../Interfaces/ITroveManager.sol";
-import "../Interfaces/IStabilityPool.sol";
-import "../Interfaces/IPriceFeed.sol";
-import "./BorrowerOperationsScript.sol";
-import "./ERC20TransferScript.sol";
-import "../Dependencies/SafeERC20.sol";
+import {LiquityMath} from "../Dependencies/LiquityMath.sol";
+import {IBorrowerOperations} from "../Interfaces/IBorrowerOperations.sol";
+import {ICollateralConfig} from "../Interfaces/ICollateralConfig.sol";
+import {ITroveManager} from "../Interfaces/ITroveManager.sol";
+import {IStabilityPool} from "../Interfaces/IStabilityPool.sol";
+import {IPriceFeed} from "../Interfaces/IPriceFeed.sol";
+import {BorrowerOperationsScript, SafeERC20, IERC20} from "./BorrowerOperationsScript.sol";
+import {ERC20TransferScript} from "./ERC20TransferScript.sol";
 
 contract BorrowerWrappersScript is BorrowerOperationsScript, ERC20TransferScript {
     using SafeERC20 for IERC20;

@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.23;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 // https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.3.0/contracts/mocks/ERC20Mock.sol
 // mock class using ERC20
@@ -15,7 +15,7 @@ contract ERC20Mock is ERC20 {
         uint8 decimals_,
         address initialAccount,
         uint256 initialBalance
-    ) public payable ERC20(name, symbol) {
+    ) payable ERC20(name, symbol) {
         _decimals = decimals_;
         _mint(initialAccount, initialBalance);
     }

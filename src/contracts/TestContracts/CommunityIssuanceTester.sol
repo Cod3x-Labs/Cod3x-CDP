@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.23;
 
-import "../LQTY/CommunityIssuance.sol";
+import {CommunityIssuance} from "../LQTY/CommunityIssuance.sol";
 
 contract CommunityIssuanceTester is CommunityIssuance {
     function unprotectedIssueLQTY() external returns (uint issuance) {

@@ -2,29 +2,31 @@
 
 pragma solidity ^0.8.23;
 
-import "../Dependencies/CheckContract.sol";
-import "../Dependencies/IERC20.sol";
+import {CheckContract} from "../Dependencies/CheckContract.sol";
+import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract TokenScript is CheckContract {
+    using SafeERC20 for IERC20;
+
     string public constant NAME = "TokenScript";
 
     IERC20 immutable token;
 
-    constructor(address _tokenAddress) public {
+    constructor(address _tokenAddress) {
         checkContract(_tokenAddress);
         token = IERC20(_tokenAddress);
     }
 
     function transfer(address recipient, uint256 amount) external returns (bool) {
-        token.transfer(recipient, amount);
+        return token.transfer(recipient, amount);
     }
 
     function allowance(address owner, address spender) external view returns (uint256) {
-        token.allowance(owner, spender);
+        return token.allowance(owner, spender);
     }
 
     function approve(address spender, uint256 amount) external returns (bool) {
-        token.approve(spender, amount);
+        return token.approve(spender, amount);
     }
 
     function transferFrom(
@@ -32,14 +34,14 @@ contract TokenScript is CheckContract {
         address recipient,
         uint256 amount
     ) external returns (bool) {
-        token.transferFrom(sender, recipient, amount);
+        return token.transferFrom(sender, recipient, amount);
     }
 
-    function increaseAllowance(address spender, uint256 addedValue) external returns (bool) {
-        token.increaseAllowance(spender, addedValue);
+    function increaseAllowance(address spender, uint256 addedValue) external {
+        return token.safeIncreaseAllowance(spender, addedValue);
     }
 
-    function decreaseAllowance(address spender, uint256 subtractedValue) external returns (bool) {
-        token.decreaseAllowance(spender, subtractedValue);
+    function decreaseAllowance(address spender, uint256 subtractedValue) external {
+        return token.safeDecreaseAllowance(spender, subtractedValue);
     }
 }

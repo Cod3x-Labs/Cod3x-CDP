@@ -3,9 +3,9 @@
 pragma solidity ^0.8.23;
 pragma experimental ABIEncoderV2;
 
-import "./ITellor.sol";
-import "./IERC2362.sol";
-import "./IMappingContract.sol";
+import {ITellor} from "./ITellor.sol";
+import {IERC2362} from "./IERC2362.sol";
+import {IMappingContract} from "./IMappingContract.sol";
 
 /**
  @author Tellor Inc
@@ -21,7 +21,7 @@ contract UsingTellor is IERC2362 {
      * @dev the constructor sets the oracle address in storage
      * @param _tellor is the Tellor Oracle address
      */
-    constructor(address payable _tellor) public {
+    constructor(address payable _tellor) {
         tellor = ITellor(_tellor);
     }
 

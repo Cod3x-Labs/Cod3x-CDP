@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.23;
 
-import "../Dependencies/AggregatorV3Interface.sol";
+import {AggregatorV3Interface} from "../Dependencies/AggregatorV3Interface.sol";
 
 contract MockAggregator is AggregatorV3Interface {
     // storage variables to hold the mock data

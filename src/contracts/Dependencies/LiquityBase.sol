@@ -2,12 +2,12 @@
 
 pragma solidity ^0.8.23;
 
-import "./BaseMath.sol";
-import "./LiquityMath.sol";
-import "../Interfaces/IActivePool.sol";
-import "../Interfaces/IDefaultPool.sol";
-import "../Interfaces/IPriceFeed.sol";
-import "../Interfaces/ILiquityBase.sol";
+import {BaseMath} from "./BaseMath.sol";
+import {LiquityMath} from "./LiquityMath.sol";
+import {IActivePool} from "../Interfaces/IActivePool.sol";
+import {IDefaultPool} from "../Interfaces/IDefaultPool.sol";
+import {IPriceFeed} from "../Interfaces/IPriceFeed.sol";
+import {ILiquityBase} from "../Interfaces/ILiquityBase.sol";
 
 /*
  * Base contract for TroveManager, BorrowerOperations and StabilityPool. Contains global system constants and

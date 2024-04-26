@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.23;
 
-import "../Dependencies/LiquityMath.sol";
+import {LiquityMath} from "../Dependencies/LiquityMath.sol";
 
 /* Tester contract for math functions in Math.sol library. */
 

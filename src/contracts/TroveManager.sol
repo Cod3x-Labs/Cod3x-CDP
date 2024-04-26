@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.23;
 
-import "./Interfaces/ICollateralConfig.sol";
-import "./Interfaces/ITroveManager.sol";
-import "./Interfaces/ICollSurplusPool.sol";
-import "./Interfaces/ILUSDToken.sol";
-import "./Interfaces/ISortedTroves.sol";
-import "./Interfaces/IRedemptionHelper.sol";
-import "./Interfaces/ILiquidationHelper.sol";
-import "./Interfaces/IRewarderManager.sol";
-import "./Dependencies/LiquityBase.sol";
-import "./Dependencies/CheckContract.sol";
-import "./Dependencies/IERC20.sol";
+import {ICollateralConfig} from "./Interfaces/ICollateralConfig.sol";
+import {ITroveManager, TroveStatus} from "./Interfaces/ITroveManager.sol";
+import {ICollSurplusPool} from "./Interfaces/ICollSurplusPool.sol";
+import {ILUSDToken} from "./Interfaces/ILUSDToken.sol";
+import {ISortedTroves} from "./Interfaces/ISortedTroves.sol";
+import {IRedemptionHelper} from "./Interfaces/IRedemptionHelper.sol";
+import {ILiquidationHelper} from "./Interfaces/ILiquidationHelper.sol";
+import {IRewarderManager} from "./Interfaces/IRewarderManager.sol";
+import {LiquityBase, IActivePool, IDefaultPool, IPriceFeed, LiquityMath} from "./Dependencies/LiquityBase.sol";
+import {CheckContract} from "./Dependencies/CheckContract.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract TroveManager is LiquityBase, CheckContract, ITroveManager {
     address public owner;

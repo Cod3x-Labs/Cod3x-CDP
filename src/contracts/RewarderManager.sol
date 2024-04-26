@@ -2,11 +2,11 @@
 
 pragma solidity ^0.8.23;
 
-import "./Interfaces/IRewarder.sol";
-import "./Interfaces/IRewarderManager.sol";
-import "./Dependencies/CheckContract.sol";
-import "./Dependencies/EnumerableSet.sol";
-import "./Dependencies/Ownable.sol";
+import {IRewarder} from "./Interfaces/IRewarder.sol";
+import {IRewarderManager} from "./Interfaces/IRewarderManager.sol";
+import {CheckContract} from "./Dependencies/CheckContract.sol";
+import {EnumerableSet} from "./Dependencies/EnumerableSet.sol";
+import {Ownable} from "./Dependencies/Ownable.sol";
 
 contract RewarderManager is Ownable, CheckContract, IRewarderManager {
     using EnumerableSet for EnumerableSet.AddressSet;

@@ -2,9 +2,8 @@
 
 pragma solidity ^0.8.23;
 
-import "./Interfaces/ILUSDToken.sol";
-import "./Interfaces/ITroveManager.sol";
-import "./Dependencies/CheckContract.sol";
+import {ILUSDToken} from "./Interfaces/ILUSDToken.sol";
+import {CheckContract} from "./Dependencies/CheckContract.sol";
 
 /*
  *
@@ -244,18 +243,12 @@ contract LUSDToken is CheckContract, ILUSDToken {
         return true;
     }
 
-    function increaseAllowance(
-        address spender,
-        uint256 addedValue
-    ) external override returns (bool) {
+    function increaseAllowance(address spender, uint256 addedValue) external returns (bool) {
         _approve(msg.sender, spender, _allowances[msg.sender][spender] + addedValue);
         return true;
     }
 
-    function decreaseAllowance(
-        address spender,
-        uint256 subtractedValue
-    ) external override returns (bool) {
+    function decreaseAllowance(address spender, uint256 subtractedValue) external returns (bool) {
         uint256 senderAllowance = _allowances[msg.sender][spender];
         require(subtractedValue <= senderAllowance, "ERC20: decreased allowance below zero");
 
@@ -425,15 +418,15 @@ contract LUSDToken is CheckContract, ILUSDToken {
 
     // --- Optional functions ---
 
-    function name() external pure override returns (string memory) {
+    function name() external pure returns (string memory) {
         return _NAME;
     }
 
-    function symbol() external pure override returns (string memory) {
+    function symbol() external pure returns (string memory) {
         return _SYMBOL;
     }
 
-    function decimals() external pure override returns (uint8) {
+    function decimals() external pure returns (uint8) {
         return _DECIMALS;
     }
 

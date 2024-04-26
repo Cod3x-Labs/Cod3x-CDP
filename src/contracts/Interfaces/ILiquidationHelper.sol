@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.23;
 
-import "./IStabilityPool.sol";
+import {IStabilityPool} from "./IStabilityPool.sol";
 
 interface ILiquidationHelper {
     function liquidate(address _borrower, address _collateral, address _caller) external;

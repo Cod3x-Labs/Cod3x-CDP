@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.23;
 
-import "../Interfaces/ISortedTroves.sol";
+import {ISortedTroves} from "../Interfaces/ISortedTroves.sol";
 
 contract SortedTrovesTester {
     ISortedTroves sortedTroves;

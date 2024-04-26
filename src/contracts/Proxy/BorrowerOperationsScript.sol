@@ -2,16 +2,16 @@
 
 pragma solidity ^0.8.23;
 
-import "../Dependencies/CheckContract.sol";
-import "../Dependencies/SafeERC20.sol";
-import "../Interfaces/IBorrowerOperations.sol";
+import {CheckContract} from "../Dependencies/CheckContract.sol";
+import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IBorrowerOperations} from "../Interfaces/IBorrowerOperations.sol";
 
 contract BorrowerOperationsScript is CheckContract {
     using SafeERC20 for IERC20;
 
     IBorrowerOperations immutable borrowerOperations;
 
-    constructor(IBorrowerOperations _borrowerOperations) public {
+    constructor(IBorrowerOperations _borrowerOperations) {
         checkContract(address(_borrowerOperations));
         borrowerOperations = _borrowerOperations;
     }

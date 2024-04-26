@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.23;
 
-import "../LUSDToken.sol";
+import {LUSDToken} from "../LUSDToken.sol";
 
 contract LUSDTokenTester is LUSDToken {
     bytes32 private immutable _PERMIT_TYPEHASH =
