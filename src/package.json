@@ -16,7 +16,7 @@
   "license": "BUSL-1.1",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",
-    "@nomicfoundation/hardhat-verify": "^2.0.5",
+    "@nomicfoundation/hardhat-verify": "^2.0.6",
     "@nomiclabs/hardhat-truffle5": "^2.0.7",
     "decimal.js": "^10.4.3",
     "dotenv-defaults": "^5.0.2",
