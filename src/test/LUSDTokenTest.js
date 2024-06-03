@@ -176,12 +176,12 @@ contract("LUSDToken", async (accounts) => {
 
     it("name(): returns the token's name", async () => {
       const name = await lusdTokenTester.name();
-      assert.equal(name, "Pluc USD");
+      assert.equal(name, "Ironclad USD");
     });
 
     it("symbol(): returns the token's symbol", async () => {
       const symbol = await lusdTokenTester.symbol();
-      assert.equal(symbol, "plUSD");
+      assert.equal(symbol, "iUSD");
     });
 
     it("decimal(): returns the number of decimal digits used", async () => {
