@@ -25,8 +25,8 @@ import {CheckContract} from "./Dependencies/CheckContract.sol";
 
 contract LUSDToken is CheckContract, ILUSDToken {
     uint256 private _totalSupply;
-    string internal constant _NAME = "Pluc USD";
-    string internal constant _SYMBOL = "plUSD";
+    string internal constant _NAME = "Ironclad USD";
+    string internal constant _SYMBOL = "iUSD";
     string internal constant _VERSION = "1";
     uint8 internal constant _DECIMALS = 18;
 
