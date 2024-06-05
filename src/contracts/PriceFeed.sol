@@ -618,7 +618,11 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         */
 
         // Try to get the price data from the previous round:
-        try priceAggregator[_collateral].getRoundData(_currentRoundId - 1) returns
+        uint80 prevRoundId;
+        unchecked {
+            prevRoundId = _currentRoundId - 1;
+        }
+        try priceAggregator[_collateral].getRoundData(prevRoundId) returns
         (
             uint80 roundId,
             int256 answer,
