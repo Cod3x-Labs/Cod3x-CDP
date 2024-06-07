@@ -2,10 +2,12 @@
 
 pragma solidity ^0.8.23;
 
+import {IERC4626} from "@openzeppelin/contracts/interfaces/IERC4626.sol";
 import "./Interfaces/ICollateralConfig.sol";
 import "./Interfaces/IPriceFeed.sol";
 import "./Interfaces/ITellorCaller.sol";
 import "./Dependencies/AggregatorV3Interface.sol";
+import "./Dependencies/SafeMath.sol";
 import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
 import "./Dependencies/BaseMath.sol";
@@ -20,6 +22,8 @@ import "./Dependencies/LiquityMath.sol";
 * Chainlink oracle.
 */
 contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
+    using SafeMath for uint256;
+
     string constant public NAME = "PriceFeed";
 
     bool public initialized = false;
@@ -399,6 +403,16 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
 
     // --- Helper functions ---
 
+    function _calculateVaultShareUSDPrice(
+        address _collateral,
+        uint _vaultAssetUnitPrice
+    ) internal view returns (uint) {
+        IERC4626 vault = IERC4626(_collateral);
+        uint256 oneShare = 10 ** vault.decimals();
+        uint256 assetsForOneShare = vault.convertToAssets(oneShare);
+        return (assetsForOneShare * _vaultAssetUnitPrice) / 10 ** vault.decimals();
+    }
+
     /* Chainlink is considered broken if its current or previous round data is in any way bad. We check the previous round
     * for two reasons:
     *
@@ -425,7 +439,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     }
 
     function _chainlinkIsFrozen(ChainlinkResponse memory _response, address _collateral) internal view returns (bool) {
-        return block.timestamp - _response.timestamp > collateralConfig.getCollateralChainlinkTimeout(_collateral);
+        return block.timestamp.sub(_response.timestamp) > collateralConfig.getCollateralChainlinkTimeout(_collateral);
     }
 
     function _chainlinkPriceChangeAboveMax(ChainlinkResponse memory _currentResponse, ChainlinkResponse memory _prevResponse) internal pure returns (bool) {
@@ -440,7 +454,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         * - If price decreased, the percentage deviation is in relation to the the previous price.
         * - If price increased, the percentage deviation is in relation to the current price.
         */
-        uint percentDeviation = (maxPrice - minPrice) * DECIMAL_PRECISION / maxPrice;
+        uint percentDeviation = maxPrice.sub(minPrice).mul(DECIMAL_PRECISION).div(maxPrice);
 
         // Return true if price has more than doubled, or more than halved.
         return percentDeviation > MAX_PRICE_DEVIATION_FROM_PREVIOUS_ROUND;
@@ -458,7 +472,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     }
 
      function _tellorIsFrozen(TellorResponse  memory _tellorResponse, address _collateral) internal view returns (bool) {
-        return block.timestamp - _tellorResponse.timestamp > collateralConfig.getCollateralTellorTimeout(_collateral);
+        return block.timestamp.sub(_tellorResponse.timestamp) > collateralConfig.getCollateralTellorTimeout(_collateral);
     }
 
     function _bothOraclesLiveAndUnbrokenAndSimilarPrice
@@ -494,7 +508,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         // Get the relative price difference between the oracles. Use the lower price as the denominator, i.e. the reference for the calculation.
         uint minPrice = LiquityMath._min(scaledTellorPrice, scaledChainlinkPrice);
         uint maxPrice = LiquityMath._max(scaledTellorPrice, scaledChainlinkPrice);
-        uint percentPriceDifference = (maxPrice - minPrice) * DECIMAL_PRECISION / minPrice;
+        uint percentPriceDifference = maxPrice.sub(minPrice).mul(DECIMAL_PRECISION).div(minPrice);
 
         /*
         * Return true if the relative price difference is <= 5%: if so, we assume both oracles are probably reporting
@@ -513,11 +527,11 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         uint price;
         if (_answerDigits >= TARGET_DIGITS) {
             // Scale the returned price value down to Liquity's target precision
-            price = _price / (10 ** (_answerDigits - TARGET_DIGITS));
+            price = _price.div(10 ** (_answerDigits - TARGET_DIGITS));
         }
         else if (_answerDigits < TARGET_DIGITS) {
             // Scale the returned price value up to Liquity's target precision
-            price = _price * (10 ** (TARGET_DIGITS - _answerDigits));
+            price = _price.mul(10 ** (TARGET_DIGITS - _answerDigits));
         }
         return price;
     }
@@ -525,9 +539,9 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     function _scaleTellorPriceByDigits(uint _price) internal pure returns (uint) {
         uint256 price = _price;
         if (TARGET_DIGITS > TELLOR_DIGITS) {
-            price = price * (10**(TARGET_DIGITS - TELLOR_DIGITS));
+            price = price.mul(10**(TARGET_DIGITS - TELLOR_DIGITS));
         } else if (TARGET_DIGITS < TELLOR_DIGITS) {
-            price = price / (10**(TELLOR_DIGITS - TARGET_DIGITS));
+            price = price.div(10**(TELLOR_DIGITS - TARGET_DIGITS));
         }
         return price;
     }
@@ -537,9 +551,11 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         emit PriceFeedStatusChanged(_collateral, _status);
     }
 
-    function _storePrice(address _collateral, uint _currentPrice) internal {
-        lastGoodPrice[_collateral] = _currentPrice;
-        emit LastGoodPriceUpdated(_collateral, _currentPrice);
+    function _storePrice(address _collateral, uint _currentPrice) internal returns (uint) {
+        uint convertedPrice = _calculateVaultShareUSDPrice(_collateral, _currentPrice);
+        lastGoodPrice[_collateral] = convertedPrice;
+        emit LastGoodPriceUpdated(_collateral, convertedPrice);
+        return convertedPrice;
     }
 
      function _storeTellorPrice(address _collateral, TellorResponse memory _tellorResponse) internal returns (uint) {
