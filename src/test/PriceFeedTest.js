@@ -66,18 +66,6 @@ contract("PriceFeed", async (accounts) => {
       "Vault Wrapped Bitcoin",
       "vwBTC",
     );
-    collateralConfig = await CollateralConfig.new();
-    const mockPriceFeed = await NonPayable.new();
-    CollateralConfig.setAsDeployed(collateralConfig);
-    await collateralConfig.initialize(
-      [collateral1.address, collateral2.address],
-      [toBN(dec(12, 17)), toBN(dec(13, 17))], // MCR for WETH at 120%, and for WBTC at 130%
-      [toBN(dec(165, 16)), toBN(dec(18, 17))], // CCR for WETH at 165%, and for WBTC at 180%
-      [ethers.MaxUint256, ethers.MaxUint256],
-      [14400, 14400], // 4 hour Chainlink timeouts
-      [14400, 14400], // 4 hour Tellor timeouts
-      mockPriceFeed.address,
-    );
   });
 
   beforeEach(async () => {
@@ -86,6 +74,18 @@ contract("PriceFeed", async (accounts) => {
 
     priceFeed = await PriceFeed.new();
     PriceFeed.setAsDeployed(priceFeed);
+
+    collateralConfig = await CollateralConfig.new();
+    CollateralConfig.setAsDeployed(collateralConfig);
+    await collateralConfig.initialize(
+      [collateral1.address, collateral2.address],
+      [toBN(dec(12, 17)), toBN(dec(13, 17))], // MCR for WETH at 120%, and for WBTC at 130%
+      [toBN(dec(165, 16)), toBN(dec(18, 17))], // CCR for WETH at 165%, and for WBTC at 180%
+      [ethers.MaxUint256, ethers.MaxUint256],
+      [14400, 14400], // 4 hour Chainlink timeouts
+      [14400, 14400], // 4 hour Tellor timeouts
+      priceFeed.address,
+    );
 
     zeroAddressPriceFeed = await PriceFeed.new();
     PriceFeed.setAsDeployed(zeroAddressPriceFeed);

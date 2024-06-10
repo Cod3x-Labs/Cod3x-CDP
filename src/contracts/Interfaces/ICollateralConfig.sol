@@ -11,4 +11,5 @@ interface ICollateralConfig {
     function isCollateralAllowed(address _collateral) external view returns (bool);
     function getCollateralChainlinkTimeout(address _collateral) external view returns (uint256);
     function getCollateralTellorTimeout(address _collateral) external view returns (uint256);
+    function updateCollateralDebtLimit(address _collateral, uint256 _debtLimit) external;
 }

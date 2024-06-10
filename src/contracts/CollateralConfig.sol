@@ -157,7 +157,9 @@ contract CollateralConfig is ICollateralConfig, CheckContract, Ownable {
     function updateCollateralDebtLimit(
         address _collateral,
         uint256 _debtLimit
-    ) external onlyOwner checkCollateral(_collateral) {
+    ) external checkCollateral(_collateral) {
+        _requireCallerIsOwnerOrPriceFeed();
+
         Config storage config = collateralConfig[_collateral];
         config.debtLimit = _debtLimit;
 
@@ -243,6 +245,11 @@ contract CollateralConfig is ICollateralConfig, CheckContract, Ownable {
         address _collateral
     ) external view override checkCollateral(_collateral) returns (uint256) {
         return collateralConfig[_collateral].tellorTimeout;
+    }
+
+    function _requireCallerIsOwnerOrPriceFeed() internal view {
+        require(msg.sender == owner() || msg.sender == address(priceFeed),
+        "CollateralConfig: Caller is neither owner nor PriceFeed");
     }
 
     modifier checkCollateral(address _collateral) {

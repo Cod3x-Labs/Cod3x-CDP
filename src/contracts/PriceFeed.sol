@@ -549,6 +549,9 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     function _changeStatus(address _collateral, Status _status) internal {
         status[_collateral] = _status;
         emit PriceFeedStatusChanged(_collateral, _status);
+        if (_status == Status.bothOraclesUntrusted) {
+            collateralConfig.updateCollateralDebtLimit(_collateral, 1);
+        }
     }
 
     function _storePrice(address _collateral, uint _currentPrice) internal returns (uint) {
@@ -668,6 +671,6 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
 
     function _requireCallerIsOwnerOrCollateralConfig() internal view {
         require(msg.sender == owner() || msg.sender == address(collateralConfig),
-            "PriceFeed: Caller is neither owner no CollateralConfig");
+            "PriceFeed: Caller is neither owner nor CollateralConfig");
     }
 }
