@@ -227,7 +227,7 @@ contract("PriceFeed", async (accounts) => {
     let price = await priceFeed.lastGoodPrice(collateral1.address);
 
     // Check Liquity PriceFeed gives 10, with 18 digit precision
-    assert.equal(price, dec(10, 18) * assetsPerShare);
+    assert.equal(price, dec(10, 18));
 
     // Oracle price is 1e9
     await mockChainlink.setDecimals(0);
@@ -236,7 +236,7 @@ contract("PriceFeed", async (accounts) => {
     await priceFeed.fetchPrice(collateral1.address);
     price = await priceFeed.lastGoodPrice(collateral1.address);
     // Check Liquity PriceFeed gives 1e9, with 18 digit precision
-    assert.isTrue(price.eq(toBN(dec(1 * assetsPerShare, 27))));
+    assert.isTrue(price.eq(toBN(dec(1, 27))));
 
     // Oracle price is 0.0001
     await mockChainlink.setDecimals(18);
@@ -245,7 +245,7 @@ contract("PriceFeed", async (accounts) => {
     await priceFeed.fetchPrice(collateral1.address);
     price = await priceFeed.lastGoodPrice(collateral1.address);
     // Check Liquity PriceFeed gives 0.0001 with 18 digit precision
-    assert.isTrue(price.eq(toBN(dec(1 * assetsPerShare, 14))));
+    assert.isTrue(price.eq(toBN(dec(1, 14))));
 
     // Oracle price is 1234.56789
     await mockChainlink.setDecimals(5);
@@ -254,7 +254,7 @@ contract("PriceFeed", async (accounts) => {
     await priceFeed.fetchPrice(collateral1.address);
     price = await priceFeed.lastGoodPrice(collateral1.address);
     // Check Liquity PriceFeed gives 0.0001 with 18 digit precision
-    assert.equal(price, 1234567890000000000000 * assetsPerShare);
+    assert.equal(price, 1234567890000000000000);
     collateral1.resetAssetsPerShare();
   });
 
