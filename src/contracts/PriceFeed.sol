@@ -219,7 +219,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
                 // If Tellor is broken then both oracles are untrusted, so return the last good price
                 if (_tellorIsBroken(tellorResponse)) {
                     _changeStatus(_collateral, Status.bothOraclesUntrusted);
-                    return _convertedLastGoodPrice(_collateral);
+                    return lastGoodPrice[_collateral];
                 }
                 /*
                 * If Tellor is only frozen but otherwise returning valid data, return the last good price.
@@ -227,7 +227,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
                 */
                 if (_tellorIsFrozen(tellorResponse, _collateral)) {
                     _changeStatus(_collateral, Status.usingTellorChainlinkUntrusted);
-                    return _convertedLastGoodPrice(_collateral);
+                    return lastGoodPrice[_collateral];
                 }
                 
                 // If Chainlink is broken and Tellor is working, switch to Tellor and return current Tellor price
@@ -240,13 +240,13 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
                 // If Tellor is broken too, remember Tellor broke, and return last good price
                 if (_tellorIsBroken(tellorResponse)) {
                     _changeStatus(_collateral, Status.usingChainlinkTellorUntrusted);
-                    return _convertedLastGoodPrice(_collateral);
+                    return lastGoodPrice[_collateral];
                 }
 
                 // If Tellor is frozen or working, remember Chainlink froze, and switch to Tellor
                 _changeStatus(_collateral, Status.usingTellorChainlinkFrozen);
                
-                if (_tellorIsFrozen(tellorResponse, _collateral)) {return _convertedLastGoodPrice(_collateral);}
+                if (_tellorIsFrozen(tellorResponse, _collateral)) {return lastGoodPrice[_collateral];}
 
                 // If Tellor is working, use it
                 return _storeTellorPrice(_collateral, tellorResponse);
@@ -257,13 +257,13 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
                 // If Tellor is broken, both oracles are untrusted, and return last good price
                  if (_tellorIsBroken(tellorResponse)) {
                     _changeStatus(_collateral, Status.bothOraclesUntrusted);
-                    return _convertedLastGoodPrice(_collateral);
+                    return lastGoodPrice[_collateral];
                 }
 
                 // If Tellor is frozen, switch to Tellor and return last good price 
                 if (_tellorIsFrozen(tellorResponse, _collateral)) { 
                     _changeStatus(_collateral, Status.usingTellorChainlinkUntrusted);
-                    return _convertedLastGoodPrice(_collateral);
+                    return lastGoodPrice[_collateral];
                 }
 
                 /* 
@@ -300,14 +300,14 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
 
             if (_tellorIsBroken(tellorResponse)) {
                 _changeStatus(_collateral, Status.bothOraclesUntrusted);
-                return _convertedLastGoodPrice(_collateral);
+                return lastGoodPrice[_collateral];
             }
 
             /*
             * If Tellor is only frozen but otherwise returning valid data, just return the last good price.
             * Tellor may need to be tipped to return current data.
             */
-            if (_tellorIsFrozen(tellorResponse, _collateral)) {return _convertedLastGoodPrice(_collateral);}
+            if (_tellorIsFrozen(tellorResponse, _collateral)) {return lastGoodPrice[_collateral];}
             
             // Otherwise, use Tellor price
             return _storeTellorPrice(_collateral, tellorResponse);
@@ -325,7 +325,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
             } 
 
             // Otherwise, return the last good price - both oracles are still untrusted (no status change)
-            return _convertedLastGoodPrice(_collateral);
+            return lastGoodPrice[_collateral];
         }
 
         // --- CASE 4: Using Tellor, and Chainlink is frozen ---
@@ -334,13 +334,13 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
                 // If both Oracles are broken, return last good price
                 if (_tellorIsBroken(tellorResponse)) {
                     _changeStatus(_collateral, Status.bothOraclesUntrusted);
-                    return _convertedLastGoodPrice(_collateral);
+                    return lastGoodPrice[_collateral];
                 }
 
                 // If Chainlink is broken, remember it and switch to using Tellor
                 _changeStatus(_collateral, Status.usingTellorChainlinkUntrusted);
 
-                if (_tellorIsFrozen(tellorResponse, _collateral)) {return _convertedLastGoodPrice(_collateral);}
+                if (_tellorIsFrozen(tellorResponse, _collateral)) {return lastGoodPrice[_collateral];}
 
                 // If Tellor is working, return Tellor current price
                 return _storeTellorPrice(_collateral, tellorResponse);
@@ -350,11 +350,11 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
                 // if Chainlink is frozen and Tellor is broken, remember Tellor broke, and return last good price
                 if (_tellorIsBroken(tellorResponse)) {
                     _changeStatus(_collateral, Status.usingChainlinkTellorUntrusted);
-                    return _convertedLastGoodPrice(_collateral);
+                    return lastGoodPrice[_collateral];
                 }
 
                 // If both are frozen, just use lastGoodPrice
-                if (_tellorIsFrozen(tellorResponse, _collateral)) {return _convertedLastGoodPrice(_collateral);}
+                if (_tellorIsFrozen(tellorResponse, _collateral)) {return lastGoodPrice[_collateral];}
 
                 // if Chainlink is frozen and Tellor is working, keep using Tellor (no status change)
                 return _storeTellorPrice(_collateral, tellorResponse);
@@ -367,7 +367,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
             }
 
              // If Chainlink is live and Tellor is frozen, just use last good price (no status change) since we have no basis for comparison
-            if (_tellorIsFrozen(tellorResponse, _collateral)) {return _convertedLastGoodPrice(_collateral);}
+            if (_tellorIsFrozen(tellorResponse, _collateral)) {return lastGoodPrice[_collateral];}
 
             // If Chainlink is live and Tellor is working, compare prices. Switch to Chainlink
             // if prices are within 5%, and return Chainlink price.
@@ -386,12 +386,12 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
             // If Chainlink breaks, now both oracles are untrusted
             if (_chainlinkIsBroken(chainlinkResponse, prevChainlinkResponse)) {
                 _changeStatus(_collateral, Status.bothOraclesUntrusted);
-                return _convertedLastGoodPrice(_collateral);
+                return lastGoodPrice[_collateral];
             }
 
             // If Chainlink is frozen, return last good price (no status change)
             if (_chainlinkIsFrozen(chainlinkResponse, _collateral)) {
-                return _convertedLastGoodPrice(_collateral);
+                return lastGoodPrice[_collateral];
             }
 
             // If Chainlink and Tellor are both live, unbroken and similar price, switch back to chainlinkWorking and return Chainlink price
@@ -404,7 +404,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
             // to bothOraclesUntrusted and return last good price
             if (_chainlinkPriceChangeAboveMax(chainlinkResponse, prevChainlinkResponse)) {
                 _changeStatus(_collateral, Status.bothOraclesUntrusted);
-                return _convertedLastGoodPrice(_collateral);
+                return lastGoodPrice[_collateral];
             }
 
             // Otherwise if Chainlink is live and deviated <50% from it's previous price and Tellor is still untrusted, 
@@ -416,22 +416,17 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     // --- Helper functions ---
 
     function _calculateVaultShareUSDPrice(
-        address _collateral,
+        uint _assetsPerShare,
+        uint _oneShare,
         uint _vaultAssetUnitPrice
-    ) internal view returns (uint) {
-        (uint assetsPerShare, uint oneShare) = _getAssetsPerShare(_collateral);
-        return (assetsPerShare * _vaultAssetUnitPrice) / oneShare;
+    ) internal pure returns (uint) {
+        return (_assetsPerShare * _vaultAssetUnitPrice) / _oneShare;
     }
 
     function _getAssetsPerShare(address _collateral) internal view returns (uint assetsPerShare, uint oneShare) {
         IERC4626 vault = IERC4626(_collateral);
         oneShare = 10 ** vault.decimals();
         assetsPerShare = vault.convertToAssets(oneShare);
-    }
-
-    function _convertedLastGoodPrice(address _collateral) internal view returns (uint) {
-        uint convertedPrice = _calculateVaultShareUSDPrice(_collateral, lastGoodPrice[_collateral]);
-        return convertedPrice;
     }
 
     /* Chainlink is considered broken if its current or previous round data is in any way bad. We check the previous round
@@ -580,7 +575,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     }
 
     function _storePrice(address _collateral, uint _currentPrice) internal returns (uint) {
-        (uint assetsPerShare, ) = _getAssetsPerShare(_collateral);
+        (uint assetsPerShare, uint oneShare) = _getAssetsPerShare(_collateral);
         uint _lastAssetsPerShare = lastAssetsPerShare[_collateral];
         if (_lastAssetsPerShare != 0) {
             uint assetsPerShareChange = _calculatePercentDeviation(assetsPerShare, lastAssetsPerShare[_collateral]);
@@ -591,9 +586,10 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
             }
         }
 
-        lastGoodPrice[_collateral] = _currentPrice;
-        emit LastGoodPriceUpdated(_collateral, _currentPrice);
-        return _currentPrice;
+        uint convertedPrice = _calculateVaultShareUSDPrice(assetsPerShare, oneShare, _currentPrice);
+        lastGoodPrice[_collateral] = convertedPrice;
+        emit LastGoodPriceUpdated(_collateral, convertedPrice);
+        return convertedPrice;
     }
 
      function _storeTellorPrice(address _collateral, TellorResponse memory _tellorResponse) internal returns (uint) {
