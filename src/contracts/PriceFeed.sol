@@ -132,7 +132,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
 
             _storeChainlinkPrice(collateral, chainlinkResponse);
 
-            (, uint256 assetsPerShare) = _calculateVaultShareUSDPrice(collateral, uint256(chainlinkResponse.answer));
+            (uint256 assetsPerShare, ) = _getAssetsPerShare(collateral);
             _storeAssetsPerShare(collateral, assetsPerShare);
         }
 
@@ -186,7 +186,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
 
     // Admin function to bypass check on percent deviation from last update
     function resetLastAssetsPerShare(address _collateral) external onlyOwner {
-        (, uint256 assetsPerShare) = _calculateVaultShareUSDPrice(_collateral, fetchPrice(_collateral));
+        (uint256 assetsPerShare, ) = _getAssetsPerShare(_collateral);
         _storeAssetsPerShare(_collateral, assetsPerShare);
     }
 
@@ -204,7 +204,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     * it uses the last good price seen by Liquity.
     *
     */
-    function fetchPrice(address _collateral) public override returns (uint) {
+    function fetchPrice(address _collateral) external override returns (uint) {
         _requireValidCollateralAddress(_collateral);
 
         // Get current and previous price data from Chainlink, and current price data from Tellor
@@ -418,15 +418,19 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     function _calculateVaultShareUSDPrice(
         address _collateral,
         uint _vaultAssetUnitPrice
-    ) internal view returns (uint256 vaultShareUSDPrice, uint256 assetsPerShare) {
+    ) internal view returns (uint) {
+        (uint assetsPerShare, uint oneShare) = _getAssetsPerShare(_collateral);
+        return (assetsPerShare * _vaultAssetUnitPrice) / oneShare;
+    }
+
+    function _getAssetsPerShare(address _collateral) internal view returns (uint assetsPerShare, uint oneShare) {
         IERC4626 vault = IERC4626(_collateral);
-        uint256 oneShare = 10 ** vault.decimals();
+        oneShare = 10 ** vault.decimals();
         assetsPerShare = vault.convertToAssets(oneShare);
-        vaultShareUSDPrice = (assetsPerShare * _vaultAssetUnitPrice) / 10 ** vault.decimals();
     }
 
     function _convertedLastGoodPrice(address _collateral) internal view returns (uint) {
-        (uint convertedPrice, ) = _calculateVaultShareUSDPrice(_collateral, lastGoodPrice[_collateral]);
+        uint convertedPrice = _calculateVaultShareUSDPrice(_collateral, lastGoodPrice[_collateral]);
         return convertedPrice;
     }
 
@@ -576,7 +580,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     }
 
     function _storePrice(address _collateral, uint _currentPrice) internal returns (uint) {
-        (, uint assetsPerShare) = _calculateVaultShareUSDPrice(_collateral, _currentPrice);
+        (uint assetsPerShare, ) = _getAssetsPerShare(_collateral);
         uint _lastAssetsPerShare = lastAssetsPerShare[_collateral];
         if (_lastAssetsPerShare != 0) {
             uint assetsPerShareChange = _calculatePercentDeviation(assetsPerShare, lastAssetsPerShare[_collateral]);
