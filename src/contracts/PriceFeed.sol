@@ -577,13 +577,13 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     function _storePrice(address _collateral, uint _currentPrice) internal returns (uint) {
         (uint assetsPerShare, uint oneShare) = _getAssetsPerShare(_collateral);
         uint _lastAssetsPerShare = lastAssetsPerShare[_collateral];
-        if (_lastAssetsPerShare != 0) {
-            uint assetsPerShareChange = _calculatePercentDeviation(assetsPerShare, lastAssetsPerShare[_collateral]);
-            if (assetsPerShareChange > MAX_PRICE_DEVIATION_FROM_PREVIOUS_ROUND) {
-                collateralConfig.updateCollateralDebtLimit(_collateral, 1);
-            } else {
-                _storeAssetsPerShare(_collateral, assetsPerShare);
-            }
+        if (_lastAssetsPerShare != 0 && 
+            _calculatePercentDeviation(assetsPerShare, _lastAssetsPerShare)
+            > MAX_PRICE_DEVIATION_FROM_PREVIOUS_ROUND)
+        {
+            collateralConfig.updateCollateralDebtLimit(_collateral, 1);
+        } else {
+            _storeAssetsPerShare(_collateral, assetsPerShare);
         }
 
         uint convertedPrice = _calculateVaultShareUSDPrice(assetsPerShare, oneShare, _currentPrice);
