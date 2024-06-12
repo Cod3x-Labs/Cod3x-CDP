@@ -5,6 +5,7 @@ pragma solidity ^0.8.23;
 interface IPriceFeed {
     // --- Events ---
     event LastGoodPriceUpdated(address _collateral, uint _lastGoodPrice);
+    event LastAssetsPerShareUpdated(address _collateral, uint _assetsPerShare);
 
     // --- Function ---
     function fetchPrice(address _collateral) external returns (uint);

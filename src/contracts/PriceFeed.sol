@@ -52,6 +52,9 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     // The last good price seen from an oracle by Liquity for each collateral
     mapping (address => uint) public lastGoodPrice;
 
+    // The last good assets per share from a vault for each collateral
+    mapping (address => uint) public lastAssetsPerShare;
+
     struct ChainlinkResponse {
         uint80 roundId;
         int256 answer;
@@ -128,6 +131,9 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
                 "PriceFeed: Chainlink must be working and current");
 
             _storeChainlinkPrice(collateral, chainlinkResponse);
+
+            (, uint256 assetsPerShare) = _calculateVaultShareUSDPrice(collateral, uint256(chainlinkResponse.answer));
+            _storeAssetsPerShare(collateral, assetsPerShare);
         }
 
         initialized = true;
@@ -178,6 +184,12 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         tellorQueryId[_collateral] = _queryId;
     }
 
+    // Admin function to bypass check on percent deviation from last update
+    function resetLastAssetsPerShare(address _collateral) external onlyOwner {
+        (, uint256 assetsPerShare) = _calculateVaultShareUSDPrice(_collateral, fetchPrice(_collateral));
+        _storeAssetsPerShare(_collateral, assetsPerShare);
+    }
+
     // --- Functions ---
 
     /*
@@ -192,7 +204,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     * it uses the last good price seen by Liquity.
     *
     */
-    function fetchPrice(address _collateral) external override returns (uint) {
+    function fetchPrice(address _collateral) public override returns (uint) {
         _requireValidCollateralAddress(_collateral);
 
         // Get current and previous price data from Chainlink, and current price data from Tellor
@@ -406,11 +418,11 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     function _calculateVaultShareUSDPrice(
         address _collateral,
         uint _vaultAssetUnitPrice
-    ) internal view returns (uint) {
+    ) internal view returns (uint256 vaultShareUSDPrice, uint256 assetsPerShare) {
         IERC4626 vault = IERC4626(_collateral);
         uint256 oneShare = 10 ** vault.decimals();
-        uint256 assetsForOneShare = vault.convertToAssets(oneShare);
-        return (assetsForOneShare * _vaultAssetUnitPrice) / 10 ** vault.decimals();
+        assetsPerShare = vault.convertToAssets(oneShare);
+        vaultShareUSDPrice = (assetsPerShare * _vaultAssetUnitPrice) / 10 ** vault.decimals();
     }
 
     /* Chainlink is considered broken if its current or previous round data is in any way bad. We check the previous round
@@ -446,18 +458,22 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         uint currentScaledPrice = _scaleChainlinkPriceByDigits(uint256(_currentResponse.answer), _currentResponse.decimals);
         uint prevScaledPrice = _scaleChainlinkPriceByDigits(uint256(_prevResponse.answer), _prevResponse.decimals);
 
-        uint minPrice = LiquityMath._min(currentScaledPrice, prevScaledPrice);
-        uint maxPrice = LiquityMath._max(currentScaledPrice, prevScaledPrice);
-
         /*
         * Use the larger price as the denominator:
         * - If price decreased, the percentage deviation is in relation to the the previous price.
         * - If price increased, the percentage deviation is in relation to the current price.
         */
-        uint percentDeviation = maxPrice.sub(minPrice).mul(DECIMAL_PRECISION).div(maxPrice);
+        uint percentDeviation = _calculatePercentDeviation(currentScaledPrice, prevScaledPrice);
 
         // Return true if price has more than doubled, or more than halved.
         return percentDeviation > MAX_PRICE_DEVIATION_FROM_PREVIOUS_ROUND;
+    }
+
+    function _calculatePercentDeviation(uint _x, uint _y) internal pure returns (uint) {
+        uint min = LiquityMath._min(_x, _y);
+        uint max = LiquityMath._max(_x, _y);
+
+        return max.sub(min).mul(DECIMAL_PRECISION).div(max);
     }
 
     function _tellorIsBroken(TellorResponse memory _response) internal view returns (bool) {
@@ -555,7 +571,17 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     }
 
     function _storePrice(address _collateral, uint _currentPrice) internal returns (uint) {
-        uint convertedPrice = _calculateVaultShareUSDPrice(_collateral, _currentPrice);
+        (uint convertedPrice, uint assetsPerShare) = _calculateVaultShareUSDPrice(_collateral, _currentPrice);
+        uint _lastAssetsPerShare = lastAssetsPerShare[_collateral];
+        if (_lastAssetsPerShare != 0) {
+            uint assetsPerShareChange = _calculatePercentDeviation(assetsPerShare, lastAssetsPerShare[_collateral]);
+            if (assetsPerShareChange > MAX_PRICE_DEVIATION_FROM_PREVIOUS_ROUND) {
+                collateralConfig.updateCollateralDebtLimit(_collateral, 1);
+            } else {
+                _storeAssetsPerShare(_collateral, assetsPerShare);
+            }
+        }
+
         lastGoodPrice[_collateral] = convertedPrice;
         emit LastGoodPriceUpdated(_collateral, convertedPrice);
         return convertedPrice;
@@ -573,6 +599,11 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         _storePrice(_collateral, scaledChainlinkPrice);
 
         return scaledChainlinkPrice;
+    }
+
+    function _storeAssetsPerShare(address _collateral, uint _assetsPerShare) internal {
+        lastAssetsPerShare[_collateral] = _assetsPerShare;
+        emit LastAssetsPerShareUpdated(_collateral, _assetsPerShare);
     }
 
     // --- Oracle response wrapper functions ---
