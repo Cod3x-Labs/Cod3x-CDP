@@ -131,9 +131,6 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
                 "PriceFeed: Chainlink must be working and current");
 
             _storeChainlinkPrice(collateral, chainlinkResponse);
-
-            (uint256 assetsPerShare, ) = _getAssetsPerShare(collateral);
-            _storeAssetsPerShare(collateral, assetsPerShare);
         }
 
         initialized = true;
