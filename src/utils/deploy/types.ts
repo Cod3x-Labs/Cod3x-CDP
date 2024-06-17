@@ -102,6 +102,7 @@ class Collateral {
   public readonly tellorTimeoutSec: number;
   public readonly chainlinkAggregatorAddress: string;
   public readonly tellorQueryID: string;
+  public readonly maxPriceDeviation: number;
 
   constructor(
     address: string,
@@ -112,6 +113,7 @@ class Collateral {
     tellorTimeoutSec: number,
     chainlinkAggregatorAddress: string,
     tellorQueryID: string,
+    maxPriceDeviation: number,
   ) {
     this.address = address;
     this.MCR = MCR;
@@ -121,6 +123,7 @@ class Collateral {
     this.tellorTimeoutSec = tellorTimeoutSec;
     this.chainlinkAggregatorAddress = chainlinkAggregatorAddress;
     this.tellorQueryID = tellorQueryID;
+    this.maxPriceDeviation = maxPriceDeviation;
   }
 }
 

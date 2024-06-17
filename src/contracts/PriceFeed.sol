@@ -40,8 +40,11 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     // legacy Tellor "request IDs" use 6 decimals, newer Tellor "query IDs" use 18 decimals
     uint constant public TELLOR_DIGITS = 18;
 
-    // Maximum deviation allowed between two consecutive Chainlink oracle prices. 18-digit precision.
-    uint constant public MAX_PRICE_DEVIATION_FROM_PREVIOUS_ROUND =  5e17; // 50%
+    /*
+    * Maximum deviation per collateral allowed between two consecutive Chainlink oracle prices,
+    * or assets per share from lastAssetsPerShare. 18-digit precision.
+    */
+    mapping (address => uint) public maxPriceDeviation;
 
     /* 
     * The maximum relative price difference between two oracle responses allowed in order for the PriceFeed
@@ -90,7 +93,8 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         address _collateralConfigAddress,
         address[] calldata _priceAggregatorAddresses,
         address _tellorCallerAddress,
-        bytes32[] calldata _tellorQueryIds
+        bytes32[] calldata _tellorQueryIds,
+        uint[] calldata _maxPriceDeviations
     )
         external
         onlyOwner
@@ -105,6 +109,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         require(numCollaterals != 0, "At least one collateral required");
         require(_priceAggregatorAddresses.length == numCollaterals, "Array lengths must match");
         require(_tellorQueryIds.length == numCollaterals, "Array lengths must match");
+        require(_maxPriceDeviations.length == numCollaterals, "Array lengths must match");
 
         checkContract(_tellorCallerAddress);
         tellorCaller = ITellorCaller(_tellorCallerAddress);
@@ -113,12 +118,15 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
             address collateral = collaterals[i];
             address priceAggregatorAddress = _priceAggregatorAddresses[i];
             bytes32 queryId = _tellorQueryIds[i];
+            uint priceDeviation = _maxPriceDeviations[i];
 
             checkContract(priceAggregatorAddress);
             require(queryId != bytes32(0), "Invalid Tellor Query ID");
+            require(priceDeviation >= 0.001 ether, "Must allow at least 0.1% deviation");
 
             priceAggregator[collateral] = AggregatorV3Interface(priceAggregatorAddress);
             tellorQueryId[collateral] = queryId;
+            maxPriceDeviation[collateral] = priceDeviation;
 
             // Explicitly set initial system status
             status[collateral] = Status.chainlinkWorking;
@@ -250,7 +258,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
             }
 
             // If Chainlink price has changed by > 50% between two consecutive rounds, compare it to Tellor's price
-            if (_chainlinkPriceChangeAboveMax(chainlinkResponse, prevChainlinkResponse)) {
+            if (_chainlinkPriceChangeAboveMax(chainlinkResponse, prevChainlinkResponse, _collateral)) {
                 // If Tellor is broken, both oracles are untrusted, and return last good price
                  if (_tellorIsBroken(tellorResponse)) {
                     _changeStatus(_collateral, Status.bothOraclesUntrusted);
@@ -399,7 +407,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
 
             // If Chainlink is live but deviated >50% from it's previous price and Tellor is still untrusted, switch 
             // to bothOraclesUntrusted and return last good price
-            if (_chainlinkPriceChangeAboveMax(chainlinkResponse, prevChainlinkResponse)) {
+            if (_chainlinkPriceChangeAboveMax(chainlinkResponse, prevChainlinkResponse, _collateral)) {
                 _changeStatus(_collateral, Status.bothOraclesUntrusted);
                 return lastGoodPrice[_collateral];
             }
@@ -455,7 +463,11 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         return block.timestamp.sub(_response.timestamp) > collateralConfig.getCollateralChainlinkTimeout(_collateral);
     }
 
-    function _chainlinkPriceChangeAboveMax(ChainlinkResponse memory _currentResponse, ChainlinkResponse memory _prevResponse) internal pure returns (bool) {
+    function _chainlinkPriceChangeAboveMax(
+        ChainlinkResponse memory _currentResponse,
+        ChainlinkResponse memory _prevResponse,
+        address _collateral
+    ) internal view returns (bool) {
         uint currentScaledPrice = _scaleChainlinkPriceByDigits(uint256(_currentResponse.answer), _currentResponse.decimals);
         uint prevScaledPrice = _scaleChainlinkPriceByDigits(uint256(_prevResponse.answer), _prevResponse.decimals);
 
@@ -467,7 +479,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         uint percentDeviation = _calculatePercentDeviation(currentScaledPrice, prevScaledPrice);
 
         // Return true if price has more than doubled, or more than halved.
-        return percentDeviation > MAX_PRICE_DEVIATION_FROM_PREVIOUS_ROUND;
+        return percentDeviation > maxPriceDeviation[_collateral];
     }
 
     function _calculatePercentDeviation(uint _x, uint _y) internal pure returns (uint) {
@@ -576,7 +588,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         uint _lastAssetsPerShare = lastAssetsPerShare[_collateral];
         if (_lastAssetsPerShare != 0 && 
             _calculatePercentDeviation(assetsPerShare, _lastAssetsPerShare)
-            > MAX_PRICE_DEVIATION_FROM_PREVIOUS_ROUND)
+            > maxPriceDeviation[_collateral])
         {
             collateralConfig.updateCollateralDebtLimit(_collateral, 1);
         } else {

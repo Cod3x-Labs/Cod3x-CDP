@@ -294,6 +294,7 @@ export class Initializer {
           collaterals.map((c: Collateral) => c.chainlinkAggregatorAddress),
           await tellorCaller.getAddress(),
           collaterals.map((c: Collateral) => c.tellorQueryID),
+          collaterals.map((c: Collateral) => c.maxPriceDeviation),
           { gasPrice: this.gasPrice },
         ),
       );
