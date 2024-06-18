@@ -342,7 +342,7 @@ export class Initializer {
     liquidationHelper: LiquidationHelper,
     oathAddress: string,
   ): Promise<void> {
-    if (!(await this.isOwnershipRenounced(troveManager))) {
+    if (!(await troveManager.initialized())) {
       await this.sendTransaction(
         troveManager.setAddresses(
           await borrowerOperations.getAddress(),

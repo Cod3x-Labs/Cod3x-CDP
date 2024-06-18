@@ -331,7 +331,7 @@ contract RedemptionHelper is LiquityBase, Ownable, IRedemptionHelper {
 
     function _requireValidMaxFeePercentage(uint _maxFeePercentage) internal view {
         require(
-            _maxFeePercentage >= troveManager.REDEMPTION_FEE_FLOOR() &&
+            _maxFeePercentage >= troveManager.redemptionFeeFloor() &&
                 _maxFeePercentage <= DECIMAL_PRECISION,
             "RedemptionHelper: Invalid maxFeePercentage"
         );

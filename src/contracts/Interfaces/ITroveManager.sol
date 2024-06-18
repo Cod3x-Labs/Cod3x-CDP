@@ -91,7 +91,7 @@ interface ITroveManager is ILiquityBase {
         address _liquidationHelperAddress
     ) external;
 
-    function REDEMPTION_FEE_FLOOR() external pure returns (uint256);
+    function redemptionFeeFloor() external view returns (uint256);
     function lusdToken() external view returns (ILUSDToken);
     function lqtyToken() external view returns (IERC20);
 

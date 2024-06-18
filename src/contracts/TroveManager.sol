@@ -15,6 +15,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract TroveManager is LiquityBase, CheckContract, ITroveManager {
     address public owner;
+    bool public initialized;
 
     // --- Connected contract declarations ---
 
@@ -47,7 +48,7 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
      * (1/2) = d^720 => d = (1/2)^(1/720)
      */
     uint public constant MINUTE_DECAY_FACTOR = 999037758833783000;
-    uint public constant override REDEMPTION_FEE_FLOOR = (DECIMAL_PRECISION / 1000) * 5; // 0.5%
+    uint public override redemptionFeeFloor = (DECIMAL_PRECISION / 100) * 5; // 5%
     uint public constant MAX_BORROWING_FEE = (DECIMAL_PRECISION / 100) * 5; // 5%
 
     /*
@@ -222,6 +223,7 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
         address _redemptionHelperAddress,
         address _liquidationHelperAddress
     ) external override {
+        require(!initialized);
         require(msg.sender == owner);
 
         checkContract(_borrowerOperationsAddress);
@@ -266,7 +268,12 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
         emit RedemptionHelperAddressChanged(_redemptionHelperAddress);
         emit LiquidationHelperAddressChanged(_liquidationHelperAddress);
 
-        owner = address(0);
+        initialized = true;
+    }
+
+    function updateRedemptionFeeFloor(uint256 floor) external {
+        require(msg.sender == owner);
+        redemptionFeeFloor = floor;
     }
 
     // --- Getters ---
@@ -1029,10 +1036,10 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
         return _calcRedemptionRate(_calcDecayedBaseRate());
     }
 
-    function _calcRedemptionRate(uint _baseRate) internal pure returns (uint) {
+    function _calcRedemptionRate(uint _baseRate) internal view returns (uint) {
         return
             LiquityMath._min(
-                REDEMPTION_FEE_FLOOR + _baseRate,
+                redemptionFeeFloor + _baseRate,
                 DECIMAL_PRECISION // cap at a maximum of 100%
             );
     }
