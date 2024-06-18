@@ -134,6 +134,7 @@ export class Initializer {
       redemptionHelper,
       liquidationHelper,
       oathAddress,
+      governanceAddress,
     );
 
     await this.initializeRewarderManager(rewarderManager, troveManager);
@@ -341,6 +342,7 @@ export class Initializer {
     redemptionHelper: RedemptionHelper,
     liquidationHelper: LiquidationHelper,
     oathAddress: string,
+    governanceAddress: string,
   ): Promise<void> {
     if (!(await troveManager.initialized())) {
       await this.sendTransaction(
@@ -362,6 +364,14 @@ export class Initializer {
             gasPrice: this.gasPrice,
           },
         ),
+      );
+    }
+
+    if (!(await this.hasExpectedOwner(troveManager, governanceAddress))) {
+      await this.sendTransaction(
+        troveManager.transferOwnership(governanceAddress, {
+          gasPrice: this.gasPrice,
+        }),
       );
     }
   }

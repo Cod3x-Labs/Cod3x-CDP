@@ -12,9 +12,9 @@ import {IRewarderManager} from "./Interfaces/IRewarderManager.sol";
 import {LiquityBase, IActivePool, IDefaultPool, IPriceFeed, LiquityMath} from "./Dependencies/LiquityBase.sol";
 import {CheckContract} from "./Dependencies/CheckContract.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {Ownable} from "./Dependencies/Ownable.sol";
 
-contract TroveManager is LiquityBase, CheckContract, ITroveManager {
-    address public owner;
+contract TroveManager is LiquityBase, Ownable, CheckContract, ITroveManager {
     bool public initialized;
 
     // --- Connected contract declarations ---
@@ -201,11 +201,6 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
         redeemCollateral
     }
 
-    constructor() {
-        // makeshift ownable implementation to circumvent contract size limit
-        owner = msg.sender;
-    }
-
     // --- Dependency setter ---
 
     function setAddresses(
@@ -222,9 +217,8 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
         address _rewarderManagerAddress,
         address _redemptionHelperAddress,
         address _liquidationHelperAddress
-    ) external override {
+    ) external override onlyOwner {
         require(!initialized);
-        require(msg.sender == owner);
 
         checkContract(_borrowerOperationsAddress);
         checkContract(_collateralConfigAddress);
@@ -271,8 +265,7 @@ contract TroveManager is LiquityBase, CheckContract, ITroveManager {
         initialized = true;
     }
 
-    function updateRedemptionFeeFloor(uint256 floor) external {
-        require(msg.sender == owner);
+    function updateRedemptionFeeFloor(uint256 floor) external onlyOwner {
         redemptionFeeFloor = floor;
     }
 
