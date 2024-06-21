@@ -133,12 +133,11 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
         require(_path.exchanges.length == _path.tokens.length - 1);
 
         // only allow lusdToken to collateral or vice versa
-        address start = _path.tokens[0];
-        address end = _path.tokens[_path.tokens.length - 1];
-        if (start == address(lusdToken)) {
-            require(collateralConfig.isCollateralAllowed(end));
-        } else if (end == address(lusdToken)) {
-            require(collateralConfig.isCollateralAllowed(start));
+        require(_path.tokens[0] == _tokenIn && _path.tokens[_path.tokens.length - 1] == _tokenOut);
+        if (_tokenIn == address(lusdToken)) {
+            require(collateralConfig.isCollateralAllowed(_tokenOut));
+        } else if (_tokenOut == address(lusdToken)) {
+            require(collateralConfig.isCollateralAllowed(_tokenIn));
         } else {
             revert();
         }
