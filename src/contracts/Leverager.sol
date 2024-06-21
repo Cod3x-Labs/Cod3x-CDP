@@ -20,19 +20,24 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
     bool public initialized = false;
 
     enum ExchangeType {
+        None,
         VeloSolid,
         Bal,
+        UniV2,
         UniV3
     }
 
-    struct ExchangeSettings {
-        address veloRouter;
-        address balVault;
-        address uniV3Router;
+    struct Exchange {
+        ExchangeType _type;
+        address router;
     }
 
-    ExchangeSettings public exchangeSettings;
-    mapping(address => mapping(address => ExchangeType)) public exchangeForPair;
+    struct SwapPath {
+        address[] tokens;
+        Exchange[] exchanges;
+    }
+
+    mapping(address => mapping(address => SwapPath)) private _swapPaths;
     ISwapper public swapper;
 
     /// @notice These represent the limits imposed on a regular caller of the Leverager contract.
@@ -57,12 +62,11 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
     event SwapperAddressChanged(address _swapper);
 
     event MaxLeverageIterationsChanged(uint _iterations);
-    event ExchangeForPairChanged(
+    event SwapPathChanged(
         address indexed _tokenIn,
         address indexed _tokenOut,
-        ExchangeType _exchange
+        SwapPath _path
     );
-    event ExchangeSettingsChanged(ExchangeSettings _settings);
     event SlippageSettingsChanged(uint _minERNPrice, uint _maxERNPrice, uint _minSwapPercentOut);
 
     event LeveredTroveOpened(
@@ -121,21 +125,33 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
         emit MaxLeverageIterationsChanged(_iterations);
     }
 
-    function setExchange(
+    function setSwapPath(
         address _tokenIn,
         address _tokenOut,
-        ExchangeType _exchange
+        SwapPath memory _path
     ) external onlyOwner {
-        exchangeForPair[_tokenIn][_tokenOut] = _exchange;
-        emit ExchangeForPairChanged(_tokenIn, _tokenOut, _exchange);
-    }
+        require(_path.exchanges.length == _path.tokens.length - 1);
 
-    function setExchangeSettings(ExchangeSettings memory _settings) external onlyOwner {
-        checkContract(_settings.veloRouter);
-        checkContract(_settings.balVault);
-        checkContract(_settings.uniV3Router);
-        exchangeSettings = _settings;
-        emit ExchangeSettingsChanged(_settings);
+        // only allow lusdToken to collateral or vice versa
+        address start = _path.tokens[0];
+        address end = _path.tokens[_path.tokens.length - 1];
+        if (start == address(lusdToken)) {
+            require(collateralConfig.isCollateralAllowed(end));
+        } else if (end == address(lusdToken)) {
+            require(collateralConfig.isCollateralAllowed(start));
+        } else {
+            revert();
+        }
+
+        for (uint i; i < _path.tokens.length; ++i) {
+            checkContract(_path.tokens[i]);
+            if (i != _path.exchanges.length) {
+                checkContract(_path.exchanges[i].router);
+            }
+        }
+
+        _swapPaths[_tokenIn][_tokenOut] = _path;
+        emit SwapPathChanged(_tokenIn, _tokenOut, _path);
     }
 
     function setSlippageSettings(
@@ -342,6 +358,10 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
         revert("Leverager: Failed to delever and close trove");
     }
 
+    function swapPath(address _tokenIn, address _tokenOut) external view returns (SwapPath memory) {
+        return _swapPaths[_tokenIn][_tokenOut];
+    }
+
     struct Params__borrowLUSDWithCollAmount {
         uint collAmount;
         address collateral;
@@ -471,33 +491,36 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
         MinAmountOutData memory _data
     ) internal returns (uint amountOut) {
         IERC20(_tokenIn).safeIncreaseAllowance(address(swapper), _amountIn);
-        ExchangeType exchange = exchangeForPair[_tokenIn][_tokenOut];
-        if (exchange == ExchangeType.Bal) {
-            amountOut = swapper.swapBal(
-                _tokenIn,
-                _tokenOut,
-                _amountIn,
-                _data,
-                exchangeSettings.balVault
-            );
-        } else if (exchange == ExchangeType.VeloSolid) {
-            amountOut = swapper.swapVelo(
-                _tokenIn,
-                _tokenOut,
-                _amountIn,
-                _data,
-                exchangeSettings.veloRouter
-            );
-        } else if (exchange == ExchangeType.UniV3) {
-            amountOut = swapper.swapUniV3(
-                _tokenIn,
-                _tokenOut,
-                _amountIn,
-                _data,
-                exchangeSettings.uniV3Router
-            );
-        } else {
-            revert("Leverager: Invalid ExchangeType");
+        SwapPath memory path = _swapPaths[_tokenIn][_tokenOut];
+        for (uint i; i < path.exchanges.length; ++i) {
+            Exchange memory exchange = path.exchanges[i];
+            if (exchange._type == ExchangeType.Bal) {
+                amountOut = swapper.swapBal(
+                    _tokenIn,
+                    _tokenOut,
+                    _amountIn,
+                    _data,
+                    exchange.router
+                );
+            } else if (exchange._type == ExchangeType.VeloSolid) {
+                amountOut = swapper.swapVelo(
+                    _tokenIn,
+                    _tokenOut,
+                    _amountIn,
+                    _data,
+                    exchange.router
+                );
+            } else if (exchange._type == ExchangeType.UniV3) {
+                amountOut = swapper.swapUniV3(
+                    _tokenIn,
+                    _tokenOut,
+                    _amountIn,
+                    _data,
+                    exchange.router
+                );
+            } else {
+                revert("Leverager: Invalid ExchangeType");
+            }
         }
 
         require(amountOut >= _data.absoluteOrBPSValue, "Leverager: Swap failed");
