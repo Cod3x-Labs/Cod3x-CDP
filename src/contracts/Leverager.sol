@@ -520,7 +520,9 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
                     _tokenOut,
                     _amountIn,
                     _data,
-                    exchange.router
+                    exchange.router,
+                    block.timestamp,
+                    false
                 );
             } else if (exchange._type == ExchangeType.VeloSolid) {
                 amountOut = swapper.swapVelo(
@@ -528,7 +530,19 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
                     _tokenOut,
                     _amountIn,
                     _data,
-                    exchange.router
+                    exchange.router,
+                    block.timestamp,
+                    false
+                );
+            } else if (exchange._type == ExchangeType.UniV2) {
+                amountOut = swapper.swapUniV2(
+                    _tokenIn,
+                    _tokenOut,
+                    _amountIn,
+                    _data,
+                    exchange.router,
+                    block.timestamp,
+                    false
                 );
             } else if (exchange._type == ExchangeType.UniV3) {
                 amountOut = swapper.swapUniV3(
@@ -536,7 +550,9 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
                     _tokenOut,
                     _amountIn,
                     _data,
-                    exchange.router
+                    exchange.router,
+                    block.timestamp,
+                    false
                 );
             } else {
                 revert InvalidExchangeType(exchange._type);
