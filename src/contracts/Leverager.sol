@@ -510,16 +510,24 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
         uint _amountIn,
         MinAmountOutData memory _data
     ) internal returns (uint amountOut) {
-        IERC20(_tokenIn).safeIncreaseAllowance(address(swapper), _amountIn);
         SwapPath memory path = _swapPaths[_tokenIn][_tokenOut];
+        uint lastIteration = path.exchanges.length - 1;
         for (uint i; i < path.exchanges.length; ++i) {
+            MinAmountOutData memory data;
+            if (i == lastIteration) {
+                data = _data;
+            } else {
+                data = MinAmountOutData(MinAmountOutKind.Absolute, 1);
+            }
+
             Exchange memory exchange = path.exchanges[i];
+            IERC20(path.tokens[i]).safeIncreaseAllowance(address(swapper), _amountIn);
             if (exchange._type == ExchangeType.Bal) {
                 amountOut = swapper.swapBal(
                     path.tokens[i],
                     path.tokens[i + 1],
                     _amountIn,
-                    _data,
+                    data,
                     exchange.router,
                     block.timestamp,
                     false
@@ -529,7 +537,7 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
                     path.tokens[i],
                     path.tokens[i + 1],
                     _amountIn,
-                    _data,
+                    data,
                     exchange.router,
                     block.timestamp,
                     false
@@ -539,7 +547,7 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
                     path.tokens[i],
                     path.tokens[i + 1],
                     _amountIn,
-                    _data,
+                    data,
                     exchange.router,
                     block.timestamp,
                     false
@@ -549,7 +557,7 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
                     path.tokens[i],
                     path.tokens[i + 1],
                     _amountIn,
-                    _data,
+                    data,
                     exchange.router,
                     block.timestamp,
                     false
@@ -557,6 +565,7 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
             } else {
                 revert InvalidExchangeType(exchange._type);
             }
+            _amountIn = amountOut;
         }
 
         if (amountOut < _data.absoluteOrBPSValue) {
