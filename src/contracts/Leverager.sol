@@ -516,8 +516,8 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
             Exchange memory exchange = path.exchanges[i];
             if (exchange._type == ExchangeType.Bal) {
                 amountOut = swapper.swapBal(
-                    _tokenIn,
-                    _tokenOut,
+                    path.tokens[i],
+                    path.tokens[i + 1],
                     _amountIn,
                     _data,
                     exchange.router,
@@ -526,8 +526,8 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
                 );
             } else if (exchange._type == ExchangeType.VeloSolid) {
                 amountOut = swapper.swapVelo(
-                    _tokenIn,
-                    _tokenOut,
+                    path.tokens[i],
+                    path.tokens[i + 1],
                     _amountIn,
                     _data,
                     exchange.router,
@@ -536,8 +536,8 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
                 );
             } else if (exchange._type == ExchangeType.UniV2) {
                 amountOut = swapper.swapUniV2(
-                    _tokenIn,
-                    _tokenOut,
+                    path.tokens[i],
+                    path.tokens[i + 1],
                     _amountIn,
                     _data,
                     exchange.router,
@@ -546,8 +546,8 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
                 );
             } else if (exchange._type == ExchangeType.UniV3) {
                 amountOut = swapper.swapUniV3(
-                    _tokenIn,
-                    _tokenOut,
+                    path.tokens[i],
+                    path.tokens[i + 1],
                     _amountIn,
                     _data,
                     exchange.router,
