@@ -1,0 +1,15 @@
+[profile.default]
+src = "contracts"
+out = "out"
+libs = ["lib", "node_modules"]
+test = "test/forge"
+script = "scripts/forge"
+
+optimizer = true
+via_ir = true
+evm_version = "paris"
+
+[fmt]
+int_types = "preserve"
+
+# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
