@@ -68,7 +68,7 @@ contract DeployTestProtocol is Script {
         governance = new MockGovernance();
         guardian = new MockGovernance();
 
-        icl = new ERC20Mock("Ironclad", "ICL", 18, msg.sender, 1_000_000 ether);
+        icl = new ERC20Mock("Ironclad", "ICL", 18, msg.sender, 0);
 
         lusdToken = new LUSDToken(
             address(troveManager),

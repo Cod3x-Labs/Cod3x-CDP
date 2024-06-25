@@ -48,8 +48,13 @@ contract LeveragerTest is Test {
         priceFeed.setPrice(address(icl), 1e18);
 
         vm.stopPrank();
+
+        address whale = makeAddr("whale");
+        deal(address(icl), whale, 10_000 ether);
+        vm.startPrank(whale);
         icl.approve(address(borrowerOperations), type(uint).max);
         borrowerOperations.openTrove(address(icl), 10_000 ether, 0.005 ether, 100 ether, address(0), address(0));
+        vm.stopPrank();
     }
 
     function _collaterals() internal view returns (address[] memory) {
@@ -74,16 +79,64 @@ contract LeveragerTest is Test {
         leverager.setSwapPath(address(icl), address(lusdToken), path);
     }
 
-    function testLeverUp() public {
-        icl.transfer(address(1), 1000 ether);
-        vm.startPrank(address(1));
-        icl.approve(address(leverager), type(uint).max);
+    function testLeverToTargetCRWithNIterations(uint collIndex, uint targetCR, uint n, uint collValue) public {
+        n = bound(n, 1, 15);
 
+        collIndex = bound(collIndex, 0, _collaterals().length - 1);
+        IERC20 coll = IERC20(_collaterals()[collIndex]);
+        targetCR = bound(targetCR, collateralConfig.getCollateralMCR(address(coll)), 2.5 ether);
+        collValue = bound(collValue, 100 * targetCR + 1 ether, 2500 ether);
+        coll.approve(address(leverager), collValue);
+
+        (uint collPrice, uint collAmount) = _dealCollAmountForValue(address(coll), collValue, address(this));
         leverager.leverToTargetCRWithNIterations(
-            address(icl), 1.3 ether, 2, 140 ether, 0.005 ether, address(0), address(0), 1 ether, 0.99 ether
+            address(coll), targetCR, n, collAmount, 0.005 ether, address(0), address(0), 1 ether, 1 ether
         );
-        vm.stopPrank();
 
-        assertEq(troveManager.getTroveStatus(address(1), address(icl)), uint(TroveStatus.active));
+        assertEq(troveManager.getTroveStatus(address(this), address(coll)), 1);
+
+        assertEq(coll.balanceOf(address(leverager)), 0);
+        assertEq(lusdToken.balanceOf(address(leverager)), 0);
+
+        assertApproxEqAbs(troveManager.getCurrentICR(address(this), address(coll), collPrice), targetCR, 0.0001 ether);
+    }
+
+    function testDeleverAndCloseTrove(uint collIndex, uint targetCR, uint n, uint collValue) public {
+        n = bound(n, 1, 15);
+
+        collIndex = bound(collIndex, 0, _collaterals().length - 1);
+        IERC20 coll = IERC20(_collaterals()[collIndex]);
+        targetCR = bound(targetCR, collateralConfig.getCollateralMCR(address(coll)), 1.75 ether);
+        collValue = bound(collValue, 110 * targetCR + 1 ether, 2500 ether);
+        coll.approve(address(leverager), collValue);
+
+        (uint collPrice, uint collAmount) = _dealCollAmountForValue(address(coll), collValue, address(this));
+        leverager.leverToTargetCRWithNIterations(
+            address(coll), targetCR, n, collAmount, 0.005 ether, address(0), address(0), 1 ether, 1 ether
+        );
+
+        uint ernBalance = lusdToken.balanceOf(address(this));
+        lusdToken.approve(address(leverager), ernBalance);
+        leverager.deleverAndCloseTrove(address(coll), ernBalance, address(0), address(0), 1 ether, 1 ether);
+
+        assertEq(troveManager.getTroveStatus(address(this), address(coll)), 2);
+        assertEq(troveManager.getTroveDebt(address(this), address(coll)), 0);
+
+        assertEq(coll.balanceOf(address(leverager)), 0);
+        assertEq(lusdToken.balanceOf(address(leverager)), 0);
+
+        uint dollarValueRecovered = lusdToken.balanceOf(address(this))
+            + coll.balanceOf(address(this)) * 10 ** (18 - collateralConfig.getCollateralDecimals(address(coll))) * collPrice
+                / 1 ether;
+        assertApproxEqRel(dollarValueRecovered, collValue, 0.05 ether);
+    }
+
+    function _dealCollAmountForValue(address coll, uint collValue, address to)
+        internal
+        returns (uint collPrice, uint collAmount)
+    {
+        collPrice = priceFeed.fetchPrice(coll);
+        collAmount = collValue * 10 ** collateralConfig.getCollateralDecimals(coll) / collPrice;
+        deal(coll, to, collAmount);
     }
 }
