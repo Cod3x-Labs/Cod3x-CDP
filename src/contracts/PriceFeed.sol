@@ -81,7 +81,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         usingChainlinkTellorUntrusted
     }
 
-    // The current status of the PricFeed for each collateral, which determines the conditions for the next price fetch attempt
+    // The current status of the PriceFeed for each collateral, which determines the conditions for the next price fetch attempt
     mapping (address => Status) public status;
 
     event CollateralConfigAddressChanged(address _newCollateralConfigAddress);
@@ -478,7 +478,6 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         */
         uint percentDeviation = _calculatePercentDeviation(currentScaledPrice, prevScaledPrice);
 
-        // Return true if price has more than doubled, or more than halved.
         return percentDeviation > maxPriceDeviation[_collateral];
     }
 
