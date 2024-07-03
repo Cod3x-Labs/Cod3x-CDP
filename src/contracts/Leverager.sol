@@ -20,23 +20,32 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
     bool public initialized = false;
 
     enum ExchangeType {
+        None,
         VeloSolid,
         Bal,
+        UniV2,
         UniV3
     }
 
-    struct ExchangeSettings {
-        address veloRouter;
-        address balVault;
-        address uniV3Router;
+    struct Exchange {
+        ExchangeType _type;
+        address router;
     }
 
-    ExchangeSettings public exchangeSettings;
-    mapping(address => mapping(address => ExchangeType)) public exchangeForPair;
+    struct SwapPath {
+        address[] tokens;
+        Exchange[] exchanges;
+    }
+
+    mapping(address => mapping(address => SwapPath)) private _swapPaths;
     ISwapper public swapper;
 
-    /// @notice These represent the limits imposed on a regular caller of the Leverager contract.
-    /// They can be fine-tuned by `owner` within hard limits specified in their respective setter functions.
+    /// @notice These variables represent the limits imposed on a regular caller of the Leverager contract.
+    /// They can be fine-tuned by `owner` within hard limits specified by the constants.
+    uint public constant ABS_MAX_ITERATIONS = 30;
+    uint public constant ABS_MIN_ERN_PRICE = 0.98 ether;
+    uint public constant ABS_MAX_ERN_PRICE = 1.10 ether;
+    uint public constant ABS_MIN_SWAP_PERC_OUT = 0.98 ether;
     uint public maxLeverageIterations = 15;
     uint public minERNPrice = 0.99 ether;
     uint public maxERNPrice = 1.05 ether;
@@ -57,12 +66,11 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
     event SwapperAddressChanged(address _swapper);
 
     event MaxLeverageIterationsChanged(uint _iterations);
-    event ExchangeForPairChanged(
+    event SwapPathChanged(
         address indexed _tokenIn,
         address indexed _tokenOut,
-        ExchangeType _exchange
+        SwapPath _path
     );
-    event ExchangeSettingsChanged(ExchangeSettings _settings);
     event SlippageSettingsChanged(uint _minERNPrice, uint _maxERNPrice, uint _minSwapPercentOut);
 
     event LeveredTroveOpened(
@@ -72,6 +80,24 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
         uint _totalColl,
         uint _startingColl
     );
+
+    error AlreadyInitialized();
+    error InvalidIterations(uint _iterations);
+    error SwapPathLengthMismatch(uint _exchangesLength, uint _tokensLength);
+    error PathDoesNotMatchTokens();
+    error InvalidIOTokens(address _tokenIn, address _tokenOut);
+    error ERNPriceOutOfRange();
+    error TooLowSwapPercentOut(uint _minSwapPercentOut, uint _absMinSwapPercentOut);
+    error ZeroIterations();
+    error TooManyIterations(uint _iterations, uint _maxIterations);
+    error AttemptToLeverActiveTrove();
+    error AttemptToLeverDuringRecovery();
+    error ZeroLUSDAmount();
+    error DeleverAndCloseFailed();
+    error InvalidExchangeType(ExchangeType _type);
+    error AmountOutBelowMin(uint _amountOut, uint _min);
+    error TooMuchSlippage(uint _swapPercentOut, uint _minSwapPercentOut);
+    error NegativeSlippage(uint _swapPercentOut);
 
     function setAddresses(
         address _borrowerOperationsAddress,
@@ -83,7 +109,7 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
         address _lusdTokenAddress,
         address _swapperAddress
     ) external onlyOwner {
-        require(!initialized, "Can only initialize once");
+        if (initialized) revert AlreadyInitialized();
 
         checkContract(_borrowerOperationsAddress);
         checkContract(_collateralConfigAddress);
@@ -116,26 +142,41 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
     }
 
     function setMaxLeverageIterations(uint _iterations) external onlyOwner {
-        require(_iterations > 1 && _iterations <= 30, "Iterations outside allowable range");
+        if (_iterations <= 1 || _iterations > 30) revert InvalidIterations(_iterations);
         maxLeverageIterations = _iterations;
         emit MaxLeverageIterationsChanged(_iterations);
     }
 
-    function setExchange(
+    function setSwapPath(
         address _tokenIn,
         address _tokenOut,
-        ExchangeType _exchange
+        SwapPath memory _path
     ) external onlyOwner {
-        exchangeForPair[_tokenIn][_tokenOut] = _exchange;
-        emit ExchangeForPairChanged(_tokenIn, _tokenOut, _exchange);
-    }
+        if (_path.exchanges.length != _path.tokens.length - 1) {
+            revert SwapPathLengthMismatch(_path.exchanges.length, _path.tokens.length);
+        }
 
-    function setExchangeSettings(ExchangeSettings memory _settings) external onlyOwner {
-        checkContract(_settings.veloRouter);
-        checkContract(_settings.balVault);
-        checkContract(_settings.uniV3Router);
-        exchangeSettings = _settings;
-        emit ExchangeSettingsChanged(_settings);
+        // only allow lusdToken to collateral or vice versa
+        if (_path.tokens[0] != _tokenIn || _path.tokens[_path.tokens.length - 1] != _tokenOut) {
+            revert PathDoesNotMatchTokens();
+        }
+        if (_tokenIn == address(lusdToken)) {
+            if (!collateralConfig.isCollateralAllowed(_tokenOut)) revert InvalidIOTokens(_tokenIn, _tokenOut);
+        } else if (_tokenOut == address(lusdToken)) {
+            if (!collateralConfig.isCollateralAllowed(_tokenIn)) revert InvalidIOTokens(_tokenIn, _tokenOut);
+        } else {
+            revert InvalidIOTokens(_tokenIn, _tokenOut);
+        }
+
+        for (uint i; i < _path.tokens.length; ++i) {
+            checkContract(_path.tokens[i]);
+            if (i != _path.exchanges.length) {
+                checkContract(_path.exchanges[i].router);
+            }
+        }
+
+        _swapPaths[_tokenIn][_tokenOut] = _path;
+        emit SwapPathChanged(_tokenIn, _tokenOut, _path);
     }
 
     function setSlippageSettings(
@@ -143,15 +184,12 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
         uint _maxERNPrice,
         uint _minSwapPercentOut
     ) external onlyOwner {
-        require(
-            _minERNPrice >= LiquityMath._getScaledCollAmount(98, 2) &&
-                _maxERNPrice <= LiquityMath._getScaledCollAmount(110, 2),
-            "ERN price out of range 0.98-1.10"
-        );
-        require(
-            _minSwapPercentOut >= LiquityMath._getScaledCollAmount(98, 2),
-            "More than 2% slippage + fees"
-        );
+        if (_minERNPrice < ABS_MIN_ERN_PRICE || _maxERNPrice > ABS_MAX_ERN_PRICE) {
+            revert ERNPriceOutOfRange();
+        }
+        if(_minSwapPercentOut < ABS_MIN_SWAP_PERC_OUT) {
+            revert TooLowSwapPercentOut(_minSwapPercentOut, ABS_MIN_SWAP_PERC_OUT);
+        }
         minERNPrice = _minERNPrice;
         maxERNPrice = _maxERNPrice;
         minSwapPercentOut = _minSwapPercentOut;
@@ -191,26 +229,24 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
         uint _ernPrice,
         uint _swapPercentOut
     ) external override {
-        require(_n != 0, "Leverager: Zero iterations");
-        require(_n <= maxLeverageIterations, "Leverager: Too many iterations");
+        if (_n == 0) revert ZeroIterations();
+        if (_n > maxLeverageIterations) revert TooManyIterations(_n, maxLeverageIterations);
         _requireERNPriceAndSwapPercentInRange(_ernPrice, _swapPercentOut);
-        require(
-            troveManager.getTroveStatus(msg.sender, _collateral) != uint(TroveStatus.active),
-            "Leverager: Cannot lever up active trove"
-        );
+        if (troveManager.getTroveStatus(msg.sender, _collateral) == uint(TroveStatus.active)) {
+            revert AttemptToLeverActiveTrove();
+        }
 
         LocalVariables_leverToTargetCRWithNIterations memory vars;
         vars.collPrice = priceFeed.fetchPrice(_collateral);
         vars.collDecimals = collateralConfig.getCollateralDecimals(_collateral);
-        require(
-            !_checkRecoveryMode(
-                _collateral,
-                vars.collPrice,
-                collateralConfig.getCollateralCCR(_collateral),
-                vars.collDecimals
-            ),
-            "Leverager: Cannot lever up during recovery mode"
-        );
+        if (_checkRecoveryMode(
+            _collateral,
+            vars.collPrice,
+            collateralConfig.getCollateralCCR(_collateral),
+            vars.collDecimals
+        )) {
+            revert AttemptToLeverDuringRecovery();
+        }
 
         vars.startingColl = _collAmount;
         vars.totalColl = _collAmount;
@@ -295,7 +331,7 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
         uint _ernPrice,
         uint _swapPercentOut
     ) external override {
-        require(_lusdAmount != 0, "Leverager: Zero LUSD amount");
+        if (_lusdAmount == 0) revert ZeroLUSDAmount();
         _requireERNPriceAndSwapPercentInRange(_ernPrice, _swapPercentOut);
 
         LocalVariables_deleverAndCloseTrove memory vars;
@@ -339,7 +375,11 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
             }
         }
 
-        revert("Leverager: Failed to delever and close trove");
+        revert DeleverAndCloseFailed();
+    }
+
+    function swapPath(address _tokenIn, address _tokenOut) external view returns (SwapPath memory) {
+        return _swapPaths[_tokenIn][_tokenOut];
     }
 
     struct Params__borrowLUSDWithCollAmount {
@@ -470,37 +510,67 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
         uint _amountIn,
         MinAmountOutData memory _data
     ) internal returns (uint amountOut) {
-        IERC20(_tokenIn).safeIncreaseAllowance(address(swapper), _amountIn);
-        ExchangeType exchange = exchangeForPair[_tokenIn][_tokenOut];
-        if (exchange == ExchangeType.Bal) {
-            amountOut = swapper.swapBal(
-                _tokenIn,
-                _tokenOut,
-                _amountIn,
-                _data,
-                exchangeSettings.balVault
-            );
-        } else if (exchange == ExchangeType.VeloSolid) {
-            amountOut = swapper.swapVelo(
-                _tokenIn,
-                _tokenOut,
-                _amountIn,
-                _data,
-                exchangeSettings.veloRouter
-            );
-        } else if (exchange == ExchangeType.UniV3) {
-            amountOut = swapper.swapUniV3(
-                _tokenIn,
-                _tokenOut,
-                _amountIn,
-                _data,
-                exchangeSettings.uniV3Router
-            );
-        } else {
-            revert("Leverager: Invalid ExchangeType");
+        SwapPath memory path = _swapPaths[_tokenIn][_tokenOut];
+        uint lastIteration = path.exchanges.length - 1;
+        for (uint i; i < path.exchanges.length; ++i) {
+            MinAmountOutData memory data;
+            if (i == lastIteration) {
+                data = _data;
+            } else {
+                data = MinAmountOutData(MinAmountOutKind.Absolute, 1);
+            }
+
+            Exchange memory exchange = path.exchanges[i];
+            IERC20(path.tokens[i]).safeIncreaseAllowance(address(swapper), _amountIn);
+            if (exchange._type == ExchangeType.Bal) {
+                amountOut = swapper.swapBal(
+                    path.tokens[i],
+                    path.tokens[i + 1],
+                    _amountIn,
+                    data,
+                    exchange.router,
+                    block.timestamp,
+                    false
+                );
+            } else if (exchange._type == ExchangeType.VeloSolid) {
+                amountOut = swapper.swapVelo(
+                    path.tokens[i],
+                    path.tokens[i + 1],
+                    _amountIn,
+                    data,
+                    exchange.router,
+                    block.timestamp,
+                    false
+                );
+            } else if (exchange._type == ExchangeType.UniV2) {
+                amountOut = swapper.swapUniV2(
+                    path.tokens[i],
+                    path.tokens[i + 1],
+                    _amountIn,
+                    data,
+                    exchange.router,
+                    block.timestamp,
+                    false
+                );
+            } else if (exchange._type == ExchangeType.UniV3) {
+                amountOut = swapper.swapUniV3(
+                    path.tokens[i],
+                    path.tokens[i + 1],
+                    _amountIn,
+                    data,
+                    exchange.router,
+                    block.timestamp,
+                    false
+                );
+            } else {
+                revert InvalidExchangeType(exchange._type);
+            }
+            _amountIn = amountOut;
         }
 
-        require(amountOut >= _data.absoluteOrBPSValue, "Leverager: Swap failed");
+        if (amountOut < _data.absoluteOrBPSValue) {
+            revert AmountOutBelowMin(amountOut, _data.absoluteOrBPSValue);
+        }
     }
 
     function _findMinAmountOut(
@@ -520,12 +590,15 @@ contract Leverager is LiquityBase, Ownable, CheckContract, ILeverager {
         uint _ernPrice,
         uint _swapPercentOut
     ) internal view {
-        require(
-            _ernPrice >= minERNPrice && _ernPrice <= maxERNPrice,
-            "Leverager: ERN price out of range"
-        );
-        require(_swapPercentOut >= minSwapPercentOut, "Leverager: Too much slippage");
-        require(_swapPercentOut <= LiquityMath.DECIMAL_PRECISION, "Leverager: Negative slippage");
+        if (_ernPrice < minERNPrice || _ernPrice > maxERNPrice) {
+            revert ERNPriceOutOfRange();
+        }
+        if (_swapPercentOut < minSwapPercentOut) {
+            revert TooMuchSlippage(_swapPercentOut, minSwapPercentOut);
+        }
+        if (_swapPercentOut > LiquityMath.DECIMAL_PRECISION) {
+            revert NegativeSlippage(_swapPercentOut);
+        }
     }
 
     function _getUnscaledCollAmount(

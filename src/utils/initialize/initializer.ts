@@ -635,17 +635,6 @@ export class Initializer {
           { gasPrice: this.gasPrice },
         ),
       );
-
-      await this.sendTransaction(
-        leverager.setExchangeSettings(
-          {
-            veloRouter: veloRouterAddress,
-            balVault: balancerVaultAddress,
-            uniV3Router: uniV3RouterAddress,
-          },
-          { gasPrice: this.gasPrice },
-        ),
-      );
     }
   }
 
