@@ -6863,14 +6863,14 @@ contract("TroveManager", async (accounts) => {
 
     await troveManager.setBaseRate(0);
 
-    // Max fee is 10%
+    // Max fee is 14.5%
     const tx3 = await th.redeemCollateralAndGetTxObject(
       B,
       collaterals[0].address,
       contracts,
       attemptedLUSDRedemption,
       GAS_PRICE,
-      dec(1, 17),
+      dec(145, 15),
     );
     assert.isTrue(tx3.receipt.status);
 
@@ -8188,7 +8188,7 @@ contract("TroveManager", async (accounts) => {
     th.assertIsApproximatelyEqual(
       th.normalizeColl18Dedc(A_balanceAfter.sub(A_balanceBefore), collDecimals),
       ETHDrawnNormalized.sub(
-        toBN(dec(5, 15))
+        toBN(dec(5, 16))
           .add(redemptionAmount.mul(mv._1e18BN).div(totalDebt).div(toBN(2)))
           .mul(ETHDrawnNormalized)
           .div(mv._1e18BN),
@@ -8742,7 +8742,8 @@ contract("TroveManager", async (accounts) => {
     );
 
     // keep redeeming until we get the base rate to the ceiling of 100%
-    for (let i = 0; i < 2; i++) {
+    // This doesn't need more than 1 iteration anymore but keeping loop in case it's needed
+    for (let i = 0; i < 1; i++) {
       // Find hints for redeeming
       const { firstRedemptionHint, partialRedemptionHintNICR } =
         await hintHelpers.getRedemptionHints(
