@@ -226,7 +226,7 @@ contract("PriceFeed", async (accounts) => {
 
     //ERC4626 collateral support setup
     const assetsPerShare = 2;
-    await collateral1.setAssetsPerShare(assetsPerShare);
+    await collateral1.setAssetsPerShare(dec(assetsPerShare, await collateral1.decimals()));
 
     await priceFeed.fetchPrice(collateral1.address);
     let price = await priceFeed.lastGoodPrice(collateral1.address);
@@ -260,7 +260,7 @@ contract("PriceFeed", async (accounts) => {
     price = await priceFeed.lastGoodPrice(collateral1.address);
     // Check Liquity PriceFeed gives 0.0001 with 18 digit precision
     assert.equal(price, 1234567890000000000000 * assetsPerShare);
-    collateral1.resetAssetsPerShare();
+    await collateral1.resetAssetsPerShare();
   });
 
   // --- Chainlink breaks ---
@@ -1153,6 +1153,9 @@ contract("PriceFeed", async (accounts) => {
 
     const statusAfter = await priceFeed.status(collateral1.address);
     assert.equal(statusAfter, "2"); // status 2: both oracles untrusted
+
+    const collateral1DebtLimit = await collateralConfig.getCollateralDebtLimit(collateral1.address);
+    assert.equal(collateral1DebtLimit, "1");
   });
 
   it("C1 chainlinkWorking: Chainlink price drop of >50% and Tellor is broken by 0 price: return last good price", async () => {
@@ -1193,6 +1196,9 @@ contract("PriceFeed", async (accounts) => {
 
     const statusAfter = await priceFeed.status(collateral1.address);
     assert.equal(statusAfter, "2"); // status 2: both oracles untrusted
+
+    const collateral1DebtLimit = await collateralConfig.getCollateralDebtLimit(collateral1.address);
+    assert.equal(collateral1DebtLimit, "1");
   });
 
   it("C1 chainlinkWorking: Chainlink price drop of >50% and Tellor is broken by invalid timestamp: switch to bothOracleSuspect", async () => {
@@ -1211,6 +1217,9 @@ contract("PriceFeed", async (accounts) => {
 
     const statusAfter = await priceFeed.status(collateral1.address);
     assert.equal(statusAfter, "2"); // status 2: both oracles untrusted
+
+    const collateral1DebtLimit = await collateralConfig.getCollateralDebtLimit(collateral1.address);
+    assert.equal(collateral1DebtLimit, "1");
   });
 
   it("C1 chainlinkWorking: Chainlink price drop of >50% and Tellor is broken by 0 timestamp: return last good price", async () => {
@@ -1252,6 +1261,9 @@ contract("PriceFeed", async (accounts) => {
 
     const statusAfter = await priceFeed.status(collateral1.address);
     assert.equal(statusAfter, "2"); // status 2: both oracles untrusted
+
+    const collateral1DebtLimit = await collateralConfig.getCollateralDebtLimit(collateral1.address);
+    assert.equal(collateral1DebtLimit, "1");
   });
 
   it("C1 chainlinkWorking: Chainlink price drop of >50% and Tellor is broken by future timestamp: return last good price", async () => {
@@ -1277,6 +1289,37 @@ contract("PriceFeed", async (accounts) => {
 
     // Check that the returned price is in fact the previous price
     assert.equal(price, dec(1200, 18));
+  });
+
+  // -- Vault inflation
+  it("C1 chainlinkWorking: Chainlink price stays the same but vault share price increases >100%", async () => {
+    await setAddresses();
+    priceFeed.setLastGoodPrice(collateral1.address, dec(1200, 18));
+
+    const assetsPerShare = await priceFeed.lastAssetsPerShare(collateral1.address);
+    await collateral1.setAssetsPerShare(assetsPerShare.mul(toBN(2)).add(toBN(10)));
+    await priceFeed.fetchPrice(collateral1.address);
+
+    const debtLimit = await collateralConfig.getCollateralDebtLimit(collateral1.address);
+    assert.equal(debtLimit, "1");
+
+    await collateral1.resetAssetsPerShare();
+  });
+
+  it("C1 chainlinkWorking: Chainlink price stays the same and vault share price increases <100%", async () => {
+    await setAddresses();
+    priceFeed.setLastGoodPrice(collateral1.address, dec(1200, 18));
+
+    const debtLimitBefore = await collateralConfig.getCollateralDebtLimit(collateral1.address);
+
+    const assetsPerShare = await priceFeed.lastAssetsPerShare(collateral1.address);
+    await collateral1.setAssetsPerShare(assetsPerShare.mul(toBN(2)).sub(toBN(10)));
+    await priceFeed.fetchPrice(collateral1.address);
+
+    const debtLimit = await collateralConfig.getCollateralDebtLimit(collateral1.address);
+    assert.equal(debtLimit, debtLimitBefore.toString());
+
+    await collateral1.resetAssetsPerShare();
   });
 
   // -- Chainlink is working
@@ -1437,6 +1480,9 @@ contract("PriceFeed", async (accounts) => {
 
     const status = await priceFeed.status(collateral1.address);
     assert.equal(status, 2); // status 2: both oracles untrusted
+
+    const collateral1DebtLimit = await collateralConfig.getCollateralDebtLimit(collateral1.address);
+    assert.equal(collateral1DebtLimit, "1");
   });
 
   it("C2 usingTellorChainlinkUntrusted: Tellor breaks by zero price: return last good price", async () => {
@@ -1475,6 +1521,9 @@ contract("PriceFeed", async (accounts) => {
 
     const status = await priceFeed.status(collateral1.address);
     assert.equal(status, 2); // status 2: both oracles untrusted
+
+    const collateral1DebtLimit = await collateralConfig.getCollateralDebtLimit(collateral1.address);
+    assert.equal(collateral1DebtLimit, "1");
   });
 
   it("C2 usingTellorChainlinkUntrusted: Tellor breaks by call reverted: return last good price", async () => {
@@ -1512,6 +1561,9 @@ contract("PriceFeed", async (accounts) => {
 
     const status = await priceFeed.status(collateral1.address);
     assert.equal(status, 2); // status 2: both oracles untrusted
+
+    const collateral1DebtLimit = await collateralConfig.getCollateralDebtLimit(collateral1.address);
+    assert.equal(collateral1DebtLimit, "1");
   });
 
   it("C2 usingTellorChainlinkUntrusted: Tellor breaks by zero timestamp: return last good price", async () => {
@@ -2517,6 +2569,9 @@ contract("PriceFeed", async (accounts) => {
 
     const status = await priceFeed.status(collateral1.address);
     assert.equal(status, 2); // status 2: both oracles untrusted
+
+    const collateral1DebtLimit = await collateralConfig.getCollateralDebtLimit(collateral1.address);
+    assert.equal(collateral1DebtLimit, "1");
   });
 
   it("C5 usingChainlinkTellorUntrusted: Chainlink breaks too, return last good price", async () => {

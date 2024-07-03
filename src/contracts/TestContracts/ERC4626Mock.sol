@@ -16,8 +16,8 @@ contract ERC4626Mock is ERC4626 {
         string memory symbol
     ) ERC4626(IERC20(asset)) ERC20(name, symbol) {}
 
-    function setAssetsPerShare(uint8 assetsPerShare_) external {
-        assetsPerShare = assetsPerShare_ * 10 ** decimals();
+    function setAssetsPerShare(uint256 assetsPerShare_) external {
+        assetsPerShare = assetsPerShare_;
         assetPerShareOverriden = true;
     }
 
