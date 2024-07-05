@@ -10,6 +10,7 @@ import {
   DefaultPool,
   CollSurplusPool,
   BorrowerOperations,
+  BorrowerHelper,
   HintHelpers,
   TellorCaller,
   RedemptionHelper,
@@ -29,6 +30,7 @@ type StablecoinOwnedContract =
   | RedemptionHelper
   | LiquidationHelper
   | BorrowerOperations
+  | BorrowerHelper
   | StabilityPool
   | ActivePool
   | DefaultPool
@@ -53,6 +55,7 @@ type ContractName =
   | "RedemptionHelper"
   | "LiquidationHelper"
   | "BorrowerOperations"
+  | "BorrowerHelper"
   | "StabilityPool"
   | "ActivePool"
   | "DefaultPool"

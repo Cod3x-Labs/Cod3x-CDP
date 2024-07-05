@@ -41,6 +41,8 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
 
     address public leveragerAddress;
 
+    address public helperAddress;
+
     /* --- Variable container structs  ---
 
     Used to hold, return and assign variables inside a function, in order to avoid the error:
@@ -102,7 +104,8 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
         address _sortedTrovesAddress,
         address _lusdTokenAddress,
         address _treasury,
-        address _leveragerAddress
+        address _leveragerAddress,
+        address _helperAddress
     ) external override onlyOwner {
         require(!initialized, "Can only initialize once");
 
@@ -120,6 +123,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
         checkContract(_lusdTokenAddress);
         checkContract(_treasury);
         checkContract(_leveragerAddress);
+        checkContract(_helperAddress);
 
         collateralConfig = ICollateralConfig(_collateralConfigAddress);
         troveManager = ITroveManager(_troveManagerAddress);
@@ -132,6 +136,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
         lusdToken = ILUSDToken(_lusdTokenAddress);
         treasury = _treasury;
         leveragerAddress = _leveragerAddress;
+        helperAddress = _helperAddress;
 
         emit CollateralConfigAddressChanged(_collateralConfigAddress);
         emit TroveManagerAddressChanged(_troveManagerAddress);
@@ -144,6 +149,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
         emit LUSDTokenAddressChanged(_lusdTokenAddress);
         emit TreasuryAddressChanged(_treasury);
         emit LeveragerAddressChanged(_leveragerAddress);
+        emit HelperAddressChanged(_helperAddress);
 
         initialized = true;
     }
@@ -152,6 +158,12 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
         checkContract(_leveragerAddress);
         leveragerAddress = _leveragerAddress;
         emit LeveragerAddressChanged(_leveragerAddress);
+    }
+
+    function setHelperAddress(address _helperAddress) external onlyOwner {
+        checkContract(_helperAddress);
+        helperAddress = _helperAddress;
+        emit HelperAddressChanged(_helperAddress);
     }
 
     function setExemptFromFee(address _borrower, bool _isExempt) external onlyOwner {
@@ -170,7 +182,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
         address _upperHint,
         address _lowerHint
     ) external override returns (address, address) {
-        _requireCallerIsLeverager();
+        _requireCallerIsLeveragerOrBorrowerHelper();
         return
             _openTrove(
                 _borrower,
@@ -419,7 +431,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
     function adjustTroveFor(
         Params_adjustTroveFor memory params
     ) external override returns (address, address) {
-        _requireCallerIsLeverager();
+        _requireCallerIsLeveragerOrBorrowerHelper();
         if (params._collTopUp != 0) {
             _requireSufficientCollateralBalanceAndAllowance(
                 msg.sender,
@@ -608,7 +620,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
     }
 
     function closeTroveFor(address _borrower, address _collateral) external override {
-        _requireCallerIsLeverager();
+        _requireCallerIsLeveragerOrBorrowerHelper();
         _closeTrove(_borrower, _collateral);
     }
 
@@ -673,6 +685,12 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
     /**
      * Claim remaining collateral from a redemption or from a liquidation with ICR > MCR in Recovery Mode
      */
+    function claimCollateralFor(address _borrower, address _collateral) external {
+        _requireCallerIsBorrowerHelper();
+        // send collateral from CollSurplus Pool to owner
+        collSurplusPool.claimColl(_borrower, _collateral);
+    }
+
     function claimCollateral(address _collateral) external override {
         // send collateral from CollSurplus Pool to owner
         collSurplusPool.claimColl(msg.sender, _collateral);
@@ -972,8 +990,15 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
         );
     }
 
-    function _requireCallerIsLeverager() internal view {
-        require(msg.sender == leveragerAddress, "BorrowerOps: Caller is not Leverager");
+    function _requireCallerIsLeveragerOrBorrowerHelper() internal view {
+        require(
+            msg.sender == leveragerAddress || msg.sender == helperAddress,
+            "BorrowerOps: Caller is neither Leverager nor BorrowerHelper"
+        );
+    }
+
+    function _requireCallerIsBorrowerHelper() internal view {
+        require(msg.sender == helperAddress, "BorrwerOps: Caller is not BorrowerHelper");
     }
 
     function _requireSufficientLUSDBalance(

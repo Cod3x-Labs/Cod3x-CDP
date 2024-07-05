@@ -5,6 +5,7 @@ pragma solidity ^0.8.23;
 import "../../lib/forge-std/src/Script.sol";
 import {ActivePool} from "../../contracts/ActivePool.sol";
 import {BorrowerOperations} from "../../contracts/BorrowerOperations.sol";
+import {BorrowerHelper} from "../../contracts/BorrowerHelper.sol";
 import {CollateralConfig} from "../../contracts/CollateralConfig.sol";
 import {CollSurplusPool} from "../../contracts/CollSurplusPool.sol";
 import {CommunityIssuance} from "../../contracts/LQTY/CommunityIssuance.sol";
@@ -26,6 +27,7 @@ import {TroveManager} from "../../contracts/TroveManager.sol";
 contract DeployTestProtocol is Script {
     ActivePool public activePool;
     BorrowerOperations public borrowerOperations;
+    BorrowerHelper public borrowerHelper;
     CollateralConfig public collateralConfig;
     CollSurplusPool public collSurplusPool;
     CommunityIssuance public communityIssuance;
@@ -51,6 +53,7 @@ contract DeployTestProtocol is Script {
     function run() public {
         activePool = new ActivePool();
         borrowerOperations = new BorrowerOperations();
+        borrowerHelper = new BorrowerHelper();
         collateralConfig = new CollateralConfig();
         collSurplusPool = new CollSurplusPool();
         communityIssuance = new CommunityIssuance();
@@ -101,8 +104,10 @@ contract DeployTestProtocol is Script {
             address(sortedTroves),
             address(lusdToken),
             address(governance),
-            address(leverager)
+            address(leverager),
+            address(borrowerHelper)
         );
+        borrowerHelper.setAddresses(address(borrowerOperations));
         collSurplusPool.setAddresses(
             address(collateralConfig),
             address(borrowerOperations),

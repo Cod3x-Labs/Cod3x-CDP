@@ -1,6 +1,7 @@
 import {
   ActivePool,
   BorrowerOperations,
+  BorrowerHelper,
   CollSurplusPool,
   CollateralConfig,
   CommunityIssuance,
@@ -79,6 +80,7 @@ export class Initializer {
     const borrowerOperations = contracts.get(
       "borrowerOperations",
     ) as BorrowerOperations;
+    const borrowerHelper = contracts.get("borrowerHelper") as BorrowerHelper;
     const activePool = contracts.get("activePool") as ActivePool;
     const defaultPool = contracts.get("defaultPool") as DefaultPool;
     const gasPool = contracts.get("gasPool") as GasPool;
@@ -176,9 +178,12 @@ export class Initializer {
       collSurplusPool,
       lusdToken,
       leverager,
+      borrowerHelper,
       treasuryAddress,
       governanceAddress,
     );
+
+    await this.initializeBorrowerHelper(borrowerHelper, borrowerOperations);
 
     await this.initializeStabilityPool(
       stabilityPool,
@@ -460,6 +465,7 @@ export class Initializer {
     collSurplusPool: CollSurplusPool,
     lusdToken: LUSDToken,
     leverager: Leverager,
+    borrowerHelper: BorrowerHelper,
     treasuryAddress: string,
     governanceAddress: string,
   ): Promise<void> {
@@ -477,6 +483,7 @@ export class Initializer {
           await lusdToken.getAddress(),
           treasuryAddress,
           await leverager.getAddress(),
+          await borrowerHelper.getAddress(),
           { gasPrice: this.gasPrice },
         ),
       );
@@ -488,6 +495,17 @@ export class Initializer {
           gasPrice: this.gasPrice,
         }),
       );
+    }
+  }
+
+  private async initializeBorrowerHelper(
+    borrowerHelper: BorrowerHelper,
+    borrowerOperations: BorrowerOperations,
+  ): Promise<void> {
+    if (!(await this.isOwnershipRenounced(borrowerHelper))) {
+      await this.sendTransaction(
+        borrowerHelper.setAddresses(await borrowerOperations.getAddress())
+      )
     }
   }
 
