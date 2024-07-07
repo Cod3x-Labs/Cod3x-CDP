@@ -106,6 +106,7 @@ contract BorrowerHelper is Ownable, CheckContract {
         IERC20 asset = IERC20(vault.asset());
 
         asset.safeTransferFrom(msg.sender, address(this), _collAmount);
+        asset.safeIncreaseAllowance(_collateral, _collAmount);
         shares = vault.deposit(_collAmount, address(this));
 
         IERC20(vault).safeIncreaseAllowance(address(borrowerOperations), shares);
