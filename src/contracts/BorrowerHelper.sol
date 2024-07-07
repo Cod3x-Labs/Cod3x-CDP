@@ -14,14 +14,27 @@ contract BorrowerHelper is Ownable, CheckContract {
 
     IBorrowerOperations public borrowerOperations;
 
+    bool public initialized = false;
+    bool public paused = false;
+
     event BorrowerOperationsAddressChanged(address _borrowerOperationsAddress);
 
+    modifier whenNotPaused() {
+        require(!paused, "BorrowerHelper: Paused");
+        _;
+    }
+
+    function pause() external onlyOwner {
+        paused = true;
+    }
+
     function setAddresses(address _borrowerOperationsAddress) external onlyOwner {
+        require(!initialized, "Can only initialize once");
         checkContract(_borrowerOperationsAddress);
         borrowerOperations = IBorrowerOperations(_borrowerOperationsAddress);
         emit BorrowerOperationsAddressChanged(_borrowerOperationsAddress);
 
-        renounceOwnership();
+        initialized = true;
     }
 
     function openTrove(
@@ -31,7 +44,7 @@ contract BorrowerHelper is Ownable, CheckContract {
         uint _LUSDAmount,
         address _upperHint,
         address _lowerHint
-    ) external {
+    ) external whenNotPaused {
         _collAmount = _transferAndDeposit(_collateral, _collAmount);
         borrowerOperations.openTroveFor(
             msg.sender,
@@ -44,7 +57,7 @@ contract BorrowerHelper is Ownable, CheckContract {
         );
     }
 
-    function closeTrove(address _collateral) external {
+    function closeTrove(address _collateral) external whenNotPaused {
         borrowerOperations.closeTroveFor(msg.sender, _collateral);
         _withdrawAndTransfer(_collateral);
     }
@@ -58,7 +71,7 @@ contract BorrowerHelper is Ownable, CheckContract {
         bool _isDebtIncrease,
         address _upperHint,
         address _lowerHint
-    ) external {
+    ) external whenNotPaused {
         if (_isDebtIncrease) {
             _collTopUp = _transferAndDeposit(_collateral, _collTopUp);
         }
@@ -80,7 +93,7 @@ contract BorrowerHelper is Ownable, CheckContract {
         }
     }
 
-    function claimCollateral(address _collateral) external {
+    function claimCollateral(address _collateral) external whenNotPaused {
         borrowerOperations.claimCollateral(_collateral);
         _withdrawAndTransfer(_collateral);
     }

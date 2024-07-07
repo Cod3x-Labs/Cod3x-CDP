@@ -63,6 +63,7 @@ export class Initializer {
     contracts: ReadonlyMap<string, StablecoinContract>,
     collaterals: ReadonlyArray<Collateral>,
     governanceAddress: string,
+    guardianAddress: string,
     oathAddress: string,
     treasuryAddress: string,
     swapperAddress: string,
@@ -183,7 +184,7 @@ export class Initializer {
       governanceAddress,
     );
 
-    await this.initializeBorrowerHelper(borrowerHelper, borrowerOperations);
+    await this.initializeBorrowerHelper(borrowerHelper, borrowerOperations, guardianAddress);
 
     await this.initializeStabilityPool(
       stabilityPool,
@@ -469,7 +470,7 @@ export class Initializer {
     treasuryAddress: string,
     governanceAddress: string,
   ): Promise<void> {
-    if (!(await this.isOwnershipRenounced(borrowerOperations))) {
+    if (!(await borrowerOperations.initialized())) {
       await this.sendTransaction(
         borrowerOperations.setAddresses(
           await collateralConfig.getAddress(),
@@ -501,11 +502,20 @@ export class Initializer {
   private async initializeBorrowerHelper(
     borrowerHelper: BorrowerHelper,
     borrowerOperations: BorrowerOperations,
+    guardianAddress: string,
   ): Promise<void> {
-    if (!(await this.isOwnershipRenounced(borrowerHelper))) {
+    if (!(await borrowerHelper.initialized())) {
       await this.sendTransaction(
         borrowerHelper.setAddresses(await borrowerOperations.getAddress())
       )
+    }
+
+    if (!(await this.hasExpectedOwner(borrowerHelper, guardianAddress))) {
+      await this.sendTransaction(
+        borrowerHelper.transferOwnership(guardianAddress, {
+          gasPrice: this.gasPrice,
+        }),
+      );
     }
   }
 

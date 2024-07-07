@@ -41,6 +41,7 @@ async function main() {
     connectedContracts,
     configurationParameters.collaterals,
     configurationParameters.internalAddresses.GOVERNANCE,
+    configurationParameters.internalAddresses.GUARDIAN,
     configurationParameters.internalAddresses.OATH,
     configurationParameters.internalAddresses.TREASURY,
     configurationParameters.externalAddresses.SWAPPER,
