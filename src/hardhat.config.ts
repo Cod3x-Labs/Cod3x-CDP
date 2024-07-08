@@ -3,6 +3,7 @@ import "@nomicfoundation/hardhat-toolbox";
 import "@nomicfoundation/hardhat-verify";
 import "@nomiclabs/hardhat-truffle5";
 import "dotenv-defaults/config";
+require("@nomicfoundation/hardhat-foundry");
 
 const config: HardhatUserConfig = {
   solidity: {

@@ -6,8 +6,9 @@ typechain
 typechain-types
 
 # Hardhat files
-cache
 artifacts
+cache_hardhat
 
 # Foundry files
+cache
 out
