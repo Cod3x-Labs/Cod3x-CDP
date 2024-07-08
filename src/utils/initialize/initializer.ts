@@ -184,7 +184,13 @@ export class Initializer {
       governanceAddress,
     );
 
-    await this.initializeBorrowerHelper(borrowerHelper, borrowerOperations, guardianAddress);
+    await this.initializeBorrowerHelper(
+      borrowerHelper,
+      borrowerOperations,
+      troveManager,
+      lusdToken,
+      guardianAddress
+    );
 
     await this.initializeStabilityPool(
       stabilityPool,
@@ -502,11 +508,18 @@ export class Initializer {
   private async initializeBorrowerHelper(
     borrowerHelper: BorrowerHelper,
     borrowerOperations: BorrowerOperations,
+    troveManager: TroveManager,
+    lusdToken: LUSDToken,
     guardianAddress: string,
   ): Promise<void> {
     if (!(await borrowerHelper.initialized())) {
       await this.sendTransaction(
-        borrowerHelper.setAddresses(await borrowerOperations.getAddress())
+        borrowerHelper.setAddresses(
+          await borrowerOperations.getAddress(),
+          await troveManager.getAddress(),
+          await lusdToken.getAddress(),
+          { gasPrice: this.gasPrice },
+        )
       )
     }
 

@@ -132,6 +132,7 @@ interface IBorrowerOperations {
     function adjustTroveFor(Params_adjustTroveFor memory) external returns (address, address);
 
     function claimCollateral(address _collateral) external;
+    function claimCollateralFor(address _borrower, address _collateral) external;
 
     function getCompositeDebt(uint _debt) external pure returns (uint);
 }

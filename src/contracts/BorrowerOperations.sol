@@ -685,7 +685,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
     /**
      * Claim remaining collateral from a redemption or from a liquidation with ICR > MCR in Recovery Mode
      */
-    function claimCollateralFor(address _borrower, address _collateral) external {
+    function claimCollateralFor(address _borrower, address _collateral) external override {
         _requireCallerIsBorrowerHelper();
         // send collateral from CollSurplus Pool to owner
         collSurplusPool.claimColl(_borrower, _collateral);

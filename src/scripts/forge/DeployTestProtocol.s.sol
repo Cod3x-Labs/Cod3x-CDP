@@ -107,7 +107,11 @@ contract DeployTestProtocol is Script {
             address(leverager),
             address(borrowerHelper)
         );
-        borrowerHelper.setAddresses(address(borrowerOperations));
+        borrowerHelper.setAddresses(
+            address(borrowerOperations),
+            address(troveManager),
+            address(lusdToken)
+        );
         collSurplusPool.setAddresses(
             address(collateralConfig),
             address(borrowerOperations),

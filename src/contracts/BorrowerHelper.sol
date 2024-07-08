@@ -4,20 +4,26 @@ pragma solidity ^0.8.23;
 
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IBorrowerOperations} from "./Interfaces/IBorrowerOperations.sol";
+import {ITroveManager} from "./Interfaces/ITroveManager.sol";
 import {CheckContract} from "./Dependencies/CheckContract.sol";
+import {LiquityBase} from "./Dependencies/LiquityBase.sol";
 import {IReaperVault} from "./Dependencies/IReaperVault.sol";
 import {Ownable} from "./Dependencies/Ownable.sol";
 
 // Helper contract to perform BorrowerOperations functions with Reaper vault tokens as collateral
-contract BorrowerHelper is Ownable, CheckContract {
+contract BorrowerHelper is LiquityBase, Ownable, CheckContract {
     using SafeERC20 for IERC20;
 
     IBorrowerOperations public borrowerOperations;
+    ITroveManager public troveManager;
+    IERC20 public lusdToken;
 
     bool public initialized = false;
     bool public paused = false;
 
     event BorrowerOperationsAddressChanged(address _borrowerOperationsAddress);
+    event TroveManagerAddressChanged(address _troveManagerAddress);
+    event LUSDTokenAddressChanged(address _lusdTokenAddress);
 
     modifier whenNotPaused() {
         require(!paused, "BorrowerHelper: Paused");
@@ -28,11 +34,22 @@ contract BorrowerHelper is Ownable, CheckContract {
         paused = true;
     }
 
-    function setAddresses(address _borrowerOperationsAddress) external onlyOwner {
+    function setAddresses(
+        address _borrowerOperationsAddress,
+        address _troveManagerAddress,
+        address _lusdTokenAddress
+    ) external onlyOwner {
         require(!initialized, "Can only initialize once");
+
         checkContract(_borrowerOperationsAddress);
+        checkContract(_troveManagerAddress);
+        checkContract(_lusdTokenAddress);
         borrowerOperations = IBorrowerOperations(_borrowerOperationsAddress);
+        lusdToken = IERC20(_lusdTokenAddress);
+        troveManager = ITroveManager(_troveManagerAddress);
         emit BorrowerOperationsAddressChanged(_borrowerOperationsAddress);
+        emit TroveManagerAddressChanged(_troveManagerAddress);
+        emit LUSDTokenAddressChanged(_lusdTokenAddress);
 
         initialized = true;
     }
@@ -55,9 +72,14 @@ contract BorrowerHelper is Ownable, CheckContract {
             _upperHint,
             _lowerHint
         );
+        lusdToken.safeTransfer(msg.sender, lusdToken.balanceOf(address(this)));
     }
 
     function closeTrove(address _collateral) external whenNotPaused {
+        uint lusdAmount = troveManager.getTroveDebt(msg.sender, _collateral) - LUSD_GAS_COMPENSATION;
+        lusdToken.safeTransferFrom(msg.sender, address(this), lusdAmount);
+        lusdToken.safeIncreaseAllowance(address(borrowerOperations), lusdAmount);
+
         borrowerOperations.closeTroveFor(msg.sender, _collateral);
         _withdrawAndTransfer(_collateral);
     }
@@ -88,13 +110,15 @@ contract BorrowerHelper is Ownable, CheckContract {
                 _lowerHint
             )
         );
-        if (!_isDebtIncrease) {
+        if (_isDebtIncrease) {
+            lusdToken.safeTransfer(msg.sender, lusdToken.balanceOf(address(this)));
+        } else {
             _withdrawAndTransfer(_collateral);
         }
     }
 
     function claimCollateral(address _collateral) external whenNotPaused {
-        borrowerOperations.claimCollateral(_collateral);
+        borrowerOperations.claimCollateralFor(msg.sender, _collateral);
         _withdrawAndTransfer(_collateral);
     }
 

@@ -447,7 +447,11 @@ class DeploymentHelper {
     );
 
     // set contracts in BorrowerHelper
-    await contracts.borrowerHelper.setAddresses(contracts.borrowerOperations.address);
+    await contracts.borrowerHelper.setAddresses(
+      contracts.borrowerOperations.address,
+      contracts.troveManager.address,
+      contracts.lusdToken.address
+    );
 
     // set contracts in the Pools
     await contracts.stabilityPool.setAddresses(
