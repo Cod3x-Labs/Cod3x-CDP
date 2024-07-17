@@ -119,7 +119,7 @@ contract BorrowerHelperTest is Test {
         borrowerHelper.closeTrove(address(iclVault));
 
         assertEq(troveManager.getTroveStatus(address(this), address(iclVault)), uint(TroveStatus.closedByOwner));
-        assertEq(iclVault.balanceOf(address(this)), collAmount);
+        assertEq(icl.balanceOf(address(this)), collAmount);
     }
 
     /*function testAdjustTrove(
