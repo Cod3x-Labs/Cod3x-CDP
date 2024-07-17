@@ -112,7 +112,8 @@ contract BorrowerHelper is LiquityBase, Ownable, CheckContract {
         );
         if (_isDebtIncrease) {
             lusdToken.safeTransfer(msg.sender, lusdToken.balanceOf(address(this)));
-        } else {
+        }
+        if (_collWithdrawal != 0) {
             _withdrawAndTransfer(_collateral);
         }
     }
