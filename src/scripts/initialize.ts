@@ -1,7 +1,7 @@
 import { ethers, network } from "hardhat";
 import { State } from "../utils/deploy/state";
 import { Initializer } from "../utils/initialize/initializer";
-import { configurationParameters } from "./parameters/hardhat";
+import { configurationParameters } from "./parameters/mode";
 import { ContractName } from "../utils/deploy/types";
 
 async function main() {
@@ -42,12 +42,9 @@ async function main() {
     configurationParameters.collaterals,
     configurationParameters.internalAddresses.GOVERNANCE,
     configurationParameters.internalAddresses.GUARDIAN,
-    configurationParameters.internalAddresses.OATH,
+    configurationParameters.externalAddresses.OATH,
     configurationParameters.internalAddresses.TREASURY,
     configurationParameters.externalAddresses.SWAPPER,
-    configurationParameters.externalAddresses.VELO_ROUTER,
-    configurationParameters.externalAddresses.BALANCER_VAULT,
-    configurationParameters.externalAddresses.UNI_V3_ROUTER,
   );
 }
 

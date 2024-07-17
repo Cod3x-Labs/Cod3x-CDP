@@ -5,6 +5,8 @@ import "@nomiclabs/hardhat-truffle5";
 import "dotenv-defaults/config";
 require("@nomicfoundation/hardhat-foundry");
 
+const PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY;
+
 const config: HardhatUserConfig = {
   solidity: {
     compilers: [
@@ -21,9 +23,26 @@ const config: HardhatUserConfig = {
     local: {
       url: "http://127.0.0.1:8545",
     },
+    mode: {
+      url: "https://mainnet.mode.network",
+      chainId: 34443,
+      accounts: [`0x${PRIVATE_KEY}`],
+    },
   },
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY,
+    apiKey: {
+      mode: "mode",
+    },
+    customChains: [
+      {
+        network: "mode",
+        chainId: 34443,
+        urls: {
+          apiURL: "https://api.routescan.io/v2/network/mainnet/evm/34443/etherscan",
+          browserURL: "https://modescan.io",
+        },
+      },
+    ],
   },
 };
 

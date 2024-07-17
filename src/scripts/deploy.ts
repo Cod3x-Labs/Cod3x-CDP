@@ -2,7 +2,7 @@ import { ethers, network } from "hardhat";
 import { State } from "../utils/deploy/state";
 import { Deployer } from "../utils/deploy/deployer";
 import { Verifier } from "../utils/deploy/verifier";
-import { configurationParameters } from "./parameters/hardhat";
+import { configurationParameters } from "./parameters/mode";
 
 async function main() {
   const [signer] = await ethers.getSigners();
@@ -30,7 +30,7 @@ async function main() {
     try {
       const contract = await deployer.deploy(name, ctorArguments);
       const contractAddress = await contract.getAddress();
-      const verification = await verifier.verifyAddress(contractAddress);
+      const verification = await verifier.verifyAddress(contractAddress, ctorArguments);
 
       deploymentState.set(name, {
         address: contractAddress,
