@@ -504,8 +504,11 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
         _requireNonZeroAdjustment(params._collTopUp, params._collWithdrawal, params._LUSDChange);
         _requireTroveisActive(contractsCache.troveManager, params._borrower, params._collateral);
 
-        // Confirm the operation is a borrower adjusting their own trove (possibly through the Leverager)
-        assert(msg.sender == params._borrower || msg.sender == leveragerAddress);
+        // Confirm the operation is a borrower adjusting their own trove (possibly through leverager or helper)
+        require(
+            msg.sender == params._borrower || msg.sender == leveragerAddress || msg.sender == helperAddress,
+            "BorrowerOperations: Untrusted caller"
+        );
 
         contractsCache.troveManager.applyPendingRewards(params._borrower, params._collateral);
 
