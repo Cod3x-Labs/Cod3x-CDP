@@ -94,7 +94,7 @@ contract BorrowerHelper is LiquityBase, Ownable, CheckContract {
         address _upperHint,
         address _lowerHint
     ) external whenNotPaused {
-        if (_isDebtIncrease) {
+        if (_collTopUp != 0) {
             _collTopUp = _transferAndDeposit(_collateral, _collTopUp);
         }
         borrowerOperations.adjustTroveFor(
