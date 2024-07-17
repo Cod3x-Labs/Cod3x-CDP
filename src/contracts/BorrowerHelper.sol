@@ -97,6 +97,10 @@ contract BorrowerHelper is LiquityBase, Ownable, CheckContract {
         if (_collTopUp != 0) {
             _collTopUp = _transferAndDeposit(_collateral, _collTopUp);
         }
+        if (_LUSDChange != 0 && !_isDebtIncrease) {
+            lusdToken.safeTransferFrom(msg.sender, address(this), _LUSDChange);
+            lusdToken.safeIncreaseAllowance(address(borrowerOperations), _LUSDChange);
+        }
         borrowerOperations.adjustTroveFor(
             IBorrowerOperations.Params_adjustTroveFor(
                 msg.sender,
