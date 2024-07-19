@@ -602,16 +602,12 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
 
      function _storeTellorPrice(address _collateral, TellorResponse memory _tellorResponse) internal returns (uint) {
         uint scaledTellorPrice = _scaleTellorPriceByDigits(_tellorResponse.value);
-        _storePrice(_collateral, scaledTellorPrice);
-
-        return scaledTellorPrice;
+        return _storePrice(_collateral, scaledTellorPrice);
     }
 
     function _storeChainlinkPrice(address _collateral, ChainlinkResponse memory _chainlinkResponse) internal returns (uint) {
         uint scaledChainlinkPrice = _scaleChainlinkPriceByDigits(uint256(_chainlinkResponse.answer), _chainlinkResponse.decimals);
-        _storePrice(_collateral, scaledChainlinkPrice);
-
-        return scaledChainlinkPrice;
+        return _storePrice(_collateral, scaledChainlinkPrice);
     }
 
     function _storeAssetsPerShare(address _collateral, uint _assetsPerShare) internal {
