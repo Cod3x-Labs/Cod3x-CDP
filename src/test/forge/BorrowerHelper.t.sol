@@ -165,6 +165,107 @@ contract BorrowerHelperTest is Test {
         console.log(iclVault.balanceOf(address(this)));
     }*/
 
+    function testPOCHigh02AdjustTrove() public {
+        uint targetCR = 5 ether;
+        uint256 collAmount = 10000 ether;
+
+        uint collTopUp = 0;
+        uint collWithdrawal = 20e18;
+        uint lusdChange = 10e18;
+        bool isDebtIncrease = true;
+
+        deal(address(icl), address(this), collAmount);
+        icl.approve(address(borrowerHelper), collAmount);
+
+        uint debt = collAmount * 1e17 / targetCR - borrowerOperations.LUSD_GAS_COMPENSATION();
+        debt -= troveManager.getBorrowingFeeWithDecay(debt);
+        borrowerHelper.openTrove(address(iclVault), collAmount, 0.005 ether, debt, address(0), address(0));
+
+        deal(address(icl), address(this), collTopUp);
+        icl.approve(address(borrowerHelper), collTopUp);
+
+        uint256 helperSharesBalance = iclVault.balanceOf(address(borrowerHelper));
+
+        borrowerHelper.adjustTrove(address(iclVault), 0.005 ether, collTopUp, collWithdrawal, lusdChange, isDebtIncrease, address(0), address(0));
+
+        uint256 helperSharesAfter = iclVault.balanceOf(address(borrowerHelper)); // @POC: Balance of vault shares has increased due to collateral withdrawal not being sent back to user
+        uint256 helperSharesDiff  = helperSharesAfter - helperSharesBalance;
+        assertEq(helperSharesDiff, 0); // No lost funds
+    }
+
+    function testPOCMedium02AdjustTrove() public {
+        uint targetCR = 5 ether;
+        uint256 collAmount = 1000 ether;
+
+        uint collTopUp = 0; // @POC: 0 deposits are not supported in `ReaperVaultV2`
+        uint collWithdrawal = 0;
+        uint lusdChange = 10e18;
+        bool isDebtIncrease = true;
+
+        deal(address(icl), address(this), collAmount);
+        icl.approve(address(borrowerHelper), collAmount);
+
+        uint debt = collAmount * 1e18 / targetCR - borrowerOperations.LUSD_GAS_COMPENSATION();
+        debt -= troveManager.getBorrowingFeeWithDecay(debt);
+        borrowerHelper.openTrove(address(iclVault), collAmount, 0.005 ether, debt, address(0), address(0));
+
+        deal(address(icl), address(this), collTopUp);
+        icl.approve(address(borrowerHelper), collTopUp);
+
+        // vm.expectRevert("Invalid amount"); // @POC: `ReaperVault` reverts on zero deposit
+        borrowerHelper.adjustTrove(address(iclVault), 0.005 ether, collTopUp, collWithdrawal, lusdChange, isDebtIncrease, address(0), address(0));
+    }
+
+    function testPOCMedium03AdjustTrove(uint targetCR) public {
+        uint MCR = collateralConfig.getCollateralMCR(address(iclVault));
+        targetCR = bound(targetCR, MCR, 5 ether);
+        uint256 collAmount = 1000 ether;
+
+        uint collTopUp = 10e18;
+        uint collWithdrawal = 0;
+        uint lusdChange = 0;
+        bool isDebtIncrease = false; // @POC: `BorrowerHelper` doesn't deposit collateral if no debt increase
+
+        deal(address(icl), address(this), collAmount);
+        icl.approve(address(borrowerHelper), collAmount);
+
+        uint debt = collAmount * 1e18 / targetCR - borrowerOperations.LUSD_GAS_COMPENSATION();
+        debt -= troveManager.getBorrowingFeeWithDecay(debt);
+        borrowerHelper.openTrove(address(iclVault), collAmount, 0.005 ether, debt, address(0), address(0));
+
+        deal(address(icl), address(this), collTopUp);
+        icl.approve(address(borrowerHelper), collTopUp);
+
+        // vm.expectRevert("BorrowerOperations: Insufficient user collateral balance"); // @POC: `BorrowerOperations` reverts because `BorrowerHelper` didn't deposit user's assets
+        borrowerHelper.adjustTrove(address(iclVault), 0.005 ether, collTopUp, collWithdrawal, lusdChange, isDebtIncrease, address(0), address(0));
+    }
+
+    function testPOCMedium04AdjustTrove() public {
+        uint MCR = collateralConfig.getCollateralMCR(address(iclVault));
+        uint targetCR = 5 ether;
+        uint collAmount = 10000 ether;
+
+        uint collTopUp = 0;
+        uint collWithdrawal = 0;
+        uint lusdChange = 10e18;
+        bool isDebtIncrease = false; // @POC: This indicates LUSD repayment
+
+        deal(address(icl), address(this), collAmount);
+        icl.approve(address(borrowerHelper), collAmount);
+
+        uint debt = collAmount * 1e17 / targetCR - borrowerOperations.LUSD_GAS_COMPENSATION();
+        debt -= troveManager.getBorrowingFeeWithDecay(debt);
+        borrowerHelper.openTrove(address(iclVault), collAmount, 0.005 ether, debt, address(0), address(0));
+
+        deal(address(icl), address(this), collTopUp);
+        icl.approve(address(borrowerHelper), collTopUp);
+        deal(address(lusdToken), address(this), lusdChange);
+        lusdToken.approve(address(borrowerHelper), lusdChange);
+
+        // vm.expectRevert("BorrowerOps: Caller doesnt have enough LUSD to make repayment"); // @POC: reverts as `BorrowerHelper` doesn't support LUSD debt repayment
+        borrowerHelper.adjustTrove(address(iclVault), 0.005 ether, collTopUp, collWithdrawal, lusdChange, isDebtIncrease, address(0), address(0));
+    }
+
     function _collaterals() internal view returns (address[] memory) {
         address[] memory collaterals = new address[](1);
         collaterals[0] = address(iclVault);
