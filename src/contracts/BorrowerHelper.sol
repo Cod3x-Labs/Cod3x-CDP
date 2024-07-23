@@ -63,6 +63,7 @@ contract BorrowerHelper is LiquityBase, Ownable, CheckContract {
         address _lowerHint
     ) external whenNotPaused {
         _collAmount = _transferAndDeposit(_collateral, _collAmount);
+        IERC20(_collateral).safeIncreaseAllowance(address(borrowerOperations), _collAmount);
         borrowerOperations.openTroveFor(
             msg.sender,
             _collateral,
@@ -96,6 +97,7 @@ contract BorrowerHelper is LiquityBase, Ownable, CheckContract {
     ) external whenNotPaused {
         if (_collTopUp != 0) {
             _collTopUp = _transferAndDeposit(_collateral, _collTopUp);
+            IERC20(_collateral).safeIncreaseAllowance(address(borrowerOperations), _collTopUp);
         }
         if (_LUSDChange != 0 && !_isDebtIncrease) {
             lusdToken.safeTransferFrom(msg.sender, address(this), _LUSDChange);
@@ -137,8 +139,6 @@ contract BorrowerHelper is LiquityBase, Ownable, CheckContract {
         asset.safeTransferFrom(msg.sender, address(this), _collAmount);
         asset.safeIncreaseAllowance(_collateral, _collAmount);
         shares = vault.deposit(_collAmount, address(this));
-
-        IERC20(vault).safeIncreaseAllowance(address(borrowerOperations), shares);
     }
 
     function _withdrawAndTransfer(address _collateral) private {
