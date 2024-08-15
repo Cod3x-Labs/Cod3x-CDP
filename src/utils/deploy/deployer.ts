@@ -19,9 +19,7 @@ export class Deployer {
     );
 
     const contractFactory = await ethers.getContractFactory(name);
-    const contract = await contractFactory.deploy(...ctorArguments, {
-      gasPrice: this.gasPrice,
-    });
+    const contract = await contractFactory.deploy(...ctorArguments);
 
     const deploymentTransaction = contract.deploymentTransaction();
     if (deploymentTransaction == null) {

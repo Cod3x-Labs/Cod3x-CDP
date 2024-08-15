@@ -22,6 +22,7 @@ export const configurationParameters: ConfigurationParameters =
           "0xdC6720c996Fad27256c7fd6E0a271e2A4687eF18", //Chronicle labs
         tellorQueryID:
           "0x6908dd654640ba7c223a7bfb615a6b6238b839f31e3cdcc8804483a620439912",
+        maxPriceDeviation: "500000000000000000" // 50%
       },
     ],
     {

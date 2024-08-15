@@ -41,6 +41,7 @@ interface IBorrowerOperations {
     event TreasuryAddressChanged(address _treasuryAddress);
     event CollateralConfigAddressChanged(address _newCollateralConfigAddress);
     event LeveragerAddressChanged(address _leverager);
+    event HelperAddressChanged(address _helperAddress);
     event SetFeeExemption(address _borrower, bool _isExempt);
     event TroveCreated(address indexed _borrower, address _collateral, uint arrayIndex);
     event TroveUpdated(
@@ -66,7 +67,8 @@ interface IBorrowerOperations {
         address _sortedTrovesAddress,
         address _lusdTokenAddress,
         address _treasury,
-        address _leveragerAddress
+        address _leveragerAddress,
+        address _helperAddress
     ) external;
 
     function openTrove(
@@ -130,6 +132,7 @@ interface IBorrowerOperations {
     function adjustTroveFor(Params_adjustTroveFor memory) external returns (address, address);
 
     function claimCollateral(address _collateral) external;
+    function claimCollateralFor(address _borrower, address _collateral) external;
 
     function getCompositeDebt(uint _debt) external pure returns (uint);
 }

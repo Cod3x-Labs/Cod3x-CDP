@@ -13,6 +13,7 @@ const GasPool = artifacts.require("./GasPool.sol");
 const CollSurplusPool = artifacts.require("./CollSurplusPool.sol");
 const FunctionCaller = artifacts.require("./TestContracts/FunctionCaller.sol");
 const BorrowerOperations = artifacts.require("./BorrowerOperations.sol");
+const BorrowerHelper = artifacts.require("./BorrowerHelper.sol")
 const HintHelpers = artifacts.require("./HintHelpers.sol");
 const Leverager = artifacts.require("./Leverager.sol");
 
@@ -89,6 +90,7 @@ class DeploymentHelper {
     const collSurplusPool = await CollSurplusPool.new();
     const functionCaller = await FunctionCaller.new();
     const borrowerOperations = await BorrowerOperations.new();
+    const borrowerHelper = await BorrowerHelper.new();
     const hintHelpers = await HintHelpers.new();
     const leverager = await Leverager.new();
     const governance = await Governance.new();
@@ -115,6 +117,7 @@ class DeploymentHelper {
     CollSurplusPool.setAsDeployed(collSurplusPool);
     FunctionCaller.setAsDeployed(functionCaller);
     BorrowerOperations.setAsDeployed(borrowerOperations);
+    BorrowerHelper.setAsDeployed(borrowerHelper);
     HintHelpers.setAsDeployed(hintHelpers);
     Leverager.setAsDeployed(leverager);
     Governance.setAsDeployed(governance);
@@ -136,6 +139,7 @@ class DeploymentHelper {
       collSurplusPool,
       functionCaller,
       borrowerOperations,
+      borrowerHelper,
       hintHelpers,
       leverager,
       governance,
@@ -163,6 +167,7 @@ class DeploymentHelper {
     testerContracts.collSurplusPool = await CollSurplusPool.new();
     testerContracts.math = await LiquityMathTester.new();
     testerContracts.borrowerOperations = await BorrowerOperationsTester.new();
+    testerContracts.borrowerHelper = await BorrowerHelper.new();
     testerContracts.troveManager = await TroveManagerTester.new();
     testerContracts.functionCaller = await FunctionCaller.new();
     testerContracts.hintHelpers = await HintHelpers.new();
@@ -438,6 +443,14 @@ class DeploymentHelper {
       contracts.lusdToken.address,
       LQTYContracts.treasury.address,
       contracts.leverager.address,
+      contracts.borrowerHelper.address,
+    );
+
+    // set contracts in BorrowerHelper
+    await contracts.borrowerHelper.setAddresses(
+      contracts.borrowerOperations.address,
+      contracts.troveManager.address,
+      contracts.lusdToken.address
     );
 
     // set contracts in the Pools

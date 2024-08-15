@@ -1,6 +1,7 @@
 import {
   ActivePool,
   BorrowerOperations,
+  BorrowerHelper,
   CollSurplusPool,
   CollateralConfig,
   CommunityIssuance,
@@ -62,41 +63,40 @@ export class Initializer {
     contracts: ReadonlyMap<string, StablecoinContract>,
     collaterals: ReadonlyArray<Collateral>,
     governanceAddress: string,
+    guardianAddress: string,
     oathAddress: string,
     treasuryAddress: string,
     swapperAddress: string,
-    veloRouterAddress: string,
-    balancerVaultAddress: string,
-    uniV3RouterAddress: string,
   ): Promise<void> {
     const collateralConfig = contracts.get(
-      "collateralConfig",
+      "CollateralConfig",
     ) as CollateralConfig;
-    const priceFeed = contracts.get("priceFeed") as PriceFeed;
-    const tellorCaller = contracts.get("tellorCaller") as TellorCaller;
-    const sortedTroves = contracts.get("sortedTroves") as SortedTroves;
-    const troveManager = contracts.get("troveManager") as TroveManager;
+    const priceFeed = contracts.get("PriceFeed") as PriceFeed;
+    const tellorCaller = contracts.get("TellorCaller") as TellorCaller;
+    const sortedTroves = contracts.get("SortedTroves") as SortedTroves;
+    const troveManager = contracts.get("TroveManager") as TroveManager;
     const borrowerOperations = contracts.get(
-      "borrowerOperations",
+      "BorrowerOperations",
     ) as BorrowerOperations;
-    const activePool = contracts.get("activePool") as ActivePool;
-    const defaultPool = contracts.get("defaultPool") as DefaultPool;
-    const gasPool = contracts.get("gasPool") as GasPool;
-    const stabilityPool = contracts.get("stabilityPool") as StabilityPool;
-    const collSurplusPool = contracts.get("collSurplusPool") as CollSurplusPool;
-    const lusdToken = contracts.get("lusdToken") as LUSDToken;
-    const rewarderManager = contracts.get("rewarderManager") as RewarderManager;
+    const borrowerHelper = contracts.get("BorrowerHelper") as BorrowerHelper;
+    const activePool = contracts.get("ActivePool") as ActivePool;
+    const defaultPool = contracts.get("DefaultPool") as DefaultPool;
+    const gasPool = contracts.get("GasPool") as GasPool;
+    const stabilityPool = contracts.get("StabilityPool") as StabilityPool;
+    const collSurplusPool = contracts.get("CollSurplusPool") as CollSurplusPool;
+    const lusdToken = contracts.get("LUSDToken") as LUSDToken;
+    const rewarderManager = contracts.get("RewarderManager") as RewarderManager;
     const redemptionHelper = contracts.get(
-      "redemptionHelper",
+      "RedemptionHelper",
     ) as RedemptionHelper;
     const liquidationHelper = contracts.get(
-      "liquidationHelper",
+      "LiquidationHelper",
     ) as LiquidationHelper;
-    const leverager = contracts.get("leverager") as Leverager;
+    const leverager = contracts.get("Leverager") as Leverager;
     const communityIssuance = contracts.get(
-      "communityIssuance",
+      "CommunityIssuance",
     ) as CommunityIssuance;
-    const hintHelpers = contracts.get("hintHelpers") as HintHelpers;
+    const hintHelpers = contracts.get("HintHelpers") as HintHelpers;
 
     await this.initializeCollateralConfig(
       collateralConfig,
@@ -176,8 +176,17 @@ export class Initializer {
       collSurplusPool,
       lusdToken,
       leverager,
+      borrowerHelper,
       treasuryAddress,
       governanceAddress,
+    );
+
+    await this.initializeBorrowerHelper(
+      borrowerHelper,
+      borrowerOperations,
+      troveManager,
+      lusdToken,
+      guardianAddress
     );
 
     await this.initializeStabilityPool(
@@ -238,9 +247,6 @@ export class Initializer {
       lusdToken,
       troveManager,
       swapperAddress,
-      veloRouterAddress,
-      balancerVaultAddress,
-      uniV3RouterAddress,
     );
 
     await this.initializeCommunityIssuance(
@@ -267,7 +273,7 @@ export class Initializer {
           collaterals.map((c: Collateral) => c.chainlinkTimeoutSec),
           collaterals.map((c: Collateral) => c.tellorTimeoutSec),
           await priceFeed.getAddress(),
-          { gasPrice: this.gasPrice },
+          // { gasPrice: this.gasPrice },
         ),
       );
     }
@@ -275,7 +281,7 @@ export class Initializer {
     if (!(await this.hasExpectedOwner(collateralConfig, governanceAddress))) {
       await this.sendTransaction(
         collateralConfig.transferOwnership(governanceAddress, {
-          gasPrice: this.gasPrice,
+          // gasPrice: this.gasPrice,
         }),
       );
     }
@@ -296,7 +302,7 @@ export class Initializer {
           await tellorCaller.getAddress(),
           collaterals.map((c: Collateral) => c.tellorQueryID),
           collaterals.map((c: Collateral) => c.maxPriceDeviation),
-          { gasPrice: this.gasPrice },
+          // { gasPrice: this.gasPrice },
         ),
       );
     }
@@ -304,7 +310,7 @@ export class Initializer {
     if (!(await this.hasExpectedOwner(priceFeed, governanceAddress))) {
       await this.sendTransaction(
         priceFeed.transferOwnership(governanceAddress, {
-          gasPrice: this.gasPrice,
+          // gasPrice: this.gasPrice,
         }),
       );
     }
@@ -321,7 +327,7 @@ export class Initializer {
           await troveManager.getAddress(),
           await borrowerOperations.getAddress(),
           {
-            gasPrice: this.gasPrice,
+            // gasPrice: this.gasPrice,
           },
         ),
       );
@@ -362,7 +368,7 @@ export class Initializer {
           await redemptionHelper.getAddress(),
           await liquidationHelper.getAddress(),
           {
-            gasPrice: this.gasPrice,
+            // gasPrice: this.gasPrice,
           },
         ),
       );
@@ -371,7 +377,7 @@ export class Initializer {
     if (!(await this.hasExpectedOwner(troveManager, governanceAddress))) {
       await this.sendTransaction(
         troveManager.transferOwnership(governanceAddress, {
-          gasPrice: this.gasPrice,
+          // gasPrice: this.gasPrice,
         }),
       );
     }
@@ -381,10 +387,10 @@ export class Initializer {
     rewarderManager: RewarderManager,
     troveManager: TroveManager,
   ): Promise<void> {
-    if (!(await this.isOwnershipRenounced(rewarderManager))) {
+    if (!(await rewarderManager.initialized())) {
       await this.sendTransaction(
         rewarderManager.setAddresses(await troveManager.getAddress(), {
-          gasPrice: this.gasPrice,
+          // gasPrice: this.gasPrice,
         }),
       );
     }
@@ -414,7 +420,7 @@ export class Initializer {
           await lusdToken.getAddress(),
           await sortedTroves.getAddress(),
           treasuryAddress,
-          { gasPrice: this.gasPrice },
+          // { gasPrice: this.gasPrice },
         ),
       );
     }
@@ -442,7 +448,7 @@ export class Initializer {
           await collSurplusPool.getAddress(),
           await priceFeed.getAddress(),
           await sortedTroves.getAddress(),
-          { gasPrice: this.gasPrice },
+          // { gasPrice: this.gasPrice },
         ),
       );
     }
@@ -460,10 +466,11 @@ export class Initializer {
     collSurplusPool: CollSurplusPool,
     lusdToken: LUSDToken,
     leverager: Leverager,
+    borrowerHelper: BorrowerHelper,
     treasuryAddress: string,
     governanceAddress: string,
   ): Promise<void> {
-    if (!(await this.isOwnershipRenounced(borrowerOperations))) {
+    if (!(await borrowerOperations.initialized())) {
       await this.sendTransaction(
         borrowerOperations.setAddresses(
           await collateralConfig.getAddress(),
@@ -477,7 +484,8 @@ export class Initializer {
           await lusdToken.getAddress(),
           treasuryAddress,
           await leverager.getAddress(),
-          { gasPrice: this.gasPrice },
+          await borrowerHelper.getAddress(),
+          // { gasPrice: this.gasPrice },
         ),
       );
     }
@@ -485,7 +493,34 @@ export class Initializer {
     if (!(await this.hasExpectedOwner(borrowerOperations, governanceAddress))) {
       await this.sendTransaction(
         borrowerOperations.transferOwnership(governanceAddress, {
-          gasPrice: this.gasPrice,
+          // gasPrice: this.gasPrice,
+        }),
+      );
+    }
+  }
+
+  private async initializeBorrowerHelper(
+    borrowerHelper: BorrowerHelper,
+    borrowerOperations: BorrowerOperations,
+    troveManager: TroveManager,
+    lusdToken: LUSDToken,
+    guardianAddress: string,
+  ): Promise<void> {
+    if (!(await borrowerHelper.initialized())) {
+      await this.sendTransaction(
+        borrowerHelper.setAddresses(
+          await borrowerOperations.getAddress(),
+          await troveManager.getAddress(),
+          await lusdToken.getAddress(),
+          // { gasPrice: this.gasPrice },
+        )
+      );
+    }
+
+    if (!(await this.hasExpectedOwner(borrowerHelper, guardianAddress))) {
+      await this.sendTransaction(
+        borrowerHelper.transferOwnership(guardianAddress, {
+          // gasPrice: this.gasPrice,
         }),
       );
     }
@@ -515,7 +550,7 @@ export class Initializer {
           await sortedTroves.getAddress(),
           await priceFeed.getAddress(),
           await communityIssuance.getAddress(),
-          { gasPrice: this.gasPrice },
+          // { gasPrice: this.gasPrice },
         ),
       );
     }
@@ -532,7 +567,7 @@ export class Initializer {
     defaultPool: DefaultPool,
     collSurplusPool: CollSurplusPool,
   ): Promise<void> {
-    if (!(await this.isOwnershipRenounced(activePool))) {
+    if (!(await activePool.addressesSet())) {
       await this.sendTransaction(
         activePool.setAddresses(
           await collateralConfig.getAddress(),
@@ -543,7 +578,7 @@ export class Initializer {
           await stabilityPool.getAddress(),
           await defaultPool.getAddress(),
           await collSurplusPool.getAddress(),
-          { gasPrice: this.gasPrice },
+          // { gasPrice: this.gasPrice },
         ),
       );
     }
@@ -561,7 +596,7 @@ export class Initializer {
           await collateralConfig.getAddress(),
           await troveManager.getAddress(),
           await activePool.getAddress(),
-          { gasPrice: this.gasPrice },
+          // { gasPrice: this.gasPrice },
         ),
       );
     }
@@ -583,7 +618,7 @@ export class Initializer {
           await troveManager.getAddress(),
           await liquidationHelper.getAddress(),
           await activePool.getAddress(),
-          { gasPrice: this.gasPrice },
+          // { gasPrice: this.gasPrice },
         ),
       );
     }
@@ -601,7 +636,7 @@ export class Initializer {
           await collateralConfig.getAddress(),
           await sortedTroves.getAddress(),
           await troveManager.getAddress(),
-          { gasPrice: this.gasPrice },
+          // { gasPrice: this.gasPrice },
         ),
       );
     }
@@ -617,9 +652,6 @@ export class Initializer {
     lusdToken: LUSDToken,
     troveManager: TroveManager,
     swapperAddress: string,
-    veloRouterAddress: string,
-    balancerVaultAddress: string,
-    uniV3RouterAddress: string,
   ): Promise<void> {
     if (!(await this.isOwnershipRenounced(leverager))) {
       await this.sendTransaction(
@@ -632,7 +664,7 @@ export class Initializer {
           await priceFeed.getAddress(),
           await lusdToken.getAddress(),
           swapperAddress,
-          { gasPrice: this.gasPrice },
+          // { gasPrice: this.gasPrice },
         ),
       );
     }
@@ -649,7 +681,7 @@ export class Initializer {
         communityIssuance.setAddresses(
           oathAddress,
           await stabilityPool.getAddress(),
-          { gasPrice: this.gasPrice },
+          // { gasPrice: this.gasPrice },
         ),
       );
     }
@@ -657,7 +689,7 @@ export class Initializer {
     if (!(await this.hasExpectedOwner(communityIssuance, governanceAddress))) {
       await this.sendTransaction(
         communityIssuance.transferOwnership(governanceAddress, {
-          gasPrice: this.gasPrice,
+          // gasPrice: this.gasPrice,
         }),
       );
     }
@@ -669,10 +701,7 @@ export class Initializer {
     const tx = await txPromise;
     try {
       console.log("Waiting for transaction to be confirmed...");
-      const receipt = await ethers.provider.waitForTransaction(
-        tx.hash,
-        this.txConfirmations,
-      );
+      const receipt = await tx.wait(this.txConfirmations);
       if (receipt == null) {
         throw Error("failed to send transaction");
       }
