@@ -213,6 +213,7 @@ contract("CollateralConfig", async (accounts) => {
         14400,
         mockChainlinkAggregator.address,
         "0x1",
+        toBN(dec(5, 17)),
       ),
       "collateral already allowed",
     );
