@@ -37,4 +37,5 @@ contract PriceFeedTestnet is IPriceFeed {
         address _priceAggregatorAddress
     ) external override {}
     function updateTellorQueryID(address _collateral, bytes32 _queryId) external override {}
+    function updateMaxPriceDeviation(address _collateral, uint256 _priceDeviation) external override {}
 }

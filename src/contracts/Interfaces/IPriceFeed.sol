@@ -14,4 +14,5 @@ interface IPriceFeed {
         address _priceAggregatorAddress
     ) external;
     function updateTellorQueryID(address _collateral, bytes32 _queryId) external;
+    function updateMaxPriceDeviation(address _collateral, uint _priceDeviation) external;
 }
