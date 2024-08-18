@@ -508,6 +508,7 @@ class DeploymentHelper {
       14400, // 4 hour Tellor timeout
       mockChainlinkAggregator.address,
       "0x1", // mock Tellor query ID
+      toBN(dec(5, 17)), // 50% max price deviation
     );
   }
 

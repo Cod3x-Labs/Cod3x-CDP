@@ -108,11 +108,13 @@ contract CollateralConfig is ICollateralConfig, CheckContract, Ownable {
         uint256 _chainlinkTimeout,
         uint256 _tellorTimeout,
         address _chainlinkAggregator,
-        bytes32 _tellorQueryId
+        bytes32 _tellorQueryId,
+        uint256 _maxPriceDeviation
     ) external onlyOwner {
         _addNewCollateral(_collateral, _MCR, _CCR, _debtLimit, _chainlinkTimeout, _tellorTimeout);
         priceFeed.updateChainlinkAggregator(_collateral, _chainlinkAggregator);
         priceFeed.updateTellorQueryID(_collateral, _tellorQueryId);
+        priceFeed.updateMaxPriceDeviation(_collateral, _maxPriceDeviation);
     }
 
     function _addNewCollateral(

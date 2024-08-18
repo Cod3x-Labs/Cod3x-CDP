@@ -88,7 +88,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     event PriceFeedStatusChanged(address _collateral, Status newStatus);
 
     // --- Dependency setters ---
-    
+
     function setAddresses(
         address _collateralConfigAddress,
         address[] calldata _priceAggregatorAddresses,
@@ -193,6 +193,14 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     function resetLastAssetsPerShare(address _collateral) external onlyOwner {
         (uint256 assetsPerShare, ) = _getAssetsPerShare(_collateral);
         _storeAssetsPerShare(_collateral, assetsPerShare);
+    }
+
+    // Admin function to update maxPriceDeviation for collateral
+    function updateMaxPriceDeviation(address _collateral, uint _priceDeviation) external {
+        _requireCallerIsOwnerOrCollateralConfig();
+        _requireValidCollateralAddress(_collateral);
+        require(_priceDeviation >= 0.001 ether, "Must allow at least 0.1% deviation");
+        maxPriceDeviation[_collateral] = _priceDeviation;
     }
 
     // --- Functions ---
