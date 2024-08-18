@@ -4,7 +4,9 @@ pragma solidity ^0.8.23;
 
 import "../../lib/forge-std/src/Test.sol";
 import "../../scripts/forge/DeployProtocol.s.sol";
+import {AggregatorV3Interface} from "../../contracts/Dependencies/AggregatorV3Interface.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {MockAggregator} from "../../contracts/TestContracts/MockAggregator.sol";
 import {ReaperVaultERC4626} from "../../lib/vault-v2/src/ReaperVaultERC4626.sol";
 
 contract ForkAndUpgrade is Test {
@@ -97,10 +99,7 @@ contract ForkAndUpgrade is Test {
     }
 
     function testOpenTrove(uint collIndex, uint collValue, uint targetCR) public {
-        // choose random allowed collateral
-        address[] memory allowedCollaterals = collateralConfig.getAllowedCollaterals();
-        collIndex = bound(collIndex, 0, allowedCollaterals.length - 1);
-        address collateral = allowedCollaterals[0];
+        address collateral = _getRandColl(collIndex);
 
         // arithmetic calculations
         uint MCR = collateralConfig.getCollateralMCR(collateral);
@@ -120,6 +119,37 @@ contract ForkAndUpgrade is Test {
 
         // assert ICR matches targetCR (within 1%)
         assertApproxEqAbs(troveManager.getCurrentICR(address(this), collateral, collPrice), targetCR, 0.01 ether);
+    }
+
+    function testCanHandlePriceDeviation(uint priceDeviation, uint collIndex, uint collValue, uint targetCR) public {
+        address collateral = _getRandColl(collIndex);
+        priceDeviation = bound (priceDeviation, 0, priceFeed.maxPriceDeviation(collateral));
+
+        AggregatorV3Interface aggregator = priceFeed.priceAggregator(collateral);
+        (uint80 roundId, int256 answer,, uint256 updatedAt,) = aggregator.latestRoundData();
+
+        MockAggregator mockAggregator = new MockAggregator();
+        mockAggregator.setPrevRoundId(roundId);
+        mockAggregator.setLatestRoundId(roundId + 1);
+        mockAggregator.setUpdateTime(updatedAt + 1);
+        mockAggregator.setPrevPrice(answer);
+        // divide by 1e28 because lastGoodPrice and priceDeviation are 18 decimals but aggregator uses 8
+        mockAggregator.setPrice(
+            int(priceFeed.lastGoodPrice(collateral) * (1e18 + priceDeviation) / 1e28)
+        );
+
+        vm.prank(priceFeed.owner());
+        priceFeed.updateChainlinkAggregator(collateral, address(mockAggregator));
+
+        testOpenTrove(collIndex, collValue, targetCR);
+        assertEq(uint(priceFeed.status(collateral)), uint(PriceFeed.Status.usingChainlinkTellorUntrusted));
+    }
+
+    // choose random (assuming collIndex is a fuzz param) allowed collateral
+    function _getRandColl(uint collIndex) internal returns (address collateral) {
+        address[] memory allowedCollaterals = collateralConfig.getAllowedCollaterals();
+        collIndex = bound(collIndex, 0, allowedCollaterals.length - 1);
+        collateral = allowedCollaterals[0];
     }
 
     function _dealUnderlyingAmountForCollValue(address collateral, uint collValue, address to)
