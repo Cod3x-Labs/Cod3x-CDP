@@ -4,4 +4,5 @@
 	branch = v1
 [submodule "src/lib/vault-v2"]
 	path = src/lib/vault-v2
-	url = git@github.com:Byte-Masons/vault-v2.git
+	url = git@github.com:Cod3x-Labs/Cod3x-Vault.git
+	branch = mode
