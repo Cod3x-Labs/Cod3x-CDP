@@ -1,102 +1,102 @@
 {
   "CollateralConfig": {
-    "address": "0xe6EBFA62180d6838A1f45B34De7D9dad7697528A",
-    "txHash": "0xbce23c415da874d9bee164746278646f7da67c6adefe4eb727f928d946968096",
-    "verification": "https://modescan.io/address/0xe6EBFA62180d6838A1f45B34De7D9dad7697528A#code"
-  },
-  "PriceFeed": {
-    "address": "0xA97c7a9d584D119878ba8F87609DD8c2bc18bF4d",
-    "txHash": "0xcba20cedcf4dca5ee7f90064156dfb4e4b4ff93f010d57b182e7b17a6adeb361",
-    "verification": "https://modescan.io/address/0xA97c7a9d584D119878ba8F87609DD8c2bc18bF4d#code"
+    "address": "0xBc7A614955388DFfb9d5e1ce27D32Cd186eEA2ec",
+    "txHash": "0x0c46b43023b82c646eaf5ba00ee4f76514283a5cd3f6f8805146f5e65b4508a5",
+    "verification": "https://modescan.io/address/0xBc7A614955388DFfb9d5e1ce27D32Cd186eEA2ec#code"
   },
   "SortedTroves": {
-    "address": "0xbb73d45f3646968B754eCd852b872F5C710c7D72",
-    "txHash": "0x566c2a9b83c798a90f7076713fdb5a30fa049dfb751dc7a8bc76614ac77df173",
-    "verification": "https://modescan.io/address/0xbb73d45f3646968B754eCd852b872F5C710c7D72#code"
+    "address": "0x349a53D38C7fe6F688165E8f20703a386D505B4C",
+    "txHash": "0xb7f90ed48e77f1e5335a2e4a1565f1fd977b81adfb1c971ee92af219a9414fd8",
+    "verification": "https://modescan.io/address/0x349a53D38C7fe6F688165E8f20703a386D505B4C#code"
   },
   "TroveManager": {
-    "address": "0xB8E7f7a8763F12f1a4Cfeb87efF1e1886A68152a",
-    "txHash": "0xfc384625661225bfa38a66943babe8e804ff1ad17065d74ff9cd46cffbcbe167",
-    "verification": "https://modescan.io/address/0xB8E7f7a8763F12f1a4Cfeb87efF1e1886A68152a#code"
+    "address": "0x829746b34F624fdB03171AA4cF4D2675B0F2A2e6",
+    "txHash": "0x06c6253bbe9cb94f8249f9f2fdf75e2f5c1a5e5c402cf237e310032ad08f4c09",
+    "verification": "https://modescan.io/address/0x829746b34F624fdB03171AA4cF4D2675B0F2A2e6#code"
   },
   "RewarderManager": {
-    "address": "0xF3Df198B85a8C48911F49615Ed5b54c77c9038f5",
-    "txHash": "0x15d94d7988565b1d58bb76536c39bcf7608d902f41106333dffb6b7bc7be486f",
-    "verification": "https://modescan.io/address/0xF3Df198B85a8C48911F49615Ed5b54c77c9038f5#code"
+    "address": "0xDE3Df3B80d8f440d3340701Ed38799bb062a8882",
+    "txHash": "0x4f801640021043304b81714c81732133dfc89b60b161580a683a7e70e1f5d690",
+    "verification": "https://modescan.io/address/0xDE3Df3B80d8f440d3340701Ed38799bb062a8882#code"
   },
   "RedemptionHelper": {
-    "address": "0xd574D7780e14b8F008f5Ba5B955C4359FC723A4B",
-    "txHash": "0x1eff59e94e66f041151ebd91b76449fa13fc458bfd2c6f554c67f0006a8c86e9",
-    "verification": "https://modescan.io/address/0xd574D7780e14b8F008f5Ba5B955C4359FC723A4B#code"
+    "address": "0xfc6dD41705453eFFD2CCDd0105F59773928e9a8D",
+    "txHash": "0x3ab431df0f12e9191ce9d6f51a70d770f56886320ae3146515d04c78e9c9f4dd",
+    "verification": "https://modescan.io/address/0xfc6dD41705453eFFD2CCDd0105F59773928e9a8D#code"
   },
   "LiquidationHelper": {
-    "address": "0xa34Db130cEF539f3F2f222f12E96D384A89E8eb2",
-    "txHash": "0xaeb1c09790090d69e640be2412204ebb8c7a01536129e9f6e3037822b69f2dac",
-    "verification": "https://modescan.io/address/0xa34Db130cEF539f3F2f222f12E96D384A89E8eb2#code"
+    "address": "0x69659a1cDFf3297D063fA1C510A020989A81e1D2",
+    "txHash": "0xa311ae9d1c21be479ee64ab7239fa231885d4ef3a05e64c9ff8b0c98b4837b18",
+    "verification": "https://modescan.io/address/0x69659a1cDFf3297D063fA1C510A020989A81e1D2#code"
   },
   "BorrowerOperations": {
-    "address": "0x2d1b857F459ca527991f574A5CB2cfF2763088f2",
-    "txHash": "0xd8d500e504f6e3ebd25d611b5404d93f39cf61632b2c1a61c90b1b5323dd106d",
-    "verification": "https://modescan.io/address/0x2d1b857F459ca527991f574A5CB2cfF2763088f2#code"
+    "address": "0x9571873B4Df31D317d4ED4FE4689915A2F3fF7d4",
+    "txHash": "0xeada81526b811f49e74ffb38a57a92c52fcee02c398fb378352826aec9510d4d",
+    "verification": "https://modescan.io/address/0x9571873B4Df31D317d4ED4FE4689915A2F3fF7d4#code"
   },
   "BorrowerHelper": {
-    "address": "0x72a131650e1DC7373Cf278Be01C3dd7B94f63BAB",
-    "txHash": "0x6c7130395e83c34568d778f9383a67534767f52cb7f7cf03633ab270f92760b0",
-    "verification": "https://modescan.io/address/0x72a131650e1DC7373Cf278Be01C3dd7B94f63BAB#code"
-  },
-  "StabilityPool": {
-    "address": "0x193aDcE432205b3FF34B764230E81430c9E3A7B5",
-    "txHash": "0x5ca7d903079c9de09284c2559f42322630e0b73bfb40402cc19b94e40406de43",
-    "verification": "https://modescan.io/address/0x193aDcE432205b3FF34B764230E81430c9E3A7B5#code"
+    "address": "0x5454891FddbcCe91A79777205A173618634a623F",
+    "txHash": "0x49835abdabcf9a81cacfbd2f24751e2d28aad5b140cde2e1b08722b736cecd1b",
+    "verification": "https://modescan.io/address/0x5454891FddbcCe91A79777205A173618634a623F#code"
   },
   "ActivePool": {
-    "address": "0x90cd40772ceD08fC90Cf40b6Be227a480D4D6F20",
-    "txHash": "0xd9d18efb1d7fca56d10d627074103ac939677c2353fde52a8ff31909a73b29da",
-    "verification": "https://modescan.io/address/0x90cd40772ceD08fC90Cf40b6Be227a480D4D6F20#code"
+    "address": "0x2cC039d8F1D45258a097D1B1D0E9843E7cd9FBf8",
+    "txHash": "0xb87f33c698b61d684beda893a4a24d23ac9a0a265c0092539a8c4eeb6652ed12",
+    "verification": "https://modescan.io/address/0x2cC039d8F1D45258a097D1B1D0E9843E7cd9FBf8#code"
   },
   "DefaultPool": {
-    "address": "0xEB42B354B377728f668a42947246196F71c83944",
-    "txHash": "0x7f79d4f2f9494fdc78d46686b117bc9b44921cbcac2f537bd626f41c4a7fd92d",
-    "verification": "https://modescan.io/address/0xEB42B354B377728f668a42947246196F71c83944#code"
+    "address": "0x506BD87c6f39805080206FcBD97905261D3F2BEc",
+    "txHash": "0x1fbade56a5dbef327a710a1eada41cdc006f60319a7122d3178928f265279582",
+    "verification": "https://modescan.io/address/0x506BD87c6f39805080206FcBD97905261D3F2BEc#code"
   },
   "CollSurplusPool": {
-    "address": "0x3B3a8854fd1f004e4F7e77E18C9809D4eCA888B4",
-    "txHash": "0x3166f78dda4c8f4fe7b21f8b5853e1193f867a4c509e2b2d82eaaf49759da6d8",
-    "verification": "https://modescan.io/address/0x3B3a8854fd1f004e4F7e77E18C9809D4eCA888B4#code"
+    "address": "0x52aD08A1446801Ad0556D669c1C80701830bB94D",
+    "txHash": "0xbdf608fb310fc4a23540147a80edd9955ce3a0cf175f9ac905f0208ee9d29caa",
+    "verification": "https://modescan.io/address/0x52aD08A1446801Ad0556D669c1C80701830bB94D#code"
   },
   "HintHelpers": {
-    "address": "0x9eb273D3A3A6508D600571d965295D051F67a370",
-    "txHash": "0xf8590232f12e680b6aaeca92b2a1bb6b49e56169a80d68ef926ed47ce60257d6",
-    "verification": "https://modescan.io/address/0x9eb273D3A3A6508D600571d965295D051F67a370#code"
+    "address": "0xBdAA7033f0A109A9777ee42a82799642a877Fc4b",
+    "txHash": "0x334b62d574cb01a5650faeabef4128f2cafbecb81378415a76bd0008c869e8a1",
+    "verification": "https://modescan.io/address/0xBdAA7033f0A109A9777ee42a82799642a877Fc4b#code"
   },
   "Leverager": {
-    "address": "0x1128cf4bc8d69c9A09473CCb03f37FbB588249b9",
-    "txHash": "0x5c082a32b91d62f4836e811bc6c27e13044e6dc46341e974ce4e7fa35cf7012a",
-    "verification": "https://modescan.io/address/0x1128cf4bc8d69c9A09473CCb03f37FbB588249b9#code"
+    "address": "0x08464ED505D0fAB48e028468c8Ba38f4Bb26DE0a",
+    "txHash": "0x6e960b6cd1fbcc0d5395eed0173563f0cd1c0c6946da47005af3fef1e87e633f",
+    "verification": "https://modescan.io/address/0x08464ED505D0fAB48e028468c8Ba38f4Bb26DE0a#code"
   },
   "CommunityIssuance": {
-    "address": "0x0490FeCFa551c233264570E80DE5D41273EDD86D",
-    "txHash": "0x78b1fc340a658a8a3adff5d5cdf583f7efb7d5496c05a4c60d27c3ccaa8b583c",
-    "verification": "https://modescan.io/address/0x0490FeCFa551c233264570E80DE5D41273EDD86D#code"
+    "address": "0xb42c356CA0d364Bb4130b12221533693AbFD81C8",
+    "txHash": "0x46532991f0387bd9e5cfcec14ee685acf48f44b31ca5783adeb3ab63c298e388",
+    "verification": "https://modescan.io/address/0xb42c356CA0d364Bb4130b12221533693AbFD81C8#code"
   },
   "GasPool": {
-    "address": "0x7c09733834873b1FDB8A70c19eE1A514023f74f9",
-    "txHash": "0x0e95bf9f181b7915486236b0c096d654093fac1ab2a6dfa7b8b9f26f0abd212a",
-    "verification": "https://modescan.io/address/0x7c09733834873b1FDB8A70c19eE1A514023f74f9#code"
+    "address": "0x4F113Fa6e8a47056189e771397518E04D2457D17",
+    "txHash": "0x803f7d8092afe49878ff0d256cbc67761d0f9e50f1f58a3d832ee75e1593546a",
+    "verification": "https://modescan.io/address/0x4F113Fa6e8a47056189e771397518E04D2457D17#code"
   },
   "TellorCaller": {
-    "address": "0xbb341D8249c1C747708D4e6F7Cd967A2479CAD75",
-    "txHash": "0x0813225b0e96a9fd45e1d4380f4e2569788bf9b2defbdc9c5331517b686380ad",
-    "verification": "https://modescan.io/address/0xbb341D8249c1C747708D4e6F7Cd967A2479CAD75#code"
+    "address": "0xC0B6AE038Fc61E79D9c953DccaBB0C1f19E37ceC",
+    "txHash": "0xbca94f014932939b9149739f7278f4b9987cefa7b0a3b7380ce1e4c726553a53",
+    "verification": "https://modescan.io/address/0xC0B6AE038Fc61E79D9c953DccaBB0C1f19E37ceC#code"
   },
   "LUSDToken": {
     "address": "0xA70266C8F8Cf33647dcFEE763961aFf418D9E1E4",
     "txHash": "0x715153e6c80a09662199ab193dd3533f9a3be71fe84e0b8a9380f57a199f6cca",
     "verification": "https://modescan.io/address/0xA70266C8F8Cf33647dcFEE763961aFf418D9E1E4#code"
   },
+  "PriceFeed": {
+    "address": "0x4cB9D8f3c406b69E186163D944F63a30c8D283F2",
+    "txHash": "0x8510b08665194fc2d2c821d732490c7a9838ede75a2571285e2ab615edb705a9",
+    "verification": "https://modescan.io/address/0x4cB9D8f3c406b69E186163D944F63a30c8D283F2#code"
+  },
+  "StabilityPool": {
+    "address": "0x8D62F275e91916Eeb0c9012Ac63961cDac306c69",
+    "txHash": "0x2e9613a9517fb6780a86d2eee23c2d95582261de11b05b7f2111df429368c49e",
+    "verification": "https://modescan.io/address/0x8D62F275e91916Eeb0c9012Ac63961cDac306c69#code"
+  },
   "MultiTroveGetter": {
-    "address": "0xA2f01800Bd6d878b82E6009a7022fa9B1cDC810c",
-    "txHash": "0xcb9a15e5b73c9c261b3eee32df951024e694879cf11b8b4751b9cc8a80b2b639",
-    "verification": "https://modescan.io/address/0xA2f01800Bd6d878b82E6009a7022fa9B1cDC810c#code"
+    "address": "0x6F92a67F487f81525f0F2e38ab574e07fBD49dc6",
+    "txHash": "0x86c56d6292e4d8fb33fe2f400bffec2e6189406750505036af185504d8fa6c00",
+    "verification": "https://modescan.io/address/0x6F92a67F487f81525f0F2e38ab574e07fBD49dc6#code"
   }
 }

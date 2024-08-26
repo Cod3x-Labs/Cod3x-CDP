@@ -11,7 +11,7 @@ import {ReaperVaultERC4626} from "../../lib/vault-v2/src/ReaperVaultERC4626.sol"
 
 contract ForkAndUpgrade is Test {
     address iUSD = 0xA70266C8F8Cf33647dcFEE763961aFf418D9E1E4;
-    address swapper = 0xF86F3Cba7034d0072725b480b09BC84f3851E119;
+    address swapper = 0x7a8bCF0E414bEd532DB7908B9d315A2f2dd4BB5C;
 
     // arrays for CollateralConfig initialization
     address[] initialCollaterals = [
@@ -123,7 +123,7 @@ contract ForkAndUpgrade is Test {
 
     function testCanHandlePriceDeviation(uint priceDeviation, uint collIndex, uint collValue, uint targetCR) public {
         address collateral = _getRandColl(collIndex);
-        priceDeviation = bound (priceDeviation, 0, priceFeed.maxPriceDeviation(collateral));
+        priceDeviation = bound(priceDeviation, 0, priceFeed.maxPriceDeviation(collateral));
 
         AggregatorV3Interface aggregator = priceFeed.priceAggregator(collateral);
         (uint80 roundId, int256 answer,, uint256 updatedAt,) = aggregator.latestRoundData();
@@ -134,9 +134,7 @@ contract ForkAndUpgrade is Test {
         mockAggregator.setUpdateTime(updatedAt + 1);
         mockAggregator.setPrevPrice(answer);
         // divide by 1e28 because lastGoodPrice and priceDeviation are 18 decimals but aggregator uses 8
-        mockAggregator.setPrice(
-            int(priceFeed.lastGoodPrice(collateral) * (1e18 + priceDeviation) / 1e28)
-        );
+        mockAggregator.setPrice(int(priceFeed.lastGoodPrice(collateral) * (1e18 + priceDeviation) / 1e28));
 
         vm.prank(priceFeed.owner());
         priceFeed.updateChainlinkAggregator(collateral, address(mockAggregator));

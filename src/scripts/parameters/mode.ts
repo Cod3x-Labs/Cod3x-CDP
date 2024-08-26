@@ -8,10 +8,10 @@ export const configurationParameters: ConfigurationParameters =
   new ConfigurationParameters(
     "https://modescan.io/address",
     0.0000003,
-    1,
+    5,
     [
       {
-        address: "0xd2b93816A671A7952DFd2E347519846DD8bF5af2", // WETH vault
+        address: "0x3117c7854d11cB0216c82B81934CAaFe0722BB44", // WETH vault
         MCR: "1.08", // 1.08 ether = 108%
         CCR: "1.2", // 1.20 ether = 120%
         limit:
@@ -25,7 +25,7 @@ export const configurationParameters: ConfigurationParameters =
         maxPriceDeviation: "500000000000000000", // 50%
       },
       {
-        address: "0x60922fc592b09635CB6b5884964A74F2EdC2D770", // MODE vault
+        address: "0xF7BC8B00a065943dC8D7B63E9632D7F987731C05", // MODE vault
         MCR: "1.2", // 1.20 ether = 120%
         CCR: "1.65", // 1.65 ether = 165%
         limit:
@@ -39,7 +39,7 @@ export const configurationParameters: ConfigurationParameters =
         maxPriceDeviation: "500000000000000000", // 50%
       },
       {
-        address: "0x1767F61C1A778Add618660e48513e8D25767D926", // USDC vault
+        address: "0x882fD369341FC435ad5E54e91d1ebC23b1Fc6d4C", // USDC vault
         MCR: "1.05", // 1.05 ether = 105%
         CCR: "1.15", // 1.15 ether = 115%
         limit:
@@ -53,7 +53,7 @@ export const configurationParameters: ConfigurationParameters =
         maxPriceDeviation: "50000000000000000", // 5%
       },
       {
-        address: "0x2D26988A363621EA9f68e863681e5b9f021244CB", // USDT vault
+        address: "0xc9cfB5221eE50098BD8882727522301A62C7b021", // USDT vault
         MCR: "1.05", // 1.05 ether = 105%
         CCR: "1.15", // 1.15 ether = 115%
         limit:
@@ -67,7 +67,7 @@ export const configurationParameters: ConfigurationParameters =
         maxPriceDeviation: "50000000000000000", // 5%
       },
       {
-        address: "0xAa33B58d7b49eDa1362f75aAB47D1751BCaB937B", // ezETH vault
+        address: "0xd9139c2dba16513eAd360658496c9c8223158Cd5", // ezETH vault
         MCR: "1.1", // 1.1 ether = 110%
         CCR: "1.4", // 1.40 ether = 140%
         limit:
@@ -96,15 +96,15 @@ export const configurationParameters: ConfigurationParameters =
       },*/
     ],
     {
-      OATH: "0x95177295A394f2b9B04545FFf58f4aF0673E839d",
-      SWAPPER: "0xF86F3Cba7034d0072725b480b09BC84f3851E119",
+      OATH: "0x3B6eA0fA8A487c90007ce120a83920fd52b06f6D", // oICL
+      SWAPPER: "0x7a8bCF0E414bEd532DB7908B9d315A2f2dd4BB5C",
     },
     {
       DEPLOYER: "0xe00691e65Cd4400c84a174a4C56f20bA43dffD89",
       GOVERNANCE: GOVERNANCE_ADDRESS,
       GUARDIAN: GUARDIAN_ADDRESS,
       TREASURY: "0x788F382d835Cb00851b883DAD7f30798AE480622",
-      LUSD_TOKEN: "0x0000000000000000000000000000000000000000",
+      LUSD_TOKEN: "0xA70266C8F8Cf33647dcFEE763961aFf418D9E1E4",
     },
     [
       {
@@ -174,9 +174,9 @@ export const configurationParameters: ConfigurationParameters =
       {
         name: "LUSDToken",
         ctorArguments: [
-          "0xB8E7f7a8763F12f1a4Cfeb87efF1e1886A68152a", // TroveManager
-          "0x193aDcE432205b3FF34B764230E81430c9E3A7B5", // StabilityPool
-          "0x2d1b857F459ca527991f574A5CB2cfF2763088f2", // BorrowerOperations
+          "", // TroveManager
+          "", // StabilityPool
+          "", // BorrowerOperations
           GOVERNANCE_ADDRESS,
           GUARDIAN_ADDRESS,
         ],
@@ -184,9 +184,9 @@ export const configurationParameters: ConfigurationParameters =
       {
         name: "MultiTroveGetter",
         ctorArguments: [
-          "0xe6EBFA62180d6838A1f45B34De7D9dad7697528A", // CollateralConfig
-          "0xB8E7f7a8763F12f1a4Cfeb87efF1e1886A68152a", // TroveManager
-          "0xbb73d45f3646968B754eCd852b872F5C710c7D72", // SortedTroves
+          "0xBc7A614955388DFfb9d5e1ce27D32Cd186eEA2ec", // CollateralConfig
+          "0x829746b34F624fdB03171AA4cF4D2675B0F2A2e6", // TroveManager
+          "0x349a53D38C7fe6F688165E8f20703a386D505B4C", // SortedTroves
         ],
       },
       {
