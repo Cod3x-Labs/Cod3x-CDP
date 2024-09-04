@@ -2,7 +2,7 @@ import { ethers, network } from "hardhat";
 import { State } from "../utils/deploy/state";
 import { Deployer } from "../utils/deploy/deployer";
 import { Verifier } from "../utils/deploy/verifier";
-import { configurationParameters } from "./parameters/mode";
+import { configurationParameters } from "./parameters/scroll";
 
 async function main() {
   const [signer] = await ethers.getSigners();

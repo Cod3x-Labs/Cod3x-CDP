@@ -1,0 +1,102 @@
+{
+  "CollateralConfig": {
+    "address": "0xEaed3db8bbbe135EeaEb7487D2F30CDeCE01DAdf",
+    "txHash": "0x1de4d3436d7dc42a9433869479019504503810997d7b95cdc363e5ec2f2ea7eb",
+    "verification": "https://scrollscan.com/address/0xEaed3db8bbbe135EeaEb7487D2F30CDeCE01DAdf#code"
+  },
+  "PriceFeed": {
+    "address": "0xD2B4C9B0d70e3Da1fBDD98f469bD02E77E12FC79",
+    "txHash": "0xc43f62c4c41b5d5400342ef97018ded278e5f053a5b5759ce17ef2f20c7ed9a7",
+    "verification": "https://scrollscan.com/address/0xD2B4C9B0d70e3Da1fBDD98f469bD02E77E12FC79#code"
+  },
+  "RewarderManager": {
+    "address": "0x22BF901406757D3702105b74fED437358B58cC61",
+    "txHash": "0x79096e742ce9178684fc0242de229c43ecf3cb8d86e1d712d8d8860bc04c8902",
+    "verification": "https://scrollscan.com/address/0x22BF901406757D3702105b74fED437358B58cC61#code"
+  },
+  "LiquidationHelper": {
+    "address": "0x504654AEdfFc42De727Ec328376E9eBa20bf11fc",
+    "txHash": "0x5925255e4852e592753888c24123e3bd22b0e6b534f0c31f61b5b30d7bdf6ffc",
+    "verification": "https://scrollscan.com/address/0x504654AEdfFc42De727Ec328376E9eBa20bf11fc#code"
+  },
+  "BorrowerOperations": {
+    "address": "0x3DBcD766770998D583996A6cC65D530bB415CeA5",
+    "txHash": "0xc6117801a5690221496b68b72caf928e21e2c99ced1164063df33ee7d791d9ac",
+    "verification": "https://scrollscan.com/address/0x3DBcD766770998D583996A6cC65D530bB415CeA5#code"
+  },
+  "BorrowerHelper": {
+    "address": "0x971a1b2fA3D4F2DAFE9264a629EA9853289e4ab1",
+    "txHash": "0x46662757769d5042712d42f073a131423cf85fbcfb26e76d35a8c5ae3166c153",
+    "verification": "https://scrollscan.com/address/0x971a1b2fA3D4F2DAFE9264a629EA9853289e4ab1#code"
+  },
+  "StabilityPool": {
+    "address": "0x81df91f066d935EF3655eE7ffBAc036A6fDF6226",
+    "txHash": "0x80951a8f709e3762700af2c14720e145a88b432853ddae1e702a38df9c15606c",
+    "verification": "https://scrollscan.com/address/0x81df91f066d935EF3655eE7ffBAc036A6fDF6226#code"
+  },
+  "ActivePool": {
+    "address": "0xf2Cba37f28385fde3d238449492E2E3A21fC845E",
+    "txHash": "0xfea95b4531f771611abfd1f5aced3756efab4afb1f49e3818c5a8cf16740f68f",
+    "verification": "https://scrollscan.com/address/0xf2Cba37f28385fde3d238449492E2E3A21fC845E#code"
+  },
+  "DefaultPool": {
+    "address": "0x4AEd341207B6DBE7e18045eD5571EdefD58c8bc3",
+    "txHash": "0xf1da34d47cd2b89a7465473ec2ef27e1cf4da132104b645394adda6320b18b79",
+    "verification": "https://scrollscan.com/address/0x4AEd341207B6DBE7e18045eD5571EdefD58c8bc3#code"
+  },
+  "CollSurplusPool": {
+    "address": "0xE174E122a75eD97d2F044055f5Ad6F82C181764B",
+    "txHash": "0xa56f505a7dc880fe5ac8f876d19167db82e39b4a696a490fbf3fdb26635761e1",
+    "verification": "https://scrollscan.com/address/0xE174E122a75eD97d2F044055f5Ad6F82C181764B#code"
+  },
+  "HintHelpers": {
+    "address": "0x102341c08F3c0932630f39F2eAae0eAe76D7F928",
+    "txHash": "0xba8300a4b64a4dea4c9ae723441dddf92e32f69b788c9d07799b9419921a0b1b",
+    "verification": "https://scrollscan.com/address/0x102341c08F3c0932630f39F2eAae0eAe76D7F928#code"
+  },
+  "Leverager": {
+    "address": "0x7759103B20CcB133799c12e3B9203B27465b2738",
+    "txHash": "0xf842da9586ba9d8a0b98b7033941464d30161325feac2e0e41bb4290ab5015e9",
+    "verification": "https://scrollscan.com/address/0x7759103B20CcB133799c12e3B9203B27465b2738#code"
+  },
+  "GasPool": {
+    "address": "0xba7F383b84E6a1EAB4842e63885E69e3f7363dDC",
+    "txHash": "0x7c3bf6eac18b53292996abf2387417fc37ba84ae02150534b89a29aeaada9ed0",
+    "verification": "https://scrollscan.com/address/0xba7F383b84E6a1EAB4842e63885E69e3f7363dDC#code"
+  },
+  "TellorCaller": {
+    "address": "0x44B035200D7cdd8F98A41684bDc8f85dB8222847",
+    "txHash": "0xf996baea8b6e404a028cadf570caf6b39898f3fd2f479f397c6fa49410006bcd",
+    "verification": "https://scrollscan.com/address/0x44B035200D7cdd8F98A41684bDc8f85dB8222847#code"
+  },
+  "SortedTroves": {
+    "address": "0x1eFcDA945bbb19E250C58acfEAc237d43eFDca39",
+    "txHash": "0xa28ec7e2c1fd24178b973fdafb4f0f3728f08bcae6ac05100eeb15c4a5e5348c",
+    "verification": "https://scrollscan.com/address/0x1eFcDA945bbb19E250C58acfEAc237d43eFDca39#code"
+  },
+  "TroveManager": {
+    "address": "0x229D05957A052b836DBD7D528F39ef438f9135Fb",
+    "txHash": "0xc2e10ffc4e8ec7e08d4d98a65e49be73d0cdeeaec1c1fc3d3ca01a6a3ba76623",
+    "verification": "https://scrollscan.com/address/0x229D05957A052b836DBD7D528F39ef438f9135Fb#code"
+  },
+  "RedemptionHelper": {
+    "address": "0x1225c53F510877074d0D1Bace26C4f0581c24cF7",
+    "txHash": "0x608d48b051ecd13090328a11e08c742b8fbfdba6ffdadab4ae866a889f13cbe4",
+    "verification": "https://scrollscan.com/address/0x1225c53F510877074d0D1Bace26C4f0581c24cF7#code"
+  },
+  "CommunityIssuance": {
+    "address": "0x7F30c91B7Fb2691D2a0D681f77056001520276B2",
+    "txHash": "0xf0b0436e81b7fc60ca6176230c0b04c026427bbbb4110484f1d21ca0adc4af0f",
+    "verification": "https://scrollscan.com/address/0x7F30c91B7Fb2691D2a0D681f77056001520276B2#code"
+  },
+  "LUSDToken": {
+    "address": "0x77fbf86399ed764A084F77B9acCb049F3DbC32d2",
+    "txHash": "0xc77367f3ff74ad302da8c5cb1d40a2ebfbc6029653f325ad57b59420db722c3d",
+    "verification": "https://scrollscan.com/address/0x77fbf86399ed764A084F77B9acCb049F3DbC32d2#code"
+  },
+  "MultiTroveGetter": {
+    "address": "0x587E0D502cd24fF3cda163BcDF7ded10f47151e7",
+    "txHash": "0xa9cefebfc94f75d45f10b9bbd2c6999496db4b2a5a48d60896a6de7ce00f6bce",
+    "verification": "https://scrollscan.com/address/0x587E0D502cd24fF3cda163BcDF7ded10f47151e7#code"
+  }
+}

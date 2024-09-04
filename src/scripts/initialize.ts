@@ -1,7 +1,7 @@
 import { ethers, network } from "hardhat";
 import { State } from "../utils/deploy/state";
 import { Initializer } from "../utils/initialize/initializer";
-import { configurationParameters } from "./parameters/mode";
+import { configurationParameters } from "./parameters/scroll";
 import { ContractName } from "../utils/deploy/types";
 
 async function main() {

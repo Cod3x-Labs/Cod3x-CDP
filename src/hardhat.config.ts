@@ -6,6 +6,7 @@ import "dotenv-defaults/config";
 require("@nomicfoundation/hardhat-foundry");
 
 const PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY;
+const SCROLLSCAN_KEY = process.env.SCROLLSCAN_API_KEY;
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -28,10 +29,16 @@ const config: HardhatUserConfig = {
       chainId: 34443,
       accounts: [`0x${PRIVATE_KEY}`],
     },
+    scroll: {
+      url: "https://scroll.drpc.org",
+      chainId: 534352,
+      accounts: [`0x${PRIVATE_KEY}`],
+    },
   },
   etherscan: {
     apiKey: {
       mode: "mode",
+      scroll: SCROLLSCAN_KEY as string,
     },
     customChains: [
       {
@@ -40,6 +47,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://api.routescan.io/v2/network/mainnet/evm/34443/etherscan",
           browserURL: "https://modescan.io",
+        },
+      },
+      {
+        network: "scroll",
+        chainId: 534352,
+        urls: {
+          apiURL: "https://api.scrollscan.com/api",
+          browserURL: "https://scrollscan.com",
         },
       },
     ],
