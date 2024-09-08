@@ -64,11 +64,6 @@
     "txHash": "0x7c3bf6eac18b53292996abf2387417fc37ba84ae02150534b89a29aeaada9ed0",
     "verification": "https://scrollscan.com/address/0xba7F383b84E6a1EAB4842e63885E69e3f7363dDC#code"
   },
-  "TellorCaller": {
-    "address": "0x44B035200D7cdd8F98A41684bDc8f85dB8222847",
-    "txHash": "0xf996baea8b6e404a028cadf570caf6b39898f3fd2f479f397c6fa49410006bcd",
-    "verification": "https://scrollscan.com/address/0x44B035200D7cdd8F98A41684bDc8f85dB8222847#code"
-  },
   "SortedTroves": {
     "address": "0x1eFcDA945bbb19E250C58acfEAc237d43eFDca39",
     "txHash": "0xa28ec7e2c1fd24178b973fdafb4f0f3728f08bcae6ac05100eeb15c4a5e5348c",
@@ -98,5 +93,10 @@
     "address": "0x587E0D502cd24fF3cda163BcDF7ded10f47151e7",
     "txHash": "0xa9cefebfc94f75d45f10b9bbd2c6999496db4b2a5a48d60896a6de7ce00f6bce",
     "verification": "https://scrollscan.com/address/0x587E0D502cd24fF3cda163BcDF7ded10f47151e7#code"
+  },
+  "TellorCaller": {
+    "address": "0xfcaaE36A70eFD79622B002809A54b4f25Ff17F5A",
+    "txHash": "0xce09706f9418f8bbbc2feba4449927d455249e60309018147b01a53daac24230",
+    "verification": "https://scrollscan.com/address/0xfcaaE36A70eFD79622B002809A54b4f25Ff17F5A#code"
   }
 }
