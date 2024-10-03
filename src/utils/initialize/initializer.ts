@@ -653,7 +653,7 @@ export class Initializer {
     troveManager: TroveManager,
     swapperAddress: string,
   ): Promise<void> {
-    if (!(await this.isOwnershipRenounced(leverager))) {
+    if (!(await leverager.initialized())) {
       await this.sendTransaction(
         leverager.setAddresses(
           await borrowerOperations.getAddress(),
